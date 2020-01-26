@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../../services/auth.dart';
 import '../../services/request.dart';
 // import screen here
-import 'home/transaction.dart';
+import 'home/transactions.dart';
 import 'home/notification.dart';
 import 'home/products.dart';
 class TabContent {    
@@ -35,7 +35,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Map<String, dynamic> currentUser={'phone':''};
-  Map<String, dynamic> userDetails={'balance':'0000'};
+  Map<String, dynamic> userDetails={'balance':0000};
   int _currentIndex = 0;
   int _counter=0;
   String _title;
@@ -47,7 +47,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   _HomePageState(){
     TabContent _productsScreen=TabContent(title:'Products', content: ProductsScreen(_incrementCounter,currentUser: currentUser,userDetails: userDetails, counter: _counter,reload:_initMe));
     TabContent _notificationPage =TabContent(title:'Notifications', content: NotificationPage());
-    TabContent _transactionPage= TabContent(title:'Transactions', content: TransactionPage());
+    TabContent _transactionPage= TabContent(title:'Transactions', content: TransactionsScreen());
     // TODO: implement initState
     _children= <TabContent>[_productsScreen,_notificationPage,_transactionPage];
 

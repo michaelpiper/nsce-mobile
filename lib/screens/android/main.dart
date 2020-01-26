@@ -6,6 +6,7 @@ import 'splash.dart';
 import 'auth.dart';
 import 'settings.dart';
 import 'addfund.dart';
+import 'transaction.dart';
 // import services here
 import '../../services/auth.dart';
 
@@ -27,12 +28,22 @@ buildAndroid(context){
         }
       },
     ),
+    onGenerateRoute: (settings){
+      List data=settings.name.split('/');
+      print(data);
+      if(data[1]=='transaction' && data[2]!=null){
+        return MaterialPageRoute(builder: (context){
+          return  TransactionPage(trnId:int.parse(data[2]));
+        });
+      }
+      return null;
+    },
     routes: <String, WidgetBuilder> {
       '/home': (BuildContext context) => HomePage(),
       '/auth' : (BuildContext context) => AuthPage(),
       '/splash' : (BuildContext context) => SplashPage(),
       '/settings':(BuildContext context) => SettingsPage(),
-      '/addfunds':(BuildContext context) => AddFundsPage()
+      '/addfunds':(BuildContext context) => AddFundsPage(),
     },
   );
 }

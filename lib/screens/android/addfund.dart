@@ -23,15 +23,15 @@ class _AddFundsPage extends State<AddFundsPage> {
   connectPaystack() {
     final form = _formKey.currentState;
     form.save();
-    if(_loading) {
-      return;
-    }
-    setState(() {
-      _loading=true;
-    });
+
     if (_formKey.currentState.validate()) {
       print('Paystack connected');
-      String result;
+      if(_loading) {
+        return;
+      }
+      setState(() {
+        _loading=true;
+      });
       PaymentCard card = PaymentCard(number: _cardNumber,
           cvc: _cvv,
           expiryYear: _expiryYear,
