@@ -205,3 +205,30 @@ fetchTrn({id=false})async{
     return false;
   }
 }
+
+
+
+// account
+
+fetchAccount({id=false})async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  Map<String, String> headers={};
+  if(prefs.containsKey(STORAGE_USER_KEY)) {
+    var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
+    if(wait.containsKey('authorization')) {
+      headers['Authorization']=wait['authorization'];
+    }
+  }
+  try{
+    var response = await http.get(API_ACCOUNT_URL+(id?id:''),headers: headers);
+    print(response.body);
+    if (response.statusCode == 200) {
+      return convert.jsonDecode(response.body);
+    } else {
+      return false;
+    }
+  }
+  catch(e){
+    return false;
+  }
+}

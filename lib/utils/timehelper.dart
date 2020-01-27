@@ -6,9 +6,10 @@ class Bart{
   String formatted;
   Bart(date,{this.format}){
     if(date is DateTime){
-      _now = date;
+      _now = date.toUtc();
     }else{
       _now  =  DateTime.parse(date);
+      _now = _now.toUtc();
     }
     formatter = new DateFormat(format);
     formatted = formatter.format(_now);
@@ -160,7 +161,8 @@ class Bart{
     }
   }
   diffNow(){
-    DateTime now =  new DateTime.now();
+    DateTime now = new DateTime.now();
+    now = now.toUtc();
     return this.diffHuman(now);
   }
   fromNow(){

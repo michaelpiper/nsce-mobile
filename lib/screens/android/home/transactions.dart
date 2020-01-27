@@ -30,6 +30,8 @@ class _TransactionsScreen extends State<TransactionsScreen> {
                color = Colors.red;
              }
              var now =  DateTime.parse(list['createdAt']);
+             print(now.timeZoneName);
+             print((new DateTime.now()).timeZoneName);
              var bart = Bart(now);
              String formatted = bart.diffNow();
              listToPush.add(

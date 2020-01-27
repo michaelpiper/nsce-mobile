@@ -8,6 +8,7 @@ import '../../services/request.dart';
 import 'home/transactions.dart';
 import 'home/notification.dart';
 import 'home/products.dart';
+import 'dart:async';
 class TabContent {    
   final String title;    
   final Widget content;    
@@ -58,8 +59,27 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _controller = TabController(length: _children.length, vsync: this);
     _title= _children[_controller.index].title;
     _controller.addListener(_handleSelected);
-    _initMe();
 
+    _initMe();
+    var timeUpdateBalance = Timer(const Duration(seconds: 20),updateBalance);
+//    some time later
+//    timeUpdateBalance.cancel();
+  }
+  void updateBalance(){
+    fetchAccount(id:'balance')
+        .then((value){
+      if(value.containsKey('error') && value['error']) {
+        return;
+      }
+      if(value.containsKey('data') && value['data']==null) {
+        return ;
+      }
+      if ( value['data'] !=userDetails['balance']){
+        setState(() {
+          userDetails['balance']=value['data'];
+        });
+      }
+    });
   }
   void _handleSelected() {
     setState(() {
