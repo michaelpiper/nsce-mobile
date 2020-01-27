@@ -193,8 +193,13 @@ fetchTrn({id=false})async{
     }
   }
   try{
-    var response = await http.get(API_TRANSACTION_URL+(id?id:''),headers: headers);
-    print(response.body);
+    var response;
+    if(id!=false) {
+      response = await http.get(API_TRANSACTION_URL +'/'+ id.toString() , headers: headers);
+    }else{
+      response = await http.get(API_TRANSACTION_URL , headers: headers);
+    }
+//    print(response.body);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -220,7 +225,14 @@ fetchAccount({id=false})async{
     }
   }
   try{
-    var response = await http.get(API_ACCOUNT_URL+(id?id:''),headers: headers);
+    var response;
+    if(id!=false) {
+      response = await http.get(API_ACCOUNT_URL + '/' + id.toString(), headers: headers);
+    }
+    else {
+      response = await http.get(API_ACCOUNT_URL , headers: headers);
+    }
+    print(API_ACCOUNT_URL);
     print(response.body);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);

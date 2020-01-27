@@ -57,29 +57,35 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _controller = TabController(length: _children.length, vsync: this);
-    _title= _children[_controller.index].title;
+    _title = _children[_controller.index].title;
     _controller.addListener(_handleSelected);
 
     _initMe();
-    var timeUpdateBalance = Timer(const Duration(seconds: 20),updateBalance);
-//    some time later
-//    timeUpdateBalance.cancel();
+    updateBalance();
   }
   void updateBalance(){
     fetchAccount(id:'balance')
         .then((value){
-      if(value.containsKey('error') && value['error']) {
-        return;
-      }
-      if(value.containsKey('data') && value['data']==null) {
-        return ;
-      }
-      if ( value['data'] !=userDetails['balance']){
-        setState(() {
-          userDetails['balance']=value['data'];
+//          print(value);
+          if(value == false){
+            return;
+          }
+          if(value.containsKey('error') && value['error']) {
+            return;
+          }
+          if(value.containsKey('data') && value['data']==null) {
+            return ;
+          }
+          if ( value['data'] !=userDetails['balance']){
+            setState(() {
+              userDetails['balance']=value['data'];
+            });
+          }
         });
-      }
-    });
+    var timeUpdateBalance = Timer(const Duration(seconds: 5),updateBalance);
+//    some time later
+//    timeUpdateBalance.cancel();
+
   }
   void _handleSelected() {
     setState(() {
