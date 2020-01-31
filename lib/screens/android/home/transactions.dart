@@ -35,12 +35,7 @@ class _TransactionsScreen extends State<TransactionsScreen> {
              var bart = Bart(now);
              String formatted = bart.diffNow();
              listToPush.add(
-               InkWell(
-                 onTap: (){
-                   Scaffold.of(context).showSnackBar(SnackBar(content:Text("opening transaction")));
-                   Navigator.of(context).pushNamed('/transaction/'+list['id'].toString());
-                 },
-                 child:Card(
+               Card(
                    elevation: 3.0,
 
                    shape:RoundedRectangleBorder(
@@ -50,7 +45,12 @@ class _TransactionsScreen extends State<TransactionsScreen> {
                    margin: EdgeInsets.only(top:10.0),
                    child:Padding(
                      padding:EdgeInsets.all(10.0),
-                     child: Column(
+                     child:InkWell(
+                       onTap: (){
+                         Scaffold.of(context).showSnackBar(SnackBar(content:Text("opening transaction")));
+                         Navigator.of(context).pushNamed('/transaction/'+list['id'].toString());
+                       },
+                       child: Column(
                          children:<Widget>[
                          Row(
                            children: <Widget>[
@@ -91,12 +91,7 @@ class _TransactionsScreen extends State<TransactionsScreen> {
     String formatted = bart.diffNow();
     for(int i=0;i<5;i++){
       transList.add(
-        InkWell(
-          onTap: (){
-            Scaffold.of(context).showSnackBar(SnackBar(content:Text("opening transaction")));
-            Navigator.of(context).pushNamed('/transaction/'+i.toString());
-          },
-          child:Card(
+        Card(
             elevation: 3.0,
             margin: EdgeInsets.only(top: 10.0),
             shape:RoundedRectangleBorder(
@@ -105,7 +100,12 @@ class _TransactionsScreen extends State<TransactionsScreen> {
                 side: BorderSide(color: Colors.amberAccent)),
             child: Padding(
               padding: EdgeInsets.all(10.0),
-              child: Column(
+              child:InkWell(
+                onTap: (){
+                  Scaffold.of(context).showSnackBar(SnackBar(content:Text("opening transaction")));
+                  Navigator.of(context).pushNamed('/transaction/'+i.toString());
+                },
+                child: Column(
                   children:<Widget>[
                     Row(
                       children: <Widget>[

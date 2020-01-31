@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 // Notification screen
-class NotificationScreen extends StatelessWidget {
+class WalletScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return  Center(

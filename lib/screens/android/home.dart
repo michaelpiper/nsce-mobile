@@ -46,12 +46,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Future act;
   Future act2;
   _HomePageState(){
-    TabContent _productsScreen=TabContent(title:'Products', content: ProductsScreen(_incrementCounter,currentUser: currentUser,userDetails: userDetails, counter: _counter,reload:_initMe));
-    TabContent _notificationPage =TabContent(title:'Notifications', content: NotificationPage());
-    TabContent _transactionPage= TabContent(title:'Transactions', content: TransactionsScreen());
-    // TODO: implement initState
-    _children= <TabContent>[_productsScreen,_notificationPage,_transactionPage];
-
+    _refresh();
   }
   @override
   void initState() {
@@ -59,7 +54,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _controller = TabController(length: _children.length, vsync: this);
     _title = _children[_controller.index].title;
     _controller.addListener(_handleSelected);
-
     _initMe();
     updateBalance();
   }
@@ -89,7 +83,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
   void _handleSelected() {
     setState(() {
-     _title= _children[_controller.index].title;
+     _title = _children[_controller.index].title;
      print(_title);
     });
   }
@@ -108,10 +102,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _childrenWithoutTitle = _children.map<Widget>(( child)=>child.content).toList();
     return 
      Scaffold(
-        appBar: AppBar( 
+        appBar: AppBar(
           title: Text(_title,style: TextStyle(color: Colors.white,),),
           actions: <Widget>[
-
             SizedBox(
               height: 25.0,
             ),
@@ -136,10 +129,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
              ),
           ],
           bottom: TabBar(
-          controller: _controller,
-          isScrollable: true,
-          labelColor: Colors.white,
-          tabs: <Tab>[
+            controller: _controller,
+            isScrollable: true,
+            labelColor: Colors.white,
+            tabs: <Tab>[
               Tab(
                 text:'Products',
 
@@ -151,7 +144,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
               Tab(
                 text:'Transactions',
-                icon: Icon(Icons.attach_money,color: Colors.white,),
+                icon: Icon(Icons.view_list,color: Colors.white,),
+              ),
+              Tab(
+                text:'Wallet',
+                icon: Icon(Icons.credit_card,color: Colors.white,),
               ),
             ],
           ),
@@ -180,9 +177,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       }
       setState(() {
         userDetails = value['data'];
-        _children [0]= TabContent(title:'Product', content: ProductsScreen(_incrementCounter,currentUser: currentUser, userDetails:userDetails,counter: _counter,reload:_initMe));
       });
     });
+  }
+  _refresh(){
+    TabContent _productsScreen=TabContent(title:'Products', content: ProductsScreen(_incrementCounter,currentUser: currentUser,userDetails: userDetails, counter: _counter,reload:_initMe));
+    TabContent _notificationScreen =TabContent(title:'Notifications', content: NotificationScreen());
+    TabContent _transactionsScreen= TabContent(title:'Transactions', content: TransactionsScreen());
+    TabContent _walletScreen= TabContent(title:'Wallet', content: TransactionsScreen());
+    // TODO: implement initState
+    _children= <TabContent>[_productsScreen, _notificationScreen,_transactionsScreen,_walletScreen];
   }
   @override
   Widget build(BuildContext context) {
@@ -191,9 +195,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       setState(() {
         print(currentUser);
         currentUser=value;
-        _children [0]= TabContent(title:'Product', content: ProductsScreen(_incrementCounter,currentUser: currentUser, userDetails:userDetails,counter: _counter,reload:_initMe));
       });
     });
+    _refresh();
+
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //

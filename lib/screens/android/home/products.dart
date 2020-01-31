@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:nsce/utils/colors.dart';
 import '../../../services/request.dart';
-//import 'package:intl/intl.dart';
-
-//final formatCurrency = new NumberFormat("#,##0.00", "en_US");
-
+// import card;
+import '../../../ext/smallcard.dart';
+import '../../../ext/carouselwithinicator.dart';
 
 class ProductsScreen extends StatelessWidget{
   final String title="Tail Coin";
@@ -14,7 +14,15 @@ class ProductsScreen extends StatelessWidget{
   Function incrementCounter;
   Function reload;
   bool _loading=false;
-  ProductsScreen(this.incrementCounter,{this.currentUser=const {'phone':''} ,this.userDetails=const {'balance':0},this.counter=1,this.reload});
+  List<Map<String, dynamic>> _categories = [];
+  ProductsScreen(this.incrementCounter,{this.currentUser=const {'phone':''} ,this.userDetails=const {'balance':0},this.counter=1,this.reload}){
+    _categories= [
+      {'avatar':'images/sample1.png','link':'/product/1','name':'Stone'},
+      {'avatar':'images/sample2.png','link':'/product/1','name':'Stone'},
+      {'avatar':'images/sample1.png','link':'/product/1','name':'Stone'},
+      {'avatar':'images/sample1.png','link':'/product/1','name':'Stone'},
+    ];
+  }
   void _returnState(context) async {
     return showDialog<void>(
       context: context,
@@ -100,7 +108,7 @@ class ProductsScreen extends StatelessWidget{
     }
     _loading=true;
     Scaffold.of(context).showSnackBar(SnackBar(content:Text("Trying to purchase item please wait")));
-    var act2 = checkAuth();
+    var act2 = fetchAccount(id:'balance');
     act2.then((value) {
 
       if (value == false) {
@@ -118,8 +126,7 @@ class ProductsScreen extends StatelessWidget{
         _loading=false;
         return;
       }
-      var temp = value['data'];
-      if(  temp['balance'] <= int.tryParse(amount)){
+      else if( value['data'] <= int.tryParse(amount)){
         _loading=false;
         return _returnInsuf(context);
       }
@@ -139,186 +146,138 @@ class ProductsScreen extends StatelessWidget{
       _loading = false;
     });
   }
+  _addFund(context){
+    return Card(
+      elevation: 6.0,
+      shape:RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(
+            20.0,
+          ),
+          side: BorderSide(color: Color.fromRGBO(237, 216, 22,1))),
+      child:  Container(
+        padding: EdgeInsets.all(15.0),
+        child:Column(
+          crossAxisAlignment:CrossAxisAlignment.stretch ,
+          children: <Widget>[
+
+            Row (
+              children: <Widget>[
+                Expanded(child:  Text('Your Account Balance is:'),),
+                InkWell(
+                  onTap: ()=>reload(),
+                  child: Text("reload",
+                    style: TextStyle(color:Colors.green),
+                  ),
+
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 15.0,
+            ),
+            Text(userDetails['balance'].toString()+' NGN'),
+
+            SizedBox(
+              height: 15.0,
+            ),
+            Material(
+              borderRadius: BorderRadius.circular(30.0),
+              //elevation: 5.0,
+              child: MaterialButton(
+                onPressed: ()async{
+                  Navigator.pushNamed(context, '/addfunds');
+                },
+                minWidth: 150.0,
+                height: 50.0,
+                color: Color.fromRGBO(237, 216, 22,0.6),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      32.0,
+                    ),
+                    side: BorderSide(color: Color.fromRGBO(237, 216, 22,1))),
+                child: Text(
+                  "Add Fund",
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
-
     return
       Scaffold(
-          body:ListView(
-            shrinkWrap: false,
-            children: <Widget>[
-              SizedBox(
-                height: 15.0,
-              ),
-              Card(
-                elevation: 6.0,
-                  shape:RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        20.0,
-                      ),
-                      side: BorderSide(color: Colors.amberAccent)),
-                child:  Container(
-                  padding: EdgeInsets.all(15.0),
-                  child:Column(
-                    crossAxisAlignment:CrossAxisAlignment.stretch ,
+        body: ListView(
+          shrinkWrap: false,
+          children: <Widget>[
+            SizedBox(
+              height: 15.0,
+            ),
+            Padding(
+                padding: EdgeInsets.symmetric(vertical: 15.0),
+                child: Column(children: [
+                  Text('Carousel With Indicator ${counter}'),
+                  CarouselWithIndicator(_categories,activeIndicator: actionColor,),
+                ])
+            ),
+            Card(
+                elevation: 4.0,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                     20.0,
+                    ),
+                    side: BorderSide(color: Colors.black12)),
+                child:Padding(
+                  padding: EdgeInsets.only(top:12.0,bottom: 10.0,left:10.0,right: 10.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-
-                      Row (
+                      Row(
                         children: <Widget>[
-                          Expanded(child:  Text('Your Account Balance is:'),),
-                          InkWell(
-                            onTap: ()=>reload(),
-                            child: Text("reload",
-                              style: TextStyle(color:Colors.green),
-                            ),
-
+                          Expanded(
+                            child: Text('Category'),
                           ),
+                          InkWell(
+                            child: Text('see All',style: TextStyle(color: Color.fromRGBO(237, 216, 22, 1),),),
+                          )
                         ],
                       ),
-                      SizedBox(
-                        height: 15.0,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: _categories.map<Widget>((e)=> SmallCard(
+                              name: e['name'],
+                              avatar: e['avatar'],
+                              link:  e['link'],
+                              width:80,
+                              height:80
+                          )
+                        ).toList(),
                       ),
-                      Text(userDetails['balance'].toString()+' NGN'),
-
-                      SizedBox(
-                        height: 15.0,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: _categories.map<Widget>((e)=> SmallCard(
+                            name: e['name'],
+                            avatar: e['avatar'],
+                            link:  e['link'],
+                            width:80,
+                            height:80
+                        )
+                        ).toList(),
                       ),
-                      Material(
-                        borderRadius: BorderRadius.circular(30.0),
-                        //elevation: 5.0,
-                        child: MaterialButton(
-                          onPressed: ()async{
-                              Navigator.pushNamed(context, '/addfunds');
-                            },
-                          minWidth: 150.0,
-                          height: 50.0,
-                          color: Colors.orange,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                32.0,
-                              ),
-                              side: BorderSide(color: Colors.amberAccent)),
-                          child: Text(
-                            "Add Fund",
-                            style: TextStyle(
-                              fontSize: 16.0,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      )
                     ],
                   ),
                 ),
               ),
               SizedBox(
                 height: 15.0,
-
               ),
-              Column(
-                children: <Widget>[
-                  Text(
-                    'You phone number is: ${currentUser['phone']}',
-                  ),
-                  Text(
-                    'You have pushed the button this many times:',
-                  ),
-                  Text(
-                    '$counter',
-                    style: Theme.of(context).textTheme.display1,
-                  ),
-                ]
-              ),
-              Column(
-                crossAxisAlignment:CrossAxisAlignment.stretch ,
-                children: <Widget>[
-                    Container(
-                      color: Colors.white70,
-
-                      child:Column(
-                        children: <Widget>[
-                          Text(
-                            'This item cost 50 NGN:',
-                          ),
-                          RaisedButton(
-                            child: Text('Buy now',style: TextStyle(color: Colors.white),),
-                            color: Colors.green,
-                            onPressed: () {
-                              _BuyItem("50",context);
-                            },
-                          ),
-                        ]
-                      ),
-                    ),
-                    SizedBox(
-                      height: 15.0,
-                    ),
-                    Container(
-                      color: Colors.white70,
-
-                      child:Column(
-                          children: <Widget>[
-                            Text(
-                              'This item cost 250 NGN:',
-                            ),
-                            RaisedButton(
-                              child: Text('Buy now',style: TextStyle(color: Colors.white),),
-                              color: Colors.green,
-                              onPressed: () {
-                                _BuyItem("250",context);
-                              },
-                            ),
-                          ]
-                      ),
-                    ),
-                    SizedBox(
-                      height: 15.0,
-                    ),
-                    Container(
-                      color: Colors.white70,
-
-                      child:Column(
-                          children: <Widget>[
-                            Text(
-                              'This item cost 150 NGN:',
-                            ),
-                            RaisedButton(
-                              child: Text('Buy now',style: TextStyle(color: Colors.white),),
-                              color: Colors.green,
-                              onPressed: () {
-                                _BuyItem("150",context);
-                              },
-                            ),
-                          ]
-                      ),
-                    ),
-                    SizedBox(
-                      height: 15.0,
-                    ),
-                    Container(
-                      color: Colors.white70,
-
-                      child:Column(
-                          children: <Widget>[
-                            Text(
-                              'This item cost 650 NGN:',
-                            ),
-                            RaisedButton(
-                              child: Text('Buy now',style: TextStyle(color: Colors.white),),
-                              color: Colors.green,
-                              onPressed: () {
-                                _BuyItem("650",context);
-                              },
-                            ),
-                          ]
-                      ),
-                    ),
-                  ]
-                ),
-                SizedBox(
-                  height: 15.0,
-                ),
-              ],
+            ],
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: incrementCounter,

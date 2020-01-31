@@ -232,8 +232,8 @@ fetchAccount({id=false})async{
     else {
       response = await http.get(API_ACCOUNT_URL , headers: headers);
     }
-    print(API_ACCOUNT_URL);
-    print(response.body);
+//    print(API_ACCOUNT_URL);
+//    print(response.body);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {

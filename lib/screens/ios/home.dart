@@ -128,38 +128,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
       ),// This trailing comma makes auto-formatting nicer for build methods.
     );
   }
-  _forAndroid(){
-    _childrenWithoutTitle = _children.map<Widget>(( child)=>child.content).toList();
-    return 
-     Scaffold(
-        appBar: AppBar( 
-          title: Text(_title),
-          bottom: TabBar(
-          controller: _controller,
-          isScrollable: true,
-          tabs: <Tab>[
-              Tab(
-                text:'Home',
-                icon: Icon(Icons.home),
-              ),
-              Tab(
-                text:'Transactions',
-                icon: Icon(Icons.attach_money),
-              ),
-              Tab(
-                text:'Notifications',
-                icon: Icon(Icons.schedule),
-              ),
-            ],
-          ),
-        ),
-        body:TabBarView(
-          controller: _controller,
-            children: _childrenWithoutTitle
-        ),
-     // This trailing comma makes auto-formatting nicer for build methods.
-    );
-  }
+
   @override
   Widget build(BuildContext context) {
     act = Provider.of<AuthService>(context).getUser();
@@ -177,12 +146,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
     // than having to individually change instances of widgets.
 
     // return _foriOS();
-    if(Platform.isAndroid){
-      return _forAndroid();
-    }else if(Platform.isIOS){
-      return _foriOS();
-    }
-    return Container(); 
+    return _foriOS();
   }
 }
 class HomeScreen extends StatelessWidget{

@@ -22,6 +22,7 @@ dependencies:
   localstorage: ^3.0.0
   shared_preferences: ^0.5.6
   flutter_paystack: ^1.0.2+1
+  carousel_slider: ^1.4.1
 
   flutter:
     sdk: flutter
@@ -49,6 +50,11 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - images/icon.png
+    - images/auth-header.png
+    - images/auth-footer.png
+    - images/badge.png
+    - images/sample1.png
+    - images/sample2.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
