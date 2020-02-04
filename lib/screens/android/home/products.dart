@@ -4,18 +4,16 @@ import 'package:nsce/utils/colors.dart';
 import '../../../services/request.dart';
 // import card;
 import '../../../ext/smallcard.dart';
-import '../../../ext/carouselwithinicator.dart';
+import '../../../ext/carouselwithindicator.dart';
 
 class ProductsScreen extends StatelessWidget{
   final String title="Tail Coin";
   Map<String, dynamic> currentUser={'phone':''};
   Map<String, dynamic> userDetails={'balance':0};
-  int counter;
-  Function incrementCounter;
   Function reload;
   bool _loading=false;
   List<Map<String, dynamic>> _categories = [];
-  ProductsScreen(this.incrementCounter,{this.currentUser=const {'phone':''} ,this.userDetails=const {'balance':0},this.counter=1,this.reload}){
+  ProductsScreen({this.currentUser=const {'phone':''} ,this.userDetails=const {'balance':0},this.reload}){
     _categories= [
       {'avatar':'images/sample1.png','link':'/product/1','name':'Stone'},
       {'avatar':'images/sample2.png','link':'/product/1','name':'Stone'},
@@ -216,15 +214,23 @@ class ProductsScreen extends StatelessWidget{
         body: ListView(
           shrinkWrap: false,
           children: <Widget>[
-            SizedBox(
-              height: 15.0,
-            ),
-            Padding(
-                padding: EdgeInsets.symmetric(vertical: 15.0),
-                child: Column(children: [
-                  Text('Carousel With Indicator ${counter}'),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color.fromARGB(0, 0, 0, 0), primaryColor],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                ),
+              ),
+              padding: EdgeInsets.symmetric(vertical: 15.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text('seeAll',textAlign: TextAlign.right,),
                   CarouselWithIndicator(_categories,activeIndicator: actionColor,),
-                ])
+                ]
+              ),
             ),
             Card(
                 elevation: 4.0,
@@ -241,7 +247,7 @@ class ProductsScreen extends StatelessWidget{
                       Row(
                         children: <Widget>[
                           Expanded(
-                            child: Text('Category'),
+                            child: Text('Category',style: TextStyle(fontWeight: FontWeight.w600,fontSize: 17,fontFamily: 'Lato'),),
                           ),
                           InkWell(
                             child: Text('see All',style: TextStyle(color: Color.fromRGBO(237, 216, 22, 1),),),
@@ -254,7 +260,7 @@ class ProductsScreen extends StatelessWidget{
                               name: e['name'],
                               avatar: e['avatar'],
                               link:  e['link'],
-                              width:80,
+                              width:(MediaQuery.of(context).size.width/4)-23.0,
                               height:80
                           )
                         ).toList(),
@@ -266,7 +272,7 @@ class ProductsScreen extends StatelessWidget{
                             avatar: e['avatar'],
                             link:  e['link'],
                             width:80,
-                            height:80
+                            height:(MediaQuery.of(context).size.width/4)-23.0
                         )
                         ).toList(),
                       ),
@@ -279,11 +285,6 @@ class ProductsScreen extends StatelessWidget{
               ),
             ],
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: incrementCounter,
-            tooltip: 'Increment',
-            child: Icon(Icons.add),
-          )
       );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nsce/utils/colors.dart';
 import 'package:provider/provider.dart';
 
 // import services here
@@ -8,6 +9,7 @@ import '../../services/request.dart';
 import 'home/transactions.dart';
 import 'home/notification.dart';
 import 'home/products.dart';
+import 'home/wallet.dart';
 import 'dart:async';
 class TabContent {    
   final String title;    
@@ -38,7 +40,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Map<String, dynamic> currentUser={'phone':''};
   Map<String, dynamic> userDetails={'balance':0000};
   int _currentIndex = 0;
-  int _counter=0;
   String _title;
   List _children = <TabContent>[ ];
   List <Widget>_childrenWithoutTitle=<Widget>[];
@@ -87,17 +88,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
      print(_title);
     });
   }
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter= _counter+2;
-      print('$_counter is counted increase');
-    });
-  }
   _forAndroid(){
     _childrenWithoutTitle = _children.map<Widget>(( child)=>child.content).toList();
     return 
@@ -109,9 +99,29 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               height: 25.0,
             ),
             Padding(
-               padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child:IconButton(
+                  color: primaryTextColor,
+                  icon:Icon(Icons.search),
+                  onPressed: (){
+                    Navigator.pushNamed(context, '/search');
+                  },
+                )
+            ),
+            Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child:IconButton(
+                  color: primaryTextColor,
+                  icon:Icon(Icons.shopping_cart),
+                  onPressed: (){
+                    Navigator.pushNamed(context, '/cart');
+                  },
+                )
+            ),
+            Padding(
+               padding: const EdgeInsets.symmetric(vertical:16.0),
                child:PopupMenuButton(
-                  color: Colors.white,
+                  color: primaryTextColor,
                   icon: Icon(Icons.more_vert,color:Colors.white),
                   onSelected: (result){
                     if(result=='i-don-catch-u')Navigator.pushNamed(context, '/settings');
@@ -181,10 +191,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
   }
   _refresh(){
-    TabContent _productsScreen=TabContent(title:'Products', content: ProductsScreen(_incrementCounter,currentUser: currentUser,userDetails: userDetails, counter: _counter,reload:_initMe));
+    TabContent _productsScreen=TabContent(title:'Products', content: ProductsScreen(currentUser: currentUser,userDetails: userDetails, reload:_initMe));
     TabContent _notificationScreen =TabContent(title:'Notifications', content: NotificationScreen());
     TabContent _transactionsScreen= TabContent(title:'Transactions', content: TransactionsScreen());
-    TabContent _walletScreen= TabContent(title:'Wallet', content: TransactionsScreen());
+    TabContent _walletScreen= TabContent(title:'Wallet', content: WalletScreen());
     // TODO: implement initState
     _children= <TabContent>[_productsScreen, _notificationScreen,_transactionsScreen,_walletScreen];
   }

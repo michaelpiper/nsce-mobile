@@ -77,6 +77,9 @@ class _TransactionsScreen extends State<TransactionsScreen> {
         );
         setState(() {
           transList=listToPush.toList();
+          if(transList.length<=0){
+            transList.add(Text('Empty transaction',textAlign: TextAlign.center,));
+          }
         });
       }
     });
@@ -86,7 +89,7 @@ class _TransactionsScreen extends State<TransactionsScreen> {
     super.initState();
     transList = <Widget>[];
     var now =  DateTime.now();
-    now = now.subtract(Duration(seconds: 200,days: 2));
+//    now = now.subtract(Duration(seconds: 200,days: 2));
     var bart = Bart(now);
     String formatted = bart.diffNow();
     for(int i=0;i<5;i++){
