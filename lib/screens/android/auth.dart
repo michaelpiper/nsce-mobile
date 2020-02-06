@@ -35,7 +35,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   String _password;
   int _screen=1;
   bool _loading=false;
-  Map<String, dynamic> _signupData={'fullname':null,'country':null,'company':null,'email':null,'phone':null,'password':null,'confirm_password':null};
+  Map<String, dynamic> _signUpData={'fullname':null,'country':null,'company':null,'email':null,'phone':null,'password':null,'confirm_password':null};
   // _MyStatefulWidgetState(){
 
   // }
@@ -47,568 +47,583 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
  
   Widget login(){
     return
-    Container(
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height,
-      child:
-        Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Image(
-              image: AssetImage('images/auth-header.png'),
-              fit: BoxFit.fill,
-              width: 1000.0,
-              height: 100,
-            ),
-            Center(
-              child: Image(
-                image: AssetImage('images/icon.png'),
-                width: 130,
-                height: 130,
-              )
-            ),
-            ListView(
-              shrinkWrap: true,
+      ListView(
+        shrinkWrap: true,
+        children: <Widget>[
+        Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child:
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Container(
-              // Center is a layout widget. It takes a single child and positions it
-              // in the middle of the parent.
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color.fromRGBO(224, 224, 224 , 1),
-                      blurRadius: 25.0, // soften the shadow
-                      spreadRadius: 2.0, // extend the shadow
-                      offset: Offset(
-                        12.0, // Move to right 10 horizontally
-                        1.0,   //Move to bottom 10 Vertically
-                      ),
-                    )
-                  ],
+                Image(
+                  image: AssetImage('images/auth-header.png'),
+                  fit: BoxFit.fill,
+                  width: 1000.0,
+                  height: 100,
                 ),
-
-                child:Card(
-                    elevation: 4.0,
-                    margin: EdgeInsets.only(top:0.0,left: 22.0),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.horizontal(
-                          left: Radius.elliptical(20.0,20.0),
-                        ),
-                        side: BorderSide(color: Colors.black12)),
-                    child:Form(
-                      key: _formKey,
-                      child:Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child:
-                          Column(
-                            children: <Widget>[
-                              // Padding(padding:,)
-                              SizedBox(
-                                height: 15.0,
-                              ),
-                              Text(
-                                'Login',
-                                style: TextStyle(fontFamily: "Lato",fontStyle:FontStyle.normal,fontWeight: FontWeight.normal,fontSize: 20),
-                              ),
-                              SizedBox(
-                                height: 15.0,
-                              ),
-                              TextFormField(
-                                key: UniqueKey(),
-                                initialValue:_username ,
-                                onSaved: (value)=> _username = value,
-                                decoration: const InputDecoration(
-                                  prefixIcon: Icon(Icons.person,color: secondaryTextColor),
-                                  labelText: 'Email',
-                                  labelStyle: TextStyle(
-                                    color:  secondaryTextColor,
-                                  ),
-                                ),
-                                keyboardType: TextInputType.text,
-                                // textInputAction: TextInputAction.continueAction,
-                                onChanged: (v) => _username = v,
-                                validator: (value) {
-                                  if (value.isEmpty) {
-                                    return 'Please enter your username or email';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              TextFormField(
-                                key: UniqueKey(),
-                                obscureText: true,
-                                initialValue: _password,
-                                onSaved: (value)=> _password = value,
-                                decoration: const InputDecoration(
-                                  prefixIcon: Icon(Icons.lock,color: secondaryTextColor),
-                                  labelText: 'Password',
-                                  labelStyle: TextStyle(
-                                    color: secondaryTextColor,
-                                  ),
-                                ),
-                                keyboardType: TextInputType.text,
-                                // textInputAction: TextInputAction.continueAction,
-                                onChanged: (v) => _password = v,
-                                validator: (value) {
-                                  if (value.isEmpty) {
-                                    return 'Please enter your password';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              SizedBox(
-                                height: 15.0,
-                              ),
-                              Center(
-
-                                child: RaisedButton(
-                                  color: primaryColor,
-                                  shape: RoundedRectangleBorder(
-
-                                      borderRadius: BorderRadius.vertical(
-                                          top: Radius.elliptical(20.0,20.0),
-                                          bottom: Radius.elliptical(20.0,20.0)
-                                      ),
-                                      side: BorderSide(color: primarySwatch)
-                                  ),
-                                  onPressed: () {
-                                    // Validate will return true if the form is valid, or false if
-                                    // the form is invalid
-                                    final form = _formKey.currentState;
-                                    form.save();
-
-
-                                    if (_formKey.currentState.validate()) {
-                                      if(_loading){
-                                        return;
-                                      }
-                                      setState(() {
-                                        _loading=true;
-                                      });
-                                      var wait=Provider.of<AuthService>(context).loginUser(username: _username, password: _password);
-                                      wait.then((status){
-                                        setState(() {
-                                          _loading=false;
-                                        });
-
-                                        if(status == null){
-                                          return  Scaffold.of(context).showSnackBar(SnackBar(content:Text('Invalid username number')));
-                                        }
-                                        else if(status == false){
-                                          return  Scaffold.of(context).showSnackBar(SnackBar(content:Text("Internet error")));
-                                        }
-                                        else if(status != true){
-                                          return Scaffold.of(context).showSnackBar(SnackBar(content:Text(status)));
-                                        }
-                                        return null;
-                                      });
-                                    }
-                                  },
-                                  child: Text((_loading?'loading...':'Login'),
-                                    style: TextStyle(
-                                      fontSize: 16.0,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                height: 25.0,
-                              ),
-                              Row(
-                                children: <Widget>[
-                                  Expanded(child: Text("New on NSCE?")),
-                                  InkWell(
-                                    onTap: (){
-                                      if(_loading) {
-                                        return;
-                                      }
-                                      setState(() {
-                                        // Process data.
-                                        _screen=2;
-                                      });
-                                    },
-                                    child: Text("Create an Account",
-                                      style: TextStyle(
-                                        color:  actionColor,
-                                      ),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ],
-                          )
-                      ),
-                    )
-                )
-            ),
-              ]
-            ),
-            Image(
-              image: AssetImage('images/auth-footer.png'),
-              fit: BoxFit.fill,
-              width: 1000.0,
-              height: 100,
-            ),
-          ],
-        ),
-
-    );
-  }
-  Widget signUp(){
-    return
-    Container(
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height,
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage('images/auth-footer.png'),
-          fit: BoxFit.fill,
-          repeat: ImageRepeat.noRepeat
-//          width: 1000.0,
-//          height: 90,
-        )
-      ),
-      child:
-
-
-          ListView(
-            shrinkWrap: false,
-            children: <Widget>[
-
-              Center(
+                Center(
                   child: Image(
                     image: AssetImage('images/icon.png'),
                     width: 130,
                     height: 130,
                   )
-              ),
-              Container(
-                child: Card(
-                    elevation: 4.0,
-                    margin: EdgeInsets.only(top:0.0,left: 22.0),
+                ),
+                Container(
+                  // Center is a layout widget. It takes a single child and positions it
+                  // in the middle of the parent.
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color.fromRGBO(224, 224, 224 , 1),
+                          blurRadius: 25.0, // soften the shadow
+                          spreadRadius: 2.0, // extend the shadow
+                          offset: Offset(
+                            12.0, // Move to right 10 horizontally
+                            1.0,   //Move to bottom 10 Vertically
+                          ),
+                        )
+                      ],
+                    ),
 
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.horizontal(
-                          left: Radius.elliptical(20.0,20.0),
-                        ),
-                        side: BorderSide(color: Colors.black12)),
-                    child:Form(
-                        key: _formKey,
-                        child:Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              children: <Widget>[
-                                // Padding(padding:,)
-
-                                SizedBox(
-                                  height: 15.0,
-                                ),
-                                Text(
-                                  'Create Account',
-                                  style: TextStyle(fontFamily: "Lato",fontStyle:FontStyle.normal,fontWeight: FontWeight.normal,fontSize: 20),
-
-                                ),
-                                SizedBox(
-                                  height: 15.0,
-                                ),
-                                TextFormField(
-                                  key: UniqueKey(),
-                                  initialValue: _signupData['fullname'] ,
-                                  onSaved: (value)=> _signupData['fullname'] = value,
-                                  decoration: const InputDecoration(
-                                    prefixIcon: Icon(Icons.person,color: secondaryTextColor),
-                                    labelText: 'Fullname',
-                                    labelStyle: TextStyle(
-                                      color: secondaryTextColor,
-                                    ),
+                    child:Card(
+                        elevation: 4.0,
+                        margin: EdgeInsets.only(top:0.0,left: 22.0),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.horizontal(
+                              left: Radius.elliptical(20.0,20.0),
+                            ),
+                            side: BorderSide(color: Colors.black12)),
+                        child:Form(
+                          key: _formKey,
+                          child:Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child:
+                              Column(
+                                children: <Widget>[
+                                  // Padding(padding:,)
+                                  SizedBox(
+                                    height: 15.0,
                                   ),
-                                  keyboardType: TextInputType.text,
-                                  // textInputAction: TextInputAction.continueAction,
-                                  onChanged: (v) => _signupData['fullname'] = v,
-                                  validator: (value) {
-                                    if (value.isEmpty) {
-                                      return 'Please enter your fullname';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                TextFormField(
-                                  key: UniqueKey(),
-                                  initialValue: _signupData['country'] ,
-                                  onSaved: (value)=> _signupData['country'] = value,
-                                  decoration: const InputDecoration(
-                                    prefixIcon: Icon(Icons.map,color: secondaryTextColor),
-                                    labelText: 'Country',
-                                    labelStyle: TextStyle(
-                                      color:  secondaryTextColor,
-                                    ),
+                                  Text(
+                                    'Login',
+                                    style: TextStyle(fontFamily: "Lato",fontStyle:FontStyle.normal,fontWeight: FontWeight.normal,fontSize: 20),
                                   ),
-                                  keyboardType: TextInputType.text,
-                                  // textInputAction: TextInputAction.continueAction,
-                                  onChanged: (v) => _signupData['country'] = v,
-                                  validator: (value) {
-                                    if (value.isEmpty) {
-                                      return 'Please enter your country';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                TextFormField(
-                                  key: UniqueKey(),
-                                  initialValue: _signupData['company'] ,
-                                  onSaved: (value)=> _signupData['company'] = value,
-                                  decoration: const InputDecoration(
-                                    prefixIcon: Icon(Icons.person,color: secondaryTextColor,),
-                                    labelText: 'Company Name',
-                                    labelStyle: TextStyle(
-                                      color: secondaryTextColor,
-                                    ),
+                                  SizedBox(
+                                    height: 15.0,
                                   ),
-                                  keyboardType: TextInputType.text,
-                                  // textInputAction: TextInputAction.continueAction,
-                                  onChanged: (v) => _signupData['company'] = v,
-                                  validator: (value) {
-                                    if (value.isEmpty) {
-                                      return 'Please enter your company name';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                TextFormField(
-                                  key: UniqueKey(),
-                                  initialValue: _signupData['email'] ,
-                                  onSaved: (value)=> _signupData['email'] = value,
-                                  decoration: const InputDecoration(
-                                    prefixIcon: Icon(Icons.email,color: secondaryTextColor),
-                                    labelText: 'Email',
-                                    labelStyle: TextStyle(
-                                      color:  secondaryTextColor,
-                                    ),
-                                  ),
-                                  keyboardType: TextInputType.emailAddress,
-                                  // textInputAction: TextInputAction.continueAction,
-                                  onChanged: (v) => _signupData['email'] = v,
-                                  validator: (value) {
-                                    if (value.isEmpty) {
-                                      return 'Please enter your email';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                TextFormField(
-                                  key: UniqueKey(),
-                                  initialValue: _signupData['phone'],
-                                  onSaved: (value)=> _signupData['phone'] = value,
-                                  decoration: const InputDecoration(
-                                    prefixIcon: Icon(Icons.call,color: secondaryTextColor),
-                                    labelText: 'Phone number',
-                                    labelStyle: TextStyle(
-                                      color:  secondaryTextColor,
-                                    ),
-                                  ),
-                                  keyboardType: TextInputType.phone,
-                                  // textInputAction: TextInputAction.continueAction,
-                                  onChanged: (v) => _signupData['phone'] = v,
-                                  validator: (value) {
-                                    if (value.isEmpty) {
-                                      return 'Please enter your phone number';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                TextFormField(
-                                  key: UniqueKey(),
-                                  obscureText: true,
-                                  initialValue:  _signupData['password'],
-                                  onSaved: (value)=> _signupData['password'] = value,
-                                  decoration: const InputDecoration(
-                                    prefixIcon: Icon(Icons.lock,color: secondaryTextColor),
-                                    labelText: 'Password',
-                                    labelStyle: TextStyle(
-                                      color:  secondaryTextColor,
-                                    ),
-                                  ),
-                                  keyboardType: TextInputType.text,
-                                  // textInputAction: TextInputAction.continueAction,
-                                  onChanged: (v) => _signupData['password'] = v,
-                                  validator: (value) {
-                                    if (value.isEmpty ) {
-                                      return 'Please enter your password';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                TextFormField(
-                                  key: UniqueKey(),
-                                  obscureText: true,
-                                  initialValue:_signupData['confirm_password'],
-                                  onSaved: (value)=> _signupData['confirm_password'] = value,
-                                  decoration: const InputDecoration(
-                                    prefixIcon: Icon(Icons.lock,color:secondaryTextColor),
-                                    labelText: 'Confirm Password',
-                                    labelStyle: TextStyle(
-                                      color:  secondaryTextColor,
-                                    ),
-
-                                  ),
-                                  keyboardType: TextInputType.text,
-                                  // textInputAction: TextInputAction.continueAction,
-                                  onChanged: (v) => _signupData['confirm_password'] = v,
-                                  validator: (value) {
-                                    if (value.isEmpty) {
-                                      return 'Please enter your password';
-                                    }
-                                    else if (value != _signupData['password']) {
-                                      return 'Password not the same with confirm password';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                SizedBox(
-                                  height: 15.0,
-                                ),
-                                Row(
-                                  children: <Widget>[
-                                    Expanded(child:
-                                    Text("By clicking on Create you agree on",style: TextStyle(
-                                      color:  secondaryTextColor,
-                                    ),)
-                                    ),
-                                    InkWell(
-                                      onTap: (){
-                                        if(_loading) {
-                                          return;
-                                        }
-      //                                  setState(() {
-      //                                    // Process data.
-      //                                    _screen=3;
-      //                                  });
-                                      },
-                                      child: Text("Terms of Service",
-                                        style: TextStyle(
-                                          color:  actionColor,
-                                        ),
+                                  TextFormField(
+                                    key: UniqueKey(),
+                                    initialValue:_username ,
+                                    onSaved: (value)=> _username = value,
+                                    decoration: const InputDecoration(
+                                      prefixIcon: Icon(Icons.person,color: secondaryTextColor),
+                                      labelText: 'Email',
+                                      labelStyle: TextStyle(
+                                        color:  secondaryTextColor,
                                       ),
-                                    )
-                                  ],
-                                ),
-                                Center(
-                                  child: RaisedButton(
-                                    color: primaryColor,
-                                    shape: RoundedRectangleBorder(
-
-                                        borderRadius: BorderRadius.vertical(
-                                            top: Radius.elliptical(20.0,20.0),
-                                            bottom: Radius.elliptical(20.0,20.0)
-                                        ),
-                                        side: BorderSide(color: primarySwatch)
                                     ),
-                                    onPressed: () {
-                                      // Validate will return true if the form is valid, or false if
-                                      // the form is invalid.
-                                      final form = _formKey.currentState;
-                                      form.save();
-
-                                      if (_formKey.currentState.validate()) {
-                                        if(_loading) {
-                                          return;
-                                        }
-                                        setState(() {
-                                          _loading=true;
-                                        });
-
-                                        var wait=Provider.of<AuthService>(context).createUser(_signupData);
-                                        wait.then((status){
-                                          setState(() {
-                                            _loading=false;
-                                          });
-
-                                          if(status == null){
-                                            return  Scaffold.of(context).showSnackBar(SnackBar(content:Text('Invalid username number')));
-                                          }
-                                          else if(status == false){
-                                            return  Scaffold.of(context).showSnackBar(SnackBar(content:Text("Internet error")));
-                                          }
-                                          else if(status != true){
-                                            return Scaffold.of(context).showSnackBar(SnackBar(content:Text(status)));
-                                          }
-                                          return showDialog<void>(
-                                            context: context,
-                                            barrierDismissible: false, // user must tap button!
-                                            builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                title: Text('Welcome '+_signupData['fullname']),
-                                                content: SingleChildScrollView(
-                                                  child: ListBody(
-                                                    children: <Widget>[
-                                                      Text('Your account have been created.'),
-                                                    ],
-                                                  ),
-                                                ),
-                                                actions: <Widget>[
-                                                  FlatButton(
-                                                    child: Text('OK'),
-                                                    onPressed: () {
-                                                      Navigator.of(context).pop();
-                                                    },
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
-                                        }
-                                        );
+                                    keyboardType: TextInputType.text,
+                                    // textInputAction: TextInputAction.continueAction,
+                                    onChanged: (v) => _username = v,
+                                    validator: (value) {
+                                      if (value.isEmpty) {
+                                        return 'Please enter your username or email';
                                       }
+                                      return null;
                                     },
-                                    child: Text(
-                                      (_loading?'loading...':'Create'),
-                                      style: TextStyle(
-                                        fontSize: 16.0,
-                                        color: Colors.white,
+                                  ),
+                                  TextFormField(
+                                    key: UniqueKey(),
+                                    obscureText: true,
+                                    initialValue: _password,
+                                    onSaved: (value)=> _password = value,
+                                    decoration: const InputDecoration(
+                                      prefixIcon: Icon(Icons.lock,color: secondaryTextColor),
+                                      labelText: 'Password',
+                                      labelStyle: TextStyle(
+                                        color: secondaryTextColor,
+                                      ),
+                                    ),
+                                    keyboardType: TextInputType.text,
+                                    // textInputAction: TextInputAction.continueAction,
+                                    onChanged: (v) => _password = v,
+                                    validator: (value) {
+                                      if (value.isEmpty) {
+                                        return 'Please enter your password';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                  SizedBox(
+                                    height: 15.0,
+                                  ),
+                                  Center(
+
+                                    child: RaisedButton(
+                                      color: primaryColor,
+                                      shape: RoundedRectangleBorder(
+
+                                          borderRadius: BorderRadius.vertical(
+                                              top: Radius.elliptical(20.0,20.0),
+                                              bottom: Radius.elliptical(20.0,20.0)
+                                          ),
+                                          side: BorderSide(color: primarySwatch)
+                                      ),
+                                      onPressed: () {
+                                        // Validate will return true if the form is valid, or false if
+                                        // the form is invalid
+                                        final form = _formKey.currentState;
+                                        form.save();
+
+
+                                        if (_formKey.currentState.validate()) {
+                                          if(_loading){
+                                            return;
+                                          }
+                                          setState(() {
+                                            _loading=true;
+                                          });
+                                          var wait=Provider.of<AuthService>(context).loginUser(username: _username, password: _password);
+                                          wait.then((status){
+                                            setState(() {
+                                              _loading=false;
+                                            });
+
+                                            if(status == null){
+                                              return  Scaffold.of(context).showSnackBar(SnackBar(content:Text('Invalid username number')));
+                                            }
+                                            else if(status == false){
+                                              return  Scaffold.of(context).showSnackBar(SnackBar(content:Text("Internet error")));
+                                            }
+                                            else if(status != true){
+                                              return Scaffold.of(context).showSnackBar(SnackBar(content:Text(status)));
+                                            }
+                                            return null;
+                                          });
+                                        }
+                                      },
+                                      child: Text((_loading?'loading...':'Login'),
+                                        style: TextStyle(
+                                          fontSize: 16.0,
+                                          color: Colors.white,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(
-                                  height: 25.0,
-                                ),
-                                Row(
-                                  children: <Widget>[
-                                    Expanded(child: Text("Have an Account?")),
-                                    InkWell(
-
-                                      onTap: (){
-                                        if(_loading) {
-                                          return;
-                                        }
-                                        setState(() {
-                                          // Process data.
-                                          _screen=1;
-                                        });
-                                      },
-                                      child: Text("Sign In",
-                                        style: TextStyle(
-                                          color:  actionColor,
+                                  SizedBox(
+                                    height: 25.0,
+                                  ),
+                                  Row(
+                                    children: <Widget>[
+                                      Expanded(child: Text("New on NSCE?")),
+                                      InkWell(
+                                        onTap: (){
+                                          if(_loading) {
+                                            return;
+                                          }
+                                          setState(() {
+                                            // Process data.
+                                            _screen=2;
+                                          });
+                                        },
+                                        child: Text("Create an Account",
+                                          style: TextStyle(
+                                            color:  actionColor,
+                                          ),
                                         ),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 15.0,
-
-                                ),
-                             ]
-                            )
+                                      )
+                                    ],
+                                  ),
+                                ],
+                              )
+                          ),
                         )
                     )
-                )
-              ),
-              SizedBox(height: 20,)
-            ]
+                ),
+                Image(
+                  image: AssetImage('images/auth-footer.png'),
+                  fit: BoxFit.fill,
+                  width: 1000.0,
+                  height: 100,
+                ),
+              ],
+            ),
           )
+        ]
+      );
+  }
+  Widget signUp(){
+    return
+      ListView(
+          shrinkWrap: true,
+          children: <Widget>[
+            Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height+345,
+              child:
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Image(
+                      image: AssetImage('images/auth-header.png'),
+                      fit: BoxFit.fill,
+                      width: 1000.0,
+                      height: 100,
+                    ),
+                    Center(
+                      child: Image(
+                          image: AssetImage('images/icon.png'),
+                          width: 130,
+                          height: 130,
+                      )
+                    ),
+                    Container(
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color.fromRGBO(224, 224, 224 , 1),
+                              blurRadius: 25.0, // soften the shadow
+                              spreadRadius: 2.0, // extend the shadow
+                              offset: Offset(
+                                12.0, // Move to right 10 horizontally
+                                1.0,   //Move to bottom 10 Vertically
+                              ),
+                            )
+                          ],
+                        ),
+                        child: Card(
+                            elevation: 4.0,
+                            margin: EdgeInsets.only(top:0.0,left: 22.0),
 
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.horizontal(
+                                  left: Radius.elliptical(20.0,20.0),
+                                ),
+                                side: BorderSide(color: Colors.black12)),
+                            child:Form(
+                                key: _formKey,
+                                child:Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Column(
+                                        children: <Widget>[
+                                          // Padding(padding:,)
+
+                                          SizedBox(
+                                            height: 15.0,
+                                          ),
+                                          Text(
+                                            'Create Account',
+                                            style: TextStyle(fontFamily: "Lato",fontStyle:FontStyle.normal,fontWeight: FontWeight.normal,fontSize: 20),
+
+                                          ),
+                                          SizedBox(
+                                            height: 15.0,
+                                          ),
+                                          TextFormField(
+                                            key: UniqueKey(),
+                                            initialValue: _signUpData['fullname'] ,
+                                            onSaved: (value)=> _signUpData['fullname'] = value,
+                                            decoration: const InputDecoration(
+                                              prefixIcon: Icon(Icons.person,color: secondaryTextColor),
+                                              labelText: 'Fullname',
+                                              labelStyle: TextStyle(
+                                                color: secondaryTextColor,
+                                              ),
+                                            ),
+                                            keyboardType: TextInputType.text,
+                                            // textInputAction: TextInputAction.continueAction,
+                                            onChanged: (v) => _signUpData['fullname'] = v,
+                                            validator: (value) {
+                                              if (value.isEmpty) {
+                                                return 'Please enter your fullname';
+                                              }
+                                              return null;
+                                            },
+                                          ),
+                                          TextFormField(
+                                            key: UniqueKey(),
+                                            initialValue: _signUpData['country'] ,
+                                            onSaved: (value)=> _signUpData['country'] = value,
+                                            decoration: const InputDecoration(
+                                              prefixIcon: Icon(Icons.map,color: secondaryTextColor),
+                                              labelText: 'Country',
+                                              labelStyle: TextStyle(
+                                                color:  secondaryTextColor,
+                                              ),
+                                            ),
+                                            keyboardType: TextInputType.text,
+                                            // textInputAction: TextInputAction.continueAction,
+                                            onChanged: (v) => _signUpData['country'] = v,
+                                            validator: (value) {
+                                              if (value.isEmpty) {
+                                                return 'Please enter your country';
+                                              }
+                                              return null;
+                                            },
+                                          ),
+                                          TextFormField(
+                                            key: UniqueKey(),
+                                            initialValue: _signUpData['company'] ,
+                                            onSaved: (value)=> _signUpData['company'] = value,
+                                            decoration: const InputDecoration(
+                                              prefixIcon: Icon(Icons.person,color: secondaryTextColor,),
+                                              labelText: 'Company Name',
+                                              labelStyle: TextStyle(
+                                                color: secondaryTextColor,
+                                              ),
+                                            ),
+                                            keyboardType: TextInputType.text,
+                                            // textInputAction: TextInputAction.continueAction,
+                                            onChanged: (v) => _signUpData['company'] = v,
+                                            validator: (value) {
+                                              if (value.isEmpty) {
+                                                return 'Please enter your company name';
+                                              }
+                                              return null;
+                                            },
+                                          ),
+                                          TextFormField(
+                                            key: UniqueKey(),
+                                            initialValue: _signUpData['email'] ,
+                                            onSaved: (value)=> _signUpData['email'] = value,
+                                            decoration: const InputDecoration(
+                                              prefixIcon: Icon(Icons.email,color: secondaryTextColor),
+                                              labelText: 'Email',
+                                              labelStyle: TextStyle(
+                                                color:  secondaryTextColor,
+                                              ),
+                                            ),
+                                            keyboardType: TextInputType.emailAddress,
+                                            // textInputAction: TextInputAction.continueAction,
+                                            onChanged: (v) => _signUpData['email'] = v,
+                                            validator: (value) {
+                                              if (value.isEmpty) {
+                                                return 'Please enter your email';
+                                              }
+                                              return null;
+                                            },
+                                          ),
+                                          TextFormField(
+                                            key: UniqueKey(),
+                                            initialValue: _signUpData['phone'],
+                                            onSaved: (value)=> _signUpData['phone'] = value,
+                                            decoration: const InputDecoration(
+                                              prefixIcon: Icon(Icons.call,color: secondaryTextColor),
+                                              labelText: 'Phone number',
+                                              labelStyle: TextStyle(
+                                                color:  secondaryTextColor,
+                                              ),
+                                            ),
+                                            keyboardType: TextInputType.phone,
+                                            // textInputAction: TextInputAction.continueAction,
+                                            onChanged: (v) => _signUpData['phone'] = v,
+                                            validator: (value) {
+                                              if (value.isEmpty) {
+                                                return 'Please enter your phone number';
+                                              }
+                                              return null;
+                                            },
+                                          ),
+                                          TextFormField(
+                                            key: UniqueKey(),
+                                            obscureText: true,
+                                            initialValue:  _signUpData['password'],
+                                            onSaved: (value)=> _signUpData['password'] = value,
+                                            decoration: const InputDecoration(
+                                              prefixIcon: Icon(Icons.lock,color: secondaryTextColor),
+                                              labelText: 'Password',
+                                              labelStyle: TextStyle(
+                                                color:  secondaryTextColor,
+                                              ),
+                                            ),
+                                            keyboardType: TextInputType.text,
+                                            // textInputAction: TextInputAction.continueAction,
+                                            onChanged: (v) => _signUpData['password'] = v,
+                                            validator: (value) {
+                                              if (value.isEmpty ) {
+                                                return 'Please enter your password';
+                                              }
+                                              return null;
+                                            },
+                                          ),
+                                          TextFormField(
+                                            key: UniqueKey(),
+                                            obscureText: true,
+                                            initialValue:_signUpData['confirm_password'],
+                                            onSaved: (value)=> _signUpData['confirm_password'] = value,
+                                            decoration: const InputDecoration(
+                                              prefixIcon: Icon(Icons.lock,color:secondaryTextColor),
+                                              labelText: 'Confirm Password',
+                                              labelStyle: TextStyle(
+                                                color:  secondaryTextColor,
+                                              ),
+
+                                            ),
+                                            keyboardType: TextInputType.text,
+                                            // textInputAction: TextInputAction.continueAction,
+                                            onChanged: (v) => _signUpData['confirm_password'] = v,
+                                            validator: (value) {
+                                              if (value.isEmpty) {
+                                                return 'Please enter your password';
+                                              }
+                                              else if (value != _signUpData['password']) {
+                                                return 'Password not the same with confirm password';
+                                              }
+                                              return null;
+                                            },
+                                          ),
+                                          SizedBox(
+                                            height: 15.0,
+                                          ),
+                                          Row(
+                                            children: <Widget>[
+                                              Expanded(child:
+                                              Text("By clicking on Create you agree on",style: TextStyle(
+                                                color:  secondaryTextColor,
+                                              ),)
+                                              ),
+                                              InkWell(
+                                                onTap: (){
+                                                  if(_loading) {
+                                                    return;
+                                                  }
+                                                  //                                  setState(() {
+                                                  //                                    // Process data.
+                                                  //                                    _screen=3;
+                                                  //                                  });
+                                                },
+                                                child: Text("Terms of Service",
+                                                  style: TextStyle(
+                                                    color:  actionColor,
+                                                  ),
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                          Center(
+                                            child: RaisedButton(
+                                              color: primaryColor,
+                                              shape: RoundedRectangleBorder(
+
+                                                  borderRadius: BorderRadius.vertical(
+                                                      top: Radius.elliptical(20.0,20.0),
+                                                      bottom: Radius.elliptical(20.0,20.0)
+                                                  ),
+                                                  side: BorderSide(color: primarySwatch)
+                                              ),
+                                              onPressed: () {
+                                                // Validate will return true if the form is valid, or false if
+                                                // the form is invalid.
+                                                final form = _formKey.currentState;
+                                                form.save();
+
+                                                if (_formKey.currentState.validate()) {
+                                                  if(_loading) {
+                                                    return;
+                                                  }
+                                                  setState(() {
+                                                    _loading=true;
+                                                  });
+
+                                                  var wait=Provider.of<AuthService>(context).createUser(_signUpData);
+                                                  wait.then((status){
+                                                    setState(() {
+                                                      _loading=false;
+                                                    });
+
+                                                    if(status == null){
+                                                      return  Scaffold.of(context).showSnackBar(SnackBar(content:Text('Invalid username number')));
+                                                    }
+                                                    else if(status == false){
+                                                      return  Scaffold.of(context).showSnackBar(SnackBar(content:Text("Internet error")));
+                                                    }
+                                                    else if(status != true){
+                                                      return Scaffold.of(context).showSnackBar(SnackBar(content:Text(status)));
+                                                    }
+                                                    return showDialog<void>(
+                                                      context: context,
+                                                      barrierDismissible: false, // user must tap button!
+                                                      builder: (BuildContext context) {
+                                                        return AlertDialog(
+                                                          title: Text('Welcome '+_signUpData['fullname']),
+                                                          content: SingleChildScrollView(
+                                                            child: ListBody(
+                                                              children: <Widget>[
+                                                                Text('Your account have been created.'),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          actions: <Widget>[
+                                                            FlatButton(
+                                                              child: Text('OK'),
+                                                              onPressed: () {
+                                                                Navigator.of(context).pop();
+                                                              },
+                                                            ),
+                                                          ],
+                                                        );
+                                                      },
+                                                    );
+                                                  }
+                                                  );
+                                                }
+                                              },
+                                              child: Text(
+                                                (_loading?'loading...':'Create'),
+                                                style: TextStyle(
+                                                  fontSize: 16.0,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: 25.0,
+                                          ),
+                                          Row(
+                                            children: <Widget>[
+                                              Expanded(child: Text("Have an Account?")),
+                                              InkWell(
+
+                                                onTap: (){
+                                                  if(_loading) {
+                                                    return;
+                                                  }
+                                                  setState(() {
+                                                    // Process data.
+                                                    _screen=1;
+                                                  });
+                                                },
+                                                child: Text("Sign In",
+                                                  style: TextStyle(
+                                                    color:  actionColor,
+                                                  ),
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                          SizedBox(
+                                            height: 15.0,
+
+                                          ),
+                                        ]
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    Image(
+                      image: AssetImage('images/auth-footer.png'),
+                      fit: BoxFit.fill,
+                      width: 1000.0,
+                      height: 100,
+                    ),
+                ]
+            )
+        )
+      ]
     );
   }
   @override
