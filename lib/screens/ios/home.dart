@@ -1,16 +1,18 @@
-
-import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:NSCE/utils/colors.dart';
 import 'package:provider/provider.dart';
-
+import '../../ext/badge.dart';
 // import services here
 import '../../services/auth.dart';
-
+import '../../services/request.dart';
 // import screen here
-import 'home/settings.dart';
-import 'home/transaction.dart';
+import 'home/transactions.dart';
 import 'home/notification.dart';
-
+import 'home/products.dart';
+import 'home/wallet.dart';
+import 'home/drawer.dart';
+import 'dart:async';
 class TabContent {    
   final String title;    
   final Widget content;    
@@ -19,8 +21,9 @@ class TabContent {
 class HomePage extends StatefulWidget {
   var currentUser;
   String title;
-  HomePage({Key key, this.title}): super(key: key){
-    this.title=(this.title !=null )?this.title:'Nsce';
+  int currentIndex;
+  HomePage({Key key, this.title, this.currentIndex= 0}): super(key: key){
+    this.title=(this.title !=null )?this.title:'NSCE';
   }
 
   // This widget is the home page of your application. It is stateful, meaning
@@ -33,111 +36,215 @@ class HomePage extends StatefulWidget {
   // always marked "final".
  
   @override
-  _HomePageState createState() => _HomePageState();
+  _HomePageState createState() => _HomePageState( currentIndex: currentIndex );
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
-  var currentUser={'phone':''};
-  int _currentIndex = 0;
-  int _counter=0;
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+  Map<String, dynamic> currentUser={'phone':''};
+  Map<String, dynamic> userDetails={'balance':0000};
+  int currentIndex;
   String _title;
   List _children = <TabContent>[ ];
-  List <Widget>_childrenWithoutTitle=<Widget>[];
   TabController _controller;
   Future act;
-  _HomePageState(){
-    TabContent _homescreen=TabContent(title:'Tail Coin', content: HomeScreen(_incrementCounter,currentUser: currentUser, counter: _counter,));
-    TabContent _notificationPage =TabContent(title:'Notifications', content: NotificationPage());
-    TabContent _transactionPage= TabContent(title:'Transactions', content: TransactionPage());
-    // TODO: implement initState
-    _children= <TabContent>[_homescreen,_notificationPage,_transactionPage];
+  Future act2;
+  int _cartCount =0;
+  Timer _updateme;
+  _HomePageState({this.currentIndex = 0}){
+    _refresh();
   }
   @override
   void initState() {
     super.initState();
     _controller = TabController(length: _children.length, vsync: this);
-    _title= _children[_controller.index].title;
+    _title = _children[currentIndex].title;
     _controller.addListener(_handleSelected);
+    _initMe();
+    _updateme=new Timer(const Duration(seconds: 5),updateBalance);
+  }
+  @override
+  void dispose(){
+    _updateme.cancel();
+    super.dispose();
+  }
+  void updateBalance(){
+    fetchAccount(id:'balance')
+        .then((value){
+//          print(value);
+          if(value == false){
+            return;
+          }
+          if(value.containsKey('error') && value['error']) {
+            return;
+          }
+          if(value.containsKey('data') && value['data']==null) {
+            return ;
+          }
+          if ( value['data'] !=userDetails['balance']){
+            setState(() {
+              userDetails['balance']=value['data'];
+            });
+          }
+        });
+    count(cartCount){
+      if(cartCount is bool || cartCount == null){
+        return;
+      }
+      if(cartCount['error']==false && cartCount['data'] is int){
+        _changeCartCount(cartCount['data']);
+      }
+    }
+    fetchCart(id:'count').then(count);
+
+  }
+  void _changeCartCount(e){
+    setState(() {
+      _cartCount=e;
+    });
   }
   void _handleSelected() {
     setState(() {
-     _title= _children[_controller.index].title;
+     _title = _children[_controller.index].title;
      print(_title);
     });
   }
   void _onTabTapped(int index) {
     setState(() {
-      if(index>2){
-       return _openSettings();
-      }
-      _currentIndex = index;
+      currentIndex = index;
       _title = _children[index].title;
     });
   }
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter= _counter+2;
-      TabContent _homescreen=TabContent(    
-        title: 'Tail Coins',    
-        content: HomeScreen(_incrementCounter,currentUser: currentUser, counter: _counter,),
+  _foriOS(){
+    return
+      Scaffold(
+        drawer:AppDrawer(userDetails:userDetails,currentUser: currentUser),
+        appBar: AppBar(
+          elevation: 0,
+          title: Text(_title,style: TextStyle(color: Colors.white,)),
+          iconTheme: IconThemeData(color:primaryTextColor),
+          actions: <Widget>[
+            SizedBox(
+              height: 25.0,
+            ),
+            Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child:IconButton(
+                  color: primaryTextColor,
+                  icon:Icon(Icons.search),
+                  onPressed: (){
+                    Navigator.pushNamed(context, '/search');
+                  },
+                )
+            ),
+            Stack(
+              children: <Widget>[
+                Positioned(
+                  right: 8,
+                  top: 10,
+                  child:_cartCount==0?SizedBox():Container(
+                    decoration: BoxDecoration(
+                      color: Colors.green,
+                      shape: BoxShape.circle
+                    ),
+                    padding: EdgeInsets.all(3),
+                    child: Text(_cartCount.toString(),style: TextStyle(color: primaryTextColor),),
+                  )
+                ),
+                Align(
+                  child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      child:IconButton(
+                        color: primaryTextColor,
+                        icon:Icon(Icons.shopping_cart),
+                        onPressed: (){
+                          Navigator.pushNamed(context, '/cart');
+                        },
+                      )
+                  ),
+                ),
+
+
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical:16.0),
+              child:PopupMenuButton(
+                  color: primaryTextColor,
+                  icon: Icon(Icons.more_vert,color:Colors.white),
+                  onSelected: (result){
+                    if(result=='i-don-catch-u')Navigator.pushNamed(context, '/settings');
+                    else if(result=='if-i-catch-u'){
+                      Provider.of<AuthService>(context).logout();
+                      if(Navigator.canPop(context)) Navigator.pop(context);
+                    }
+                    print(result);
+                  },
+                  itemBuilder: (BuildContext context)=><PopupMenuEntry>[
+                    const PopupMenuItem(value:'if-i-catch-u',child: Text('Logout')),
+                    const PopupMenuItem(value:'i-don-catch-u',child: Text('Settings')),
+                  ]
+              ),
+            ),
+          ],
+        ),
+        body:_children[currentIndex].content,
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: currentIndex,
+          onTap: _onTabTapped,
+          selectedLabelStyle: TextStyle(
+              color: Colors.black
+          ),
+          selectedItemColor: Colors.blue,
+          selectedIconTheme:IconThemeData(color:Colors.blueAccent),
+          unselectedItemColor: Colors.black54,
+          unselectedIconTheme:IconThemeData(color: Colors.black54),
+          type: BottomNavigationBarType.fixed,
+          items: <BottomNavigationBarItem>[
+            BottomNavigationBarItem(icon: Icon(Icons.home), title: Text('Home')),
+            BottomNavigationBarItem(icon: Icon(Icons.schedule), title: Text('Notifications')),
+            BottomNavigationBarItem(icon: Icon(Icons.view_list), title: Text('Transactions')),
+            BottomNavigationBarItem(icon: Icon(Icons.credit_card), title: Text('Wallet')),
+          ],
+        ),// This trailing comma makes auto-formatting nicer for build methods.
       );
-      TabContent _notificationPage = TabContent(    
-        title: 'Notifications',   
-        content:  NotificationPage());
-      TabContent _transactionPage= TabContent(    
-        title: 'Transactions', 
-        content:  TransactionPage());
-      _children= <TabContent>[_homescreen,_notificationPage,_transactionPage];
-      print('$_counter is counted increase');
+  }
+  _initMe(){
+    act2 = checkAuth();
+    act2.then((value){
+//      print(value);
+      if(value == false){
+        return;
+      }
+      if(value.containsKey('error') && value['error']) {
+        return;
+      }
+      if(value.containsKey('data') && value['data']==null) {
+        return ;
+      }
+      setState(() {
+        userDetails = value['data'];
+      });
     });
   }
-  void _openSettings(){
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) =>SettingsPage()),
-    );
+  _refresh(){
+    TabContent _productsScreen=TabContent(title:'Home', content: ProductsScreen(currentUser: currentUser,userDetails: userDetails, reload:_initMe));
+    TabContent _notificationScreen =TabContent(title:'Notifications', content: NotificationScreen());
+    TabContent _transactionsScreen= TabContent(title:'Transactions', content: TransactionsScreen());
+    TabContent _walletScreen= TabContent(title:'Wallet', content: WalletScreen(currentUser: currentUser,userDetails: userDetails, reload:_initMe));
+    // TODO: implement initState
+    _children= <TabContent>[_productsScreen, _notificationScreen,_transactionsScreen,_walletScreen];
   }
-  _foriOS(){
-    return 
-    Scaffold(
-      appBar: AppBar(title: Text(_title),),
-      body:_children[_currentIndex].content,
-      // body:HomeScreen(_incrementCounter,currentUser: currentUser, counter: _counter,),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _onTabTapped, 
-        selectedLabelStyle: TextStyle(
-          color: Colors.black
-        ),
-        selectedItemColor: Colors.blue,
-        selectedIconTheme:IconThemeData(color:Colors.blueAccent),
-        unselectedItemColor: Colors.black54,
-        unselectedIconTheme:IconThemeData(color: Colors.black54),
-        type: BottomNavigationBarType.fixed,
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), title: Text('Home')),
-          BottomNavigationBarItem(icon: Icon(Icons.mail), title: Text('Notifications')),
-          BottomNavigationBarItem(icon: Icon(Icons.person), title: Text('Transactions')),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), title: Text('Settings')),
-        ],
-      ),// This trailing comma makes auto-formatting nicer for build methods.
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     act = Provider.of<AuthService>(context).getUser();
-    act.then((value){
+    act.then ((value){
       setState(() {
-      currentUser=value;
-      _children [0]= TabContent(title:'Tail Coin', content: HomeScreen(_incrementCounter,currentUser: currentUser, counter: _counter,));
+//        print(currentUser);
+        currentUser=value;
       });
     });
+    _refresh();
+
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -145,70 +252,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
 
-    // return _foriOS();
+//    return _forAndroid();
     return _foriOS();
-  }
-}
-class HomeScreen extends StatelessWidget{
-   String title="Tail Coin";
-  var currentUser={'phone':''};
-  int counter;
-  Function incrementCounter;
-  HomeScreen(this.incrementCounter,{this.currentUser=const {'phone':''} ,this.counter=1});
- 
-   @override
-  Widget build(BuildContext context) {
-    
-  return 
-    Scaffold(
-      body:
-        Center(
-          // Center is a layout widget. It takes a single child and positions it
-          // in the middle of the parent.
-          child: Column(
-            // Column is also a layout widget. It takes a list of children and
-            // arranges them vertically. By default, it sizes itself to fit its
-            // children horizontally, and tries to be as tall as its parent.
-            //
-            // Invoke "debug painting" (press "p" in the console, choose the
-            // "Toggle Debug Paint" action from the Flutter Inspector in Android
-            // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-            // to see the wireframe for each widget.
-            //
-            // Column has various properties to control how it sizes itself and
-            // how it positions its children. Here we use mainAxisAlignment to
-            // center the children vertically; the main axis here is the vertical
-            // axis because Columns are vertical (the cross axis would be
-            // horizontal).
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                'You phone number is: ${currentUser['phone']}',
-              ),
-              Text(
-                'You have pushed the button this many times:',
-              ),
-              Text(
-                '$counter',
-                style: Theme.of(context).textTheme.display1,
-              ),
-              RaisedButton(
-                child: Text('Open route'),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) =>TransactionPage()),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-        onPressed: incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      )
-    );
+
   }
 }

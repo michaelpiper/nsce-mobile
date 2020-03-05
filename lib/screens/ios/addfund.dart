@@ -1,8 +1,10 @@
 import'dart:async';
+import 'package:NSCE/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_paystack/flutter_paystack.dart';
 import '../../services/request.dart';
+import '../../services/auth.dart';
 // third screen
 
 class AddFundsPage extends StatefulWidget {
@@ -32,37 +34,53 @@ class _AddFundsPage extends State<AddFundsPage> {
       setState(() {
         _loading=true;
       });
-      PaymentCard card = PaymentCard(number: _cardNumber,
-          cvc: _cvv,
-          expiryYear: _expiryYear,
-          expiryMonth: _expiryMonth);
-      Charge charge = Charge()
-        ..amount = _amount * 100
-        ..putCustomField('full name', 'Michael Piper')
-        ..email = "pipermichael@aol.com"
-        ..card = card;
-      PaystackPlugin.chargeCard(context,
-          charge: charge,
-          beforeValidate: (transaction) {
-            print(transaction.reference);
-          },
-          onError: (err, transaction) {
-            print(err);
-            _returnError();
-            setState(() {
-              _loading=false;
-            });
-          },
-          onSuccess: (transaction) {
+      var act = AuthService.getUserDetails();
+      act.then ((value) async {
+        if(value is bool  || value==null || value.isEmpty){
+          _returnError();
+          setState(() {
+            _loading=false;
+          });
+          return;
+        }
+        Map<dynamic, dynamic> userDetails = value;
+        var user = await (new AuthService()).getUser();
+        print(userDetails);
+        print(user);
+        PaymentCard card = PaymentCard(number: _cardNumber,
+            cvc: _cvv,
+            expiryYear: _expiryYear,
+            expiryMonth: _expiryMonth);
+        Charge charge = Charge()
+          ..amount = _amount * 100
+          ..putCustomField('full name', userDetails['firstName']+' '+userDetails['lastName'])
+          ..putCustomField('phone number', user['phone'])
+          ..email = user['email']
+          ..card = card;
+        PaystackPlugin.chargeCard(context,
+            charge: charge,
+            beforeValidate: (transaction) {
+              print(transaction.reference);
+            },
+            onError: (err, transaction) {
+              print(err);
+              _returnError();
+              setState(() {
+                _loading=false;
+              });
+            },
+            onSuccess: (transaction) {
 //            print(transaction.reference);
-            print(_amount);
-            _returnState();
-            setState(() {
-              _loading=false;
-            });
-            createTrn({'trnRef':transaction.reference,'amount':_amount.toString()});
-          }
-      );
+              print(_amount);
+              _returnState();
+              setState(() {
+                _loading=false;
+              });
+              createTrn({'trnRef':transaction.reference,'amount':_amount.toString()});
+            }
+        );
+
+      });
     }
   }
   void _returnState() async {
@@ -225,7 +243,7 @@ class _AddFundsPage extends State<AddFundsPage> {
                     onPressed: connectPaystack,
                     minWidth: 150.0,
                     height: 50.0,
-                    color: Colors.orange,
+                    color: primaryColor,
                     child: Row(
                       crossAxisAlignment:CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
