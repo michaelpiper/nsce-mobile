@@ -13,12 +13,19 @@ class ProductsScreen extends StatelessWidget{
   Function reload;
   bool _loading=false;
   List<Map<String, dynamic>> _categories = [];
+  List<Map<String, dynamic>> _dealoftheday = [];
   ProductsScreen({this.currentUser=const {'phone':''} ,this.userDetails=const {'balance':0},this.reload}){
     _categories= [
       {'avatar':'images/sample1.png','link':'/product/1','name':'Stone'},
-      {'avatar':'images/sample2.png','link':'/product/1','name':'Stone'},
+      {'avatar':'images/sample2.png','link':'/product/1','name':'Concrate'},
+      {'avatar':'images/sample3.png','link':'/product/1','name':'Asphalt'},
+    ];
+
+    _dealoftheday= [
       {'avatar':'images/sample1.png','link':'/product/1','name':'Stone'},
+      {'avatar':'images/sample2.png','link':'/product/1','name':'Gravel'},
       {'avatar':'images/sample1.png','link':'/product/1','name':'Stone'},
+      {'avatar':'images/sample1.png','link':'/product/1','name':'Concrate'},
     ];
   }
   void _returnState(context) async {
@@ -144,69 +151,7 @@ class ProductsScreen extends StatelessWidget{
       _loading = false;
     });
   }
-  _addFund(context){
-    return Card(
-      elevation: 6.0,
-      shape:RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(
-            20.0,
-          ),
-          side: BorderSide(color: Color.fromRGBO(237, 216, 22,1))),
-      child:  Container(
-        padding: EdgeInsets.all(15.0),
-        child:Column(
-          crossAxisAlignment:CrossAxisAlignment.stretch ,
-          children: <Widget>[
 
-            Row (
-              children: <Widget>[
-                Expanded(child:  Text('Your Account Balance is:'),),
-                InkWell(
-                  onTap: ()=>reload(),
-                  child: Text("reload",
-                    style: TextStyle(color:Colors.green),
-                  ),
-
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 15.0,
-            ),
-            Text(userDetails['balance'].toString()+' NGN'),
-
-            SizedBox(
-              height: 15.0,
-            ),
-            Material(
-              borderRadius: BorderRadius.circular(30.0),
-              //elevation: 5.0,
-              child: MaterialButton(
-                onPressed: ()async{
-                  Navigator.pushNamed(context, '/addfunds');
-                },
-                minWidth: 150.0,
-                height: 50.0,
-                color: Color.fromRGBO(237, 216, 22,0.6),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      32.0,
-                    ),
-                    side: BorderSide(color: Color.fromRGBO(237, 216, 22,1))),
-                child: Text(
-                  "Add Fund",
-                  style: TextStyle(
-                    fontSize: 16.0,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
   @override
   Widget build(BuildContext context) {
     return
@@ -214,29 +159,71 @@ class ProductsScreen extends StatelessWidget{
         body: ListView(
           shrinkWrap: false,
           children: <Widget>[
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color.fromARGB(0, 0, 0, 0), primaryColor],
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color.fromARGB(0, 0, 0, 0), primaryColor],
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                  ),
+                ),
+                padding: EdgeInsets.symmetric(vertical: 15.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(right: 10.0),
+                      child: Text('seeAll ',textAlign: TextAlign.right,style: TextStyle(color: primaryTextColor,),),),
+                    CarouselWithIndicator(_categories,activeIndicator: actionColor,),
+                  ]
                 ),
               ),
-              padding: EdgeInsets.symmetric(vertical: 15.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text('seeAll',textAlign: TextAlign.right,),
-                  CarouselWithIndicator(_categories,activeIndicator: actionColor,),
-                ]
+              Card(
+                  elevation: 4.0,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                       20.0,
+                      ),
+                      side: BorderSide(color: Colors.black12)),
+                  child:Padding(
+                    padding: EdgeInsets.only(top:12.0,bottom: 10.0,left:10.0,right: 10.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: Text('Types',style: TextStyle(fontWeight: FontWeight.w600,fontSize: 17,fontFamily: 'Lato'),),
+                            ),
+                            InkWell(
+                              child: Text('see All',style: TextStyle(color: Color.fromRGBO(237, 216, 22, 1),),),
+                            )
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: _categories.map<Widget>((e)=> SmallCard(
+                                name: e['name'],
+                                avatar: e['avatar'],
+                                link:  e['link'],
+                                width:(MediaQuery.of(context).size.width/3)-23.0,
+                                height:80
+                            )
+                          ).toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              SizedBox(
+                height: 15.0,
               ),
-            ),
-            Card(
+              Card(
                 elevation: 4.0,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(
-                     20.0,
+                      20.0,
                     ),
                     side: BorderSide(color: Colors.black12)),
                 child:Padding(
@@ -247,7 +234,7 @@ class ProductsScreen extends StatelessWidget{
                       Row(
                         children: <Widget>[
                           Expanded(
-                            child: Text('Category',style: TextStyle(fontWeight: FontWeight.w600,fontSize: 17,fontFamily: 'Lato'),),
+                            child: Text('Deal of the Day',style: TextStyle(fontWeight: FontWeight.w600,fontSize: 17,fontFamily: 'Lato',color: Colors.deepOrange),),
                           ),
                           InkWell(
                             child: Text('see All',style: TextStyle(color: Color.fromRGBO(237, 216, 22, 1),),),
@@ -256,23 +243,23 @@ class ProductsScreen extends StatelessWidget{
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: _categories.map<Widget>((e)=> SmallCard(
-                              name: e['name'],
-                              avatar: e['avatar'],
-                              link:  e['link'],
-                              width:(MediaQuery.of(context).size.width/4)-23.0,
-                              height:80
-                          )
+                        children: _dealoftheday.map<Widget>((e)=> SmallCard(
+                            name: e['name'],
+                            avatar: e['avatar'],
+                            link:  e['link'],
+                            width:(MediaQuery.of(context).size.width/4)-23.0,
+                            height:80
+                        )
                         ).toList(),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: _categories.map<Widget>((e)=> SmallCard(
+                        children: _dealoftheday.map<Widget>((e)=> SmallCard(
                             name: e['name'],
                             avatar: e['avatar'],
                             link:  e['link'],
-                            width:80,
-                            height:(MediaQuery.of(context).size.width/4)-23.0
+                            width:(MediaQuery.of(context).size.width/4)-23.0,
+                            height:80
                         )
                         ).toList(),
                       ),

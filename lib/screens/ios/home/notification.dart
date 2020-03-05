@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
 // Notification screen
-class NotificationPage extends StatelessWidget {
+class NotificationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return  Center(
       child: RaisedButton(
         onPressed: () {
-          Navigator.pop(context);
+//          Navigator.pop(context);
         },
-        child: Text('Go back!'),
+        child: Text('logout'),
       ),
     );
   }

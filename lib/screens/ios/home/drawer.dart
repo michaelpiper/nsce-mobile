@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth.dart';
-// third screen
-class TransactionPage extends StatelessWidget {
-  final int trnId;
-  TransactionPage({this.trnId});
+import '../../utils/colors.dart';
+
+
+class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Transaction "+trnId.toString(), style:TextStyle(color:Colors.white)),
+        title: Text("Lol",style:TextStyle(color:Colors.white)),
         iconTheme: IconThemeData(color: Colors.white),
+
       ),
       body: Center(
         child: RaisedButton(
           onPressed: () async {
-
+            Provider.of<AuthService>(context).logout();
             if(Navigator.canPop(context))
               Navigator.pop(context);
           },
-          child: Text('Go Back!'),
+          child: Text('Logout!'),
         ),
       ),
     );

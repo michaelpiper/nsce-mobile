@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-class SplashPage extends StatelessWidget {
+class Loading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Text('Splash screen')
+          child: Text('Splash screen')
       ),
     );
   }

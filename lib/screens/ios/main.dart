@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 // import screen here
 import 'home.dart';
@@ -8,11 +9,20 @@ import 'settings.dart';
 import 'addfund.dart';
 import 'transaction.dart';
 import 'product.dart';
+import 'search.dart';
+import 'cart.dart';
 // import services here
 import '../../services/auth.dart';
 // import color
 import '../../utils/colors.dart';
-buildIOS(context){
+buildAndroid(context){
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: primaryColor,
+      statusBarBrightness: Brightness.dark,
+//      systemNavigationBarColor: primaryColor,
+//    systemNavigationBarDividerColor: primarySwatch
+  ));
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp,DeviceOrientation.portraitDown]);
   return MaterialApp(
     title: 'Nsce',
     theme: ThemeData(
@@ -51,6 +61,8 @@ buildIOS(context){
       '/splash' : (BuildContext context) => SplashPage(),
       '/settings':(BuildContext context) => SettingsPage(),
       '/addfunds':(BuildContext context) => AddFundsPage(),
+      '/search':(BuildContext context) =>SearchPage(),
+      '/cart':(BuildContext context) => CartPage()
     },
   );
 }
