@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'ios/main.dart';
+import 'package:NSCE/screens/ios/main.dart';
 import 'package:NSCE/utils/colors.dart';
 Widget screen(context){
   if(Platform.isAndroid || Platform.isIOS){
