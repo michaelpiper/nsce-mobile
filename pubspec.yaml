@@ -1,4 +1,4 @@
-name: nsce
+name: NSCE
 description: A new Flutter project.
 
 # The following defines the version and build number for your application.
@@ -23,6 +23,10 @@ dependencies:
   shared_preferences: ^0.5.6
   flutter_paystack: ^1.0.2+1
   carousel_slider: ^1.4.1
+  table_calendar: ^2.2.2
+  url_launcher: ^5.4.2
+  share: ^0.6.3+6
+  flutter_rating_bar: ^3.0.1+1
   flutter:
     sdk: flutter
 
@@ -31,6 +35,8 @@ dependencies:
   cupertino_icons: ^0.1.2
 
 dev_dependencies:
+#  flutter_launcher_icons: ^0.7.0
+
   flutter_test:
     sdk: flutter
 
@@ -54,6 +60,19 @@ flutter:
     - images/badge.png
     - images/sample1.png
     - images/sample2.png
+    - images/sample3.png
+    - images/loading.jpg
+    - images/bootloader.png
+    - images/cheque.png
+    - images/bank.png
+    - images/wallet.png
+    - images/wallet_card.png
+    - assets/icons/calculator.png
+    - assets/icons/invoice.png
+    - assets/icons/payment.png
+    - assets/icons/order.png
+    - assets/icons/wallet.png
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
@@ -80,3 +99,8 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+flutter_icons:
+  image_path: "image/icon.png"
+  android: true
+  ios: true
