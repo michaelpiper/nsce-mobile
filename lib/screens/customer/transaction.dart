@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../services/auth.dart';
+import 'package:nsce/services/auth.dart';
 // third screen
 class TransactionPage extends StatelessWidget {
   final int trnId;
@@ -15,7 +15,6 @@ class TransactionPage extends StatelessWidget {
       body: Center(
         child: RaisedButton(
           onPressed: () async {
-
             if(Navigator.canPop(context))
               Navigator.pop(context);
           },

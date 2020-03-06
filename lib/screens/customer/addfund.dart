@@ -2,7 +2,7 @@ import'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_paystack/flutter_paystack.dart';
-import '../../services/request.dart';
+import 'package:nsce/services/request.dart';
 // third screen
 
 class AddFundsPage extends StatefulWidget {

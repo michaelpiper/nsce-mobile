@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
 
 // import service here
-import '../../services/auth.dart';
+import 'package:nsce/services/auth.dart';
 /// This Widget is the main application widget.
 class AuthPage extends StatelessWidget {
   static const String _title = 'Welcome';

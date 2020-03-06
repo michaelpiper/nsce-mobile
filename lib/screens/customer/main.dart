@@ -9,10 +9,10 @@ import 'addfund.dart';
 import 'transaction.dart';
 import 'product.dart';
 // import services here
-import '../../services/auth.dart';
+import 'package:nsce/services/auth.dart';
 // import color
-import '../../utils/colors.dart';
-buildIOS(context){
+import 'package:nsce/utils/colors.dart';
+buildApp(context){
   return MaterialApp(
     title: 'Nsce',
     theme: ThemeData(

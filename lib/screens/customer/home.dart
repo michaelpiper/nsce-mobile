@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 // import services here
-import '../../services/auth.dart';
+import 'package:nsce/services/auth.dart';
 
 // import screen here
-import 'home/settings.dart';
-import 'home/transaction.dart';
-import 'home/notification.dart';
+import 'settings.dart';
+import 'transaction.dart';
+import 'notification.dart';
 
 class TabContent {    
   final String title;    

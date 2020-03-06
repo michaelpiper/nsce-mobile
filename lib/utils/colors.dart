@@ -10,3 +10,5 @@ const Color noteColor = Colors.black54;
 const Color secondaryColor = Color.fromRGBO(214, 242, 40, 0.42);
 const Color secondaryTextColor = Color.fromRGBO(211, 211, 211,1);
 const Color primarySwatch = Colors.orange;
+const Color liteColor = Color.fromRGBO(255, 255, 255, 1);
+const Color liteTextColor = Color.fromRGBO(0, 0, 0, 0.4);
