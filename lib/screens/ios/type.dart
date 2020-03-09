@@ -31,7 +31,6 @@ class _TypePageState extends State<TypePage> with TickerProviderStateMixin {
     _products=[
 
     ];
-    print('am here dffsfdf sd');
     _loadingIndicator=true;
     _loadingProductIndicator=true;
   }
@@ -126,7 +125,6 @@ class _TypePageState extends State<TypePage> with TickerProviderStateMixin {
       width:90,
       color: liteColor,
       child: Column(
-       crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.start,
         children:
             _types.map <Widget>((type)=>Card(
@@ -188,10 +186,10 @@ class _TypePageState extends State<TypePage> with TickerProviderStateMixin {
       child:  ListView(
         shrinkWrap: true,
         children: <Widget>[
-          SizedBox(height: 12.0,),
-          Container(child: Text('Product',style: TextStyle(color: noteColor,fontWeight: FontWeight.w600,fontSize: 20),),color: liteColor,),
-          SizedBox(height: 5.0,),
-          productsBuilder()
+          Container(height: 5.0,color: bgColor,),
+          Container(padding:EdgeInsets.symmetric(horizontal: 12),child: Text('Product',style: TextStyle(color: noteColor,fontWeight: FontWeight.w600,fontSize: 20),),color: liteColor,),
+          Container(height: 5.0,color: bgColor,),
+          Container(color: liteColor,child: productsBuilder(),)
         ]
       ),
     );
@@ -203,6 +201,7 @@ class _TypePageState extends State<TypePage> with TickerProviderStateMixin {
         iconTheme: IconThemeData(color: liteTextColor),
         backgroundColor: liteColor,
       ),
+      backgroundColor: bgColor,
       body:Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,

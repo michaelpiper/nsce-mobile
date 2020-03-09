@@ -52,7 +52,7 @@ class CartPageState extends State<CartPage>{
     }
     int _total=0;
     _cartList.forEach((e) {_total +=(e['Product']['price'] - e['Product']['discount']) * e['quantity'];});
-    List _buildBody=_cartList.length==0?Center(child: Text('Empty cart'),):_cartList.map<Widget>((e)=>Container(
+    List _buildBody=_cartList.length==0?[Center(child: Text('Empty cart'),)]:_cartList.map<Widget>((e)=>Container(
       margin: EdgeInsets.symmetric(vertical: 10.0),
       decoration: BoxDecoration(
         boxShadow: [

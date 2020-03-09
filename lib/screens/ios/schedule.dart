@@ -114,11 +114,11 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
         setState(() {
           _selectedEvents = data['schedule'].map<Map>((e)
           {
-            DateTime start =DateTime.parse(e['time']).toLocal();
+            DateTime start =DateTime.parse(e['start']).toLocal();
             num diff = data['diff'];
-            DateTime end = DateTime.parse(e['time']).add(new Duration(minutes:diff.toInt())).toLocal();
+            DateTime end = DateTime.parse(e['end']).toLocal();
            return {
-             'schedule':e['time'],
+             'schedule': start.toString(),
              'time': (start.hour>9?start.hour.toString():'0'+start.hour.toString())+':'+(start.minute>9?start.minute.toString():'0'+start.minute.toString())+' - '+( end.hour>9?end.hour.toString():'0'+end.hour.toString())+':'+(end.minute>9?end.minute.toString():'0'+end.minute.toString()),
             'title': 'Production will take '+e['timeTaken']
            };

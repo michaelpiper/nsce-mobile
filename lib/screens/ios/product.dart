@@ -24,6 +24,7 @@ class ProductStatePage extends State<ProductPage>{
   bool _loadingIndicator;
   Map<String,dynamic>  _product;
   final LocalStorage storage = new LocalStorage(STORAGE_KEY);
+  TextEditingController _txtController = TextEditingController();
   ProductStatePage({this.id});
   @override
   void initState() {
@@ -35,12 +36,14 @@ class ProductStatePage extends State<ProductPage>{
   void increament(){
     setState(() {
       unit++;
+      _txtController.text=unit.toString();
     });
   }
   void decreament(){
     setState(() {
       if(unit>1)unit--;
       else unit=1;
+      _txtController.text=unit.toString();
     });
   }
   Future _loadProduct() async {
@@ -313,10 +316,27 @@ class ProductStatePage extends State<ProductPage>{
                                   increament();
                                 },
                               ),
-                              Text(unit.toString(),
-                                style: TextStyle(
-                                    textBaseline: TextBaseline.alphabetic),
-                                textAlign: TextAlign.end,
+                              Padding(
+                                padding: EdgeInsets.only(bottom: 7),
+                                child:  SizedBox(
+                                  width: 32,
+                                  child: TextField(
+                                    controller: _txtController,
+                                    keyboardType: TextInputType.number,
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none
+                                    ),
+                                    onChanged: (e)=>setState(() {
+                                      unit=int.tryParse(e);
+                                    }),
+                                    onSubmitted: (e)=>setState(() {
+                                      unit=int.tryParse(e);
+                                    }),
+                                    style: TextStyle(
+                                      textBaseline: TextBaseline.alphabetic,
+                                    ),
+                                  ),
+                                ),
                               ),
                               IconButton(
                                 padding: EdgeInsets.all(0.0),
@@ -367,6 +387,7 @@ class ProductStatePage extends State<ProductPage>{
       )
     );
     return Scaffold(
+      resizeToAvoidBottomInset : true,
       appBar: AppBar(
         elevation: 0,
         title: Text(_product['name'],style: TextStyle(color: Colors.white),),

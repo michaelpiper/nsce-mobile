@@ -159,7 +159,7 @@ class _AddFundsPage extends State<AddFundsPage> {
               shrinkWrap: false,
               children: <Widget>[
                 TextFormField(
-                  key: UniqueKey(),
+
                   initialValue: _cardNumber,
                   onChanged: (v) => _cardNumber = v,
                   keyboardType: TextInputType.number,
@@ -173,7 +173,7 @@ class _AddFundsPage extends State<AddFundsPage> {
                 ),
 
                 TextFormField(
-                  key: UniqueKey(),
+
                   initialValue: _expiryDate,
                   maxLength: 5,
                   onChanged: (v) {
@@ -198,7 +198,7 @@ class _AddFundsPage extends State<AddFundsPage> {
                   height: 15.0,
                 ),
                 TextFormField(
-                  key: UniqueKey(),
+
                   initialValue: _cvv,
                   maxLength: 3,
                   onChanged: (v) => _cvv =v,
@@ -217,7 +217,6 @@ class _AddFundsPage extends State<AddFundsPage> {
                   height: 15.0,
                 ),
                 TextFormField(
-                  key: UniqueKey(),
                   initialValue: _amount.toString(),
                   onChanged: (v) => _amount = int.parse(v),
                   keyboardType: TextInputType.number,

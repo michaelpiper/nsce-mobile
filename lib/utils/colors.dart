@@ -13,3 +13,4 @@ const Color primarySwatch = Colors.orange;
 
 const Color liteColor = Colors.white;
 const Color liteTextColor = Colors.black87;
+const Color bgColor =Colors.white70;
