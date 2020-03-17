@@ -27,6 +27,7 @@ dependencies:
   url_launcher: ^5.4.2
   share: ^0.6.3+6
   flutter_rating_bar: ^3.0.1+1
+  google_maps_webservice: ^0.0.16
   flutter:
     sdk: flutter
 
@@ -67,6 +68,7 @@ flutter:
     - images/bank.png
     - images/wallet.png
     - images/wallet_card.png
+    - images/map.png
     - assets/icons/calculator.png
     - assets/icons/invoice.png
     - assets/icons/payment.png

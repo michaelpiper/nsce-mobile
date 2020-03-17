@@ -85,7 +85,7 @@ checkAuth() async {
     this cannot be overridden.
     encoding defaults to utf8.
   */
-  print(API_AUTH_URL);
+
 
   Map<String, String> headers={'Authorization':''};
 
@@ -99,7 +99,8 @@ checkAuth() async {
 
   try{
     var response = await http.get(API_AUTH_URL, headers: headers);
-    print(response.body);
+//    print(response.body);
+    print(response.request.url);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -876,6 +877,30 @@ markAsUnreadNotifications(id)async{
   }
   catch(e){
     print(e);
+    return false;
+  }
+}
+
+
+searchAddress(String address)async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  Map<String, String> headers={};
+  if(prefs.containsKey(STORAGE_USER_KEY)) {
+    var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
+    if(wait.containsKey('authorization')) {
+      headers['Authorization']=wait['authorization'];
+    }
+  }
+  try{
+    var response = await http.get(API_AUTO_COMPLETE_ADDRESS_URL + '/' + address, headers: headers);
+
+    if (response.statusCode == 200) {
+      return convert.jsonDecode(response.body);
+    } else {
+      return false;
+    }
+  }
+  catch(e){
     return false;
   }
 }

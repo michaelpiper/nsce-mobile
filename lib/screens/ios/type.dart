@@ -189,7 +189,7 @@ class _TypePageState extends State<TypePage> with TickerProviderStateMixin {
           Container(height: 5.0,color: bgColor,),
           Container(padding:EdgeInsets.symmetric(horizontal: 12),child: Text('Product',style: TextStyle(color: noteColor,fontWeight: FontWeight.w600,fontSize: 20),),color: liteColor,),
           Container(height: 5.0,color: bgColor,),
-          Container(color: liteColor,child: productsBuilder(),)
+          Container(child: productsBuilder(),)
         ]
       ),
     );

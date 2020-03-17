@@ -7,12 +7,15 @@ import 'package:NSCE/utils/helper.dart';
 import 'package:NSCE/utils/constants.dart';
 import 'package:NSCE/services/request.dart';
 import 'package:NSCE/ext/dialogman.dart';
+import 'package:localstorage/localstorage.dart';
+import 'dart:convert' as convert;
 class CartPage extends StatefulWidget {
   @override
   CartPageState createState() =>CartPageState();
 }
 class CartPageState extends State<CartPage>{
   bool _loadingCartIndicator =true;
+  final LocalStorage localStorage = new LocalStorage(STORAGE_KEY);
   List <Map<String,dynamic>> _cartList=[];
   final DialogMan dialogMan =DialogMan(child: Scaffold(
       backgroundColor: Colors.transparent,
@@ -52,7 +55,7 @@ class CartPageState extends State<CartPage>{
     }
     int _total=0;
     _cartList.forEach((e) {_total +=(e['Product']['price'] - e['Product']['discount']) * e['quantity'];});
-    List _buildBody=_cartList.length==0?[Center(child: Text('Empty cart'),)]:_cartList.map<Widget>((e)=>Container(
+    List _buildBody=_cartList.map<Widget>((e)=>Container(
       margin: EdgeInsets.symmetric(vertical: 10.0),
       decoration: BoxDecoration(
         boxShadow: [
@@ -216,6 +219,7 @@ class CartPageState extends State<CartPage>{
         title:Text('Total'),
         trailing: Text(CURRENCY['sign']+' '+_total.toString()),
       )));
+      _buildBody.add(SizedBox(height: 10.0,));
     }
     Widget checkoutButton = Container(
       color: Colors.transparent,
@@ -240,7 +244,9 @@ class CartPageState extends State<CartPage>{
           MaterialButton(
             color: primaryColor,
             onPressed: (){
-              Navigator.pushNamed(context, '/checkout');
+              localStorage.setItem(STORAGE_CART_KEY, convert.jsonEncode(_cartList)).then<void>((value){
+                Navigator.pushNamed(context, '/checkout');
+              });
             },
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.vertical(
@@ -263,7 +269,7 @@ class CartPageState extends State<CartPage>{
         title: Text("Cart", style:TextStyle(color:liteTextColor)),
       ),
       body: Center(
-        child: _loadingCartIndicator?Loading():ListView(
+        child: _loadingCartIndicator?Loading():_cartList.length==0? Center(child: Text('Empty cart'),):ListView(
           children: _buildBody,
         ),
       ),

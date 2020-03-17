@@ -15,6 +15,7 @@ class ConfirmSchedulePage extends StatefulWidget {
 }
 class ConfirmSchedulePageState extends State<ConfirmSchedulePage>{
   final LocalStorage localStorage = new LocalStorage(STORAGE_KEY);
+  final _formKey = GlobalKey<FormState>();
   String selectedMethod='';
   Map _schedule={};
   List<Map<String,dynamic>> _dispatch=[];
@@ -39,6 +40,7 @@ class ConfirmSchedulePageState extends State<ConfirmSchedulePage>{
         _time = _time.add(Duration(minutes:dit.toInt()));
       }
     }
+    selectedMethod = _schedule['post']['pickup']=="0"?'Site Delivery':'Pick up at Quarry';
   }
   void changeMethod(e){
     setState(() {
@@ -72,16 +74,83 @@ class ConfirmSchedulePageState extends State<ConfirmSchedulePage>{
         ],
       ),
     );
-    Widget _buildContent=Container(
-      child:  Column(
-        children:
-        _dispatch.map<Widget>((dispatch)=> Card(
-          child: ListTile(
-            title: Text(dispatch['title']),
-            subtitle: Text(dispatch['time']),
-          )
-        )).toList()
-      ),
+    Widget _buildContent= Form(
+        key: _formKey,
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: ListBody(
+            children: <Widget>[
+              TextFormField(
+                initialValue:_schedule['post']['contactPerson'],
+                onSaved: (value)=> _schedule['post']['contactPerson']  = value,
+                decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.person,color: secondaryTextColor),
+                    labelText: 'Contact Person',
+                    labelStyle: TextStyle(
+                      color:  secondaryTextColor,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                        borderSide:BorderSide(color: Colors.black12,width:2)
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                        borderSide:BorderSide(color: Colors.grey,width:2)
+                    )
+                ),
+                keyboardType: TextInputType.text,
+                textInputAction: TextInputAction.done,
+                onChanged: (v) => _schedule['post']['contactPerson'] = v,
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please enter contact person name';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(
+                height: 4,
+              ),
+             TextFormField(
+                initialValue:_schedule['post']['contactPhone'] ,
+                onSaved: (value)=> _schedule['post']['contactPhone']   = value,
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.done,
+                decoration: const InputDecoration(
+                    hintText: '+2349433313465',
+                    hintStyle: TextStyle(
+                      color:  secondaryTextColor,
+                    ),
+                    labelText: 'Contact Phone',
+                    labelStyle: TextStyle(
+                      color:  secondaryTextColor,
+                    ),
+                    filled: true,
+                    fillColor: Colors.white70,
+                    enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                        borderSide:BorderSide(color: Colors.black12,width:2)
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                        borderSide:BorderSide(color: Colors.grey,width:2)
+                    )
+
+                ),
+                onChanged: (v) => _schedule['post']['contactPhone']  = v,
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please enter your phone number';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(
+                height: 4,
+              ),
+            ],
+          ),
+        )
     );
     Widget _addTocart=Container(
         color: Colors.transparent,
@@ -107,28 +176,35 @@ class ConfirmSchedulePageState extends State<ConfirmSchedulePage>{
                   }else{
                     _schedule['post']['pickup']='0';
                   }
-                  addToCart(_schedule['post']).then<void>((res)async{
-                    dialogMan.hide();
-                    await showDialog<void>(
-                      context: context,
-                      barrierDismissible: false, // user must tap button!
-                      builder: (BuildContext context) {
-                        String message="Time not available";
-                        bool link=false;
-                        if(res is bool || res == null){
-                          message="Couldn't proccess request at this time please try again";
-                        }
-                        else if(res['error'] is bool && res['error']==true){
-                          message=res['message']!=null?res['message']:'Time not available';
-                        }
-                        else{
-                          message=res['message']!=null?res['message']:'Item added to cart';
-                          link=true;
-                        }
-                        return SmartAlert(title:"Alert",description:message,onOk: (){ if(link) Navigator.popAndPushNamed(context, '/cart');},);
-                      },
-                    );
-                  });
+
+                  final form = _formKey.currentState;
+                  form.save();
+
+
+                  if (form.validate()) {
+                    return addToCart(_schedule['post']).then<void>((res)async{
+                      dialogMan.hide();
+                      await showDialog<void>(
+                        context: context,
+                        barrierDismissible: false, // user must tap button!
+                        builder: (BuildContext context) {
+                          String message="Time not available";
+                          bool link=false;
+                          if(res is bool || res == null){
+                            message="Couldn't proccess request at this time please try again";
+                          }
+                          else if(res['error'] is bool && res['error']==true){
+                            message=res['message']!=null?res['message']:'Time not available';
+                          }
+                          else{
+                            message=res['message']!=null?res['message']:'Item added to cart';
+                            link=true;
+                          }
+                          return SmartAlert(title:"Alert",description:message,onOk: (){ if(link) Navigator.popAndPushNamed(context, '/cart');},);
+                        },
+                      );
+                    });
+                  }
                   return null;
                 },
                 shape: RoundedRectangleBorder(
@@ -147,7 +223,10 @@ class ConfirmSchedulePageState extends State<ConfirmSchedulePage>{
     Widget _shippingMethods =SelectionList(
         ['Site Delivery','Pick up at Quarry'],
       title:Text('Shipping Methods'),
+      disabled: true,
+      value:_schedule['post']['pickup']=="0"?'Site Delivery':'Pick up at Quarry',
       onChange: (e)=>changeMethod(e),
+
     );
     return Scaffold(
         appBar: AppBar(
@@ -165,7 +244,7 @@ class ConfirmSchedulePageState extends State<ConfirmSchedulePage>{
             _buildHead,
             _shippingMethods,
             Center(
-              child: Text((_dispatch.length>0?_dispatch.length.toString():'')+' Dispach '+(selectedMethod!=''?'for '+selectedMethod:'')),
+              child: Text(' Contact Form '),
             ),
             _buildContent
           ]
@@ -174,4 +253,3 @@ class ConfirmSchedulePageState extends State<ConfirmSchedulePage>{
     );
   }
 }
-

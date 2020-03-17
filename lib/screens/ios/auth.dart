@@ -292,6 +292,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         children: <Widget>[
           Container(
             color: primaryTextColor,
+            constraints: BoxConstraints(minHeight:MediaQuery.of(context).size.height,maxHeight: MediaQuery.of(context).size.height ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
@@ -1013,6 +1014,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         children: <Widget>[
           Container(
             color: primaryTextColor,
+            constraints: BoxConstraints(minHeight:MediaQuery.of(context).size.height,maxHeight: MediaQuery.of(context).size.height ),
+
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[

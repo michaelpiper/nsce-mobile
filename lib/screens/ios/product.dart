@@ -6,9 +6,11 @@ import 'package:NSCE/utils/constants.dart';
 import 'package:NSCE/ext/loading.dart';
 import 'package:NSCE/services/request.dart';
 import 'package:NSCE/utils/helper.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:share/share.dart';
+import 'package:NSCE/ext/selectionlist.dart';
 import 'package:localstorage/localstorage.dart';
+import 'package:NSCE/ext/smartalert.dart';
+import 'package:NSCE/services/auth.dart';
+import 'package:provider/provider.dart';
 import 'dart:convert' as convert;
 class ProductPage extends StatefulWidget {
   final int id;
@@ -18,13 +20,15 @@ class ProductPage extends StatefulWidget {
   ProductStatePage createState() =>ProductStatePage(id:id);
 }
 
-class ProductStatePage extends State<ProductPage>{
+class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
   final int id;
   int unit;
   bool _loadingIndicator;
+  String selectedMethod='';
   Map<String,dynamic>  _product;
   final LocalStorage storage = new LocalStorage(STORAGE_KEY);
   TextEditingController _txtController = TextEditingController();
+  Map post={'productId':'','quantity':'','schedule':'','pickup':'','contactPerson':'','contactPhone':''};
   ProductStatePage({this.id});
   @override
   void initState() {
@@ -32,6 +36,7 @@ class ProductStatePage extends State<ProductPage>{
     super.initState();
     _loadingIndicator=true;
     unit=1;
+    _txtController.text=unit.toString();
   }
   void increament(){
     setState(() {
@@ -69,6 +74,7 @@ class ProductStatePage extends State<ProductPage>{
       _loadingIndicator= false;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     if(_loadingIndicator){
@@ -78,8 +84,12 @@ class ProductStatePage extends State<ProductPage>{
       return Loading();
     }
     Widget titleSection = Container(
-      padding: const EdgeInsets.all(32),
-      child: Row(
+        padding: EdgeInsets.only(
+            top: 0.12,
+            right: 0.0,
+            left: 0.0),
+        child:Card(
+      child:  Padding(padding: EdgeInsets.only(right:7.0),child: Row(
         children: [
           Expanded(
             /*1*/
@@ -90,69 +100,27 @@ class ProductStatePage extends State<ProductPage>{
                 Container(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Text(
-                    'Product Quarry',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    'Location',
+                    style: TextStyle(fontWeight: FontWeight.w300,fontSize: 20,color: textColor),
                   ),
                 ),
                 Text(
-                  _product['Category']['Quarry']['state']+', '+_product['Category']['Quarry']['country'],
+                  _product['Category']['Quarry']['address']+' '+_product['Category']['Quarry']['state']+', '+_product['Category']['Quarry']['country'],
                   style: TextStyle(
                     color: Colors.grey[500],
                   ),
                 ),
+                SizedBox(height: 15,)
               ],
             ),
           ),
-          /*3*/
-          Icon(
-            Icons.star,
-            color: Colors.yellow[500],
-          ),
-          Text(_product['Category']['Quarry']['likes']>0?_product['Category']['Quarry']['likes'].toString():''),
         ],
-      ),
+      ),),
+    )
     );
 
-    Color color = Theme.of(context).primaryColor;
+//    Color color = Theme.of(context).primaryColor;
 
-    Widget buttonSection = Container(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          InkWell(onTap: (){
-            launch('tel:'+_product['Category']['Quarry']['contactPhone']);
-            },
-            child:_buildButtonColumn(color, Icons.call, 'CALL'),
-          ),
-          InkWell(onTap: (){
-            String url='https://maps.google.com/?q='+_product['Category']['Quarry']['address'];
-            url+=", "+_product['Category']['Quarry']['state'];
-            url+=", "+_product['Category']['Quarry']['country'];
-            launch(url);
-          },
-            child:_buildButtonColumn(color, Icons.near_me, 'ROUTE'),
-          ),
-          InkWell(onTap: (){
-            String text = _product['Category']['Quarry']['address'];
-            Share.share(text);
-          },
-            child:_buildButtonColumn(color, Icons.share, 'SHARE'),
-          ),
-
-        ],
-      ),
-    );
-
-    Widget textSection = Container(
-      padding: const EdgeInsets.all(32),
-      child: Text(
-        _product['Category']['Quarry']['address']+ "\n"+
-        _product['Category']['Quarry']['description'],
-        softWrap: true,
-      ),
-    );
     Widget headerSection= Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -256,16 +224,14 @@ class ProductStatePage extends State<ProductPage>{
             children: <Widget>[
               Row(
               children: <Widget>[
-                Expanded(child: Text('Shipping Info',style: TextStyle(fontWeight: FontWeight.w300,fontSize: 20,color: textColor),),),InkWell(child: Text('see more',style:TextStyle(color:primaryColor)))
+                Expanded(child: Text('Description',style: TextStyle(fontWeight: FontWeight.w300,fontSize: 20,color: textColor),),),InkWell(child: Text('see more',style:TextStyle(color:primaryColor)))
               ]),
               Row(
 //                mainAxisAlignment: MainAxisAlignment.start,
 //                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   Padding(padding: EdgeInsets.only(right:7.0),),
-                  Icon(Icons.local_shipping,color:noteColor),
-                  Padding(padding: EdgeInsets.only(right:3.0),),
-                  Expanded(child:Text(_product['Category']['Quarry']['address']+' from Quarry in\n'+_product['Category']['Quarry']['state']+', '+_product['Category']['Quarry']['country'],style:TextStyle(color:noteColor,fontSize: 16,textBaseline: TextBaseline.alphabetic)))
+                  Expanded(child:Text(_product['descripton'].toString()+' from Quarry in\n'+_product['Category']['Quarry']['state']+', '+_product['Category']['Quarry']['country'],style:TextStyle(color:noteColor,fontSize: 16,textBaseline: TextBaseline.alphabetic)))
                 ],
               )
             ]
@@ -321,6 +287,7 @@ class ProductStatePage extends State<ProductPage>{
                                 child:  SizedBox(
                                   width: 32,
                                   child: TextField(
+
                                     controller: _txtController,
                                     keyboardType: TextInputType.number,
                                     decoration: InputDecoration(
@@ -375,10 +342,7 @@ class ProductStatePage extends State<ProductPage>{
                 ),
                 child: Text('Schedule'),
                 onPressed: (){
-                  Map post={'productId':id.toString(),'quantity':unit.toString(),'schedule':'','pickup':'0'};
-                  storage.setItem(STORAGE_SCHEDULE_KEY, convert.jsonEncode({'post':post,'product':_product})).then<void>((value){
-                    Navigator.pushNamed(context, '/schedule');
-                  });
+                  showFancyCustomDialog(context);
                 },
               )
             ],
@@ -397,34 +361,257 @@ class ProductStatePage extends State<ProductPage>{
         children: [
           headerSection,
           aboutSection,
-          shippingSection,
           titleSection,
-          buttonSection,
-          textSection,
+          shippingSection,
         ],
       ),
       bottomNavigationBar: addtocart,
     );
-  }
 
-  Column _buildButtonColumn(Color color, IconData icon, String label) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, color: color),
-        Container(
-          margin: const EdgeInsets.only(top: 8),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: color,
-            ),
-          ),
+  }
+  void changeMethod(e){
+    setState(() {
+
+      selectedMethod=e;
+      if(e=="Site Delivery"){
+        showFancyCustomDialogForAddress(context);
+      }
+    });
+  }
+  void continueToAdd()async{
+    var act = await Provider.of<AuthService>(context).getUser();
+    var act2 = checkAuth();
+    act2.then((value) {
+      print(value['data']);
+      if(value is Map &&  value.containsKey('data')){
+        Map <String,dynamic> contact = value['data'];
+        post['productId']=id.toString();
+        post['quantity']=unit.toString();
+        post['schedule']='';
+        post['pickup']= selectedMethod=="Site Delivery"?'0':'1';
+        post['contactPerson']=contact['firstName']+' '+contact['lastName'];
+        post['contactPhone']=act['phone'];
+        storage.setItem(STORAGE_SCHEDULE_KEY, convert.jsonEncode({'post':post,'product':_product})).then<void>((value){
+          Navigator.pushNamed(context, '/schedule');
+        });
+      }
+
+    });
+
+  }
+  void showFancyCustomDialog(BuildContext context) {
+    Dialog fancyDialog = Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20.0),
         ),
-      ],
+        height: 300.0,
+        width: 300.0,
+        child: Stack(
+          children: <Widget>[
+            Container(
+              width: double.infinity,
+              height: 300,
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Padding(
+                padding: EdgeInsets.only(top: 50),
+                child: SelectionList(
+                  ['Site Delivery','Pick up at Quarry'],
+                  onChange: (e)=>changeMethod(e),
+
+                ),
+              ),
+            ),
+            Container(
+              width: double.infinity,
+              height: 50,
+              alignment: Alignment.bottomCenter,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                ),
+              ),
+              child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  "Choose your Delivery method",
+                  style: TextStyle(
+                      color: textColor,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: InkWell(
+                onTap: () {
+                  if(selectedMethod==''){
+                    showDialog<void>(
+                      context: context,
+                      barrierDismissible: false, // user must tap button!
+                      builder: (BuildContext context) {
+                        return  SmartAlert(title:"Warning",description:"Please select one of the shipping method");
+                      },
+                    );
+                  }else{
+                    Navigator.pop(context);
+                    continueToAdd();
+                  }
+                },
+                child: Container(
+                  width: double.infinity,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: primaryColor,
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(12),
+                      bottomRight: Radius.circular(12),
+                    ),
+                  ),
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      "Confirm Delivery Method",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Align(
+              // These values are based on trial & error method
+              alignment: Alignment(1.05, -1.05),
+              child: InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.close,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
+    showDialog(
+        context: context, builder: (BuildContext context) => fancyDialog);
+  }
+  void showFancyCustomDialogForAddress(BuildContext context) {
+    Dialog fancyDialog = Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        height: 300.0,
+        width: 300.0,
+        child: Stack(
+          children: <Widget>[
+            Container(
+              width: double.infinity,
+              height: 300,
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(12.0),
+                image: DecorationImage(image: AssetImage('images/map.png'),fit: BoxFit.fill)
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 5,horizontal: 10),
+                child: ListView(
+                  children: <Widget>[
+                    SizedBox(height: 40,),
+                    Card(
+                      child: ListTile(onTap:(){
+                        post['contactPhone']="";
+                        post['address'] = "Ogba Bus Stop, 29, College Road, Alhaji Haruna Bus-Stop(Beside Mr. Biggs), Ogba,, Ifako Agege, Ikeja, Nigeria";
+                        List arrAddress =post['address'].split(',');
+                        post['country'] = arrAddress[arrAddress.length-1];
+                        post['state'] = arrAddress[arrAddress.length-2];
+                        post['geolocation'] = "6.6394141, 3.3322259";
+                        Navigator.of(context).pop();
+                      },title: Text('lagos',style: TextStyle(color: textColor),),),
+                    ),
+                  ],
+                )
+              ),
+            ),
+            Container(
+              width: double.infinity,
+              height: 50,
+              alignment: Alignment.bottomCenter,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                ),
+              ),
+              child: Align(
+                alignment: Alignment.center,
+                child:
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10,vertical: 4),
+                  child:  TextField(
+                    decoration: InputDecoration(
+                        hintText: 'Lagos',
+                        suffixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Colors.red,
+                                width: 5.0
+                            ),
+                            borderRadius: BorderRadius.all(Radius.circular(12))
+                        )
+                    ),
+                  ),
+                ),
+
+              ),
+            ),
+            Align(
+              // These values are based on trial & error method
+              alignment: Alignment(1.05, -1.05),
+              child: InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.close,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    showDialog(
+        context: context, builder: (BuildContext context) => fancyDialog, barrierDismissible: false);
   }
 }

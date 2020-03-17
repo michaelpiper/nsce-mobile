@@ -2,9 +2,16 @@ import 'package:flutter/material.dart';
 import '../../utils/colors.dart';
 import '../../utils/constants.dart';
 import '../../ext/smartalert.dart';
+import 'package:localstorage/localstorage.dart';
+import 'dart:convert' as convert;
 // Notification screen
 class ConfirmOrderPage extends StatelessWidget {
-  String selectedMethod;
+  final String selectedMethod='';
+  final LocalStorage localStorage = new LocalStorage(STORAGE_KEY);
+  List _cart;
+  ConfirmOrderPage(){
+    _cart=convert.jsonDecode(localStorage.getItem(STORAGE_CART_KEY));
+  }
   @override
   Widget build(BuildContext context) {
     Widget _confrimOrder=Container(
@@ -141,6 +148,39 @@ class ConfirmOrderPage extends StatelessWidget {
         ),
       ),
     );
+    List orderTitle = <Widget>[
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Text('Chipping - 20min',style: TextStyle(color: noteColor),),
+          Text(CURRENCY['sign']+' 180,000'),
+        ],
+      ),
+      SizedBox(
+        height: 5,
+      )
+    ];
+
+//    .addAll(
+//    _cart.map<Widget>((e)=>
+//    Row(
+//    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//    children: <Widget>[
+//    Text(e['Product']['name'],style: TextStyle(color: noteColor),),
+//    Text(CURRENCY['sign']+e['price']),
+//    ]
+//    )
+//    ).toList(),
+//    <Widget>[
+//    Row(
+//    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//    children: <Widget>[
+//    Text('Total'),
+//    Text(CURRENCY['sign']+' 18,000'),
+//    ]
+//    )
+//    ]
+//    )
     Widget ordersSection =  Container(
       padding: EdgeInsets.only(
           top: 0.12,
@@ -152,61 +192,7 @@ class ConfirmOrderPage extends StatelessWidget {
         child:Padding(
           padding: EdgeInsets.symmetric(vertical: 15.0,horizontal: 10.0),
           child: Column(
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    Expanded(child: Text('Order details',style: TextStyle(fontWeight: FontWeight.w300,fontSize: 20,color: textColor),),),
-                    InkWell(child: Text('Edit',style:TextStyle(color:primaryColor)))
-                  ]
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text('Chipping - 20min',style: TextStyle(color: noteColor),),
-                    Text(CURRENCY['sign']+' 180,000'),
-                  ]
-                ),
-                SizedBox(
-                  height: 5,
-                ),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text('Chipping - 20min',style: TextStyle(color: noteColor),),
-                      Text(CURRENCY['sign']+' 180,000'),
-                    ]
-                ),
-                SizedBox(
-                  height: 5,
-                ),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text('Chipping - 20min',style: TextStyle(color: noteColor),),
-                      Text(CURRENCY['sign']+' 180,000'),
-                    ]
-                ),
-                SizedBox(
-                  height: 5,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text('Shipping Fee',style: TextStyle(color: noteColor),),
-                    Text(CURRENCY['sign']+' 18,000'),
-                  ]
-                ),
-                SizedBox(
-                  height: 5,
-                ),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text('Total'),
-                      Text(CURRENCY['sign']+' 18,000'),
-                    ]
-                ),
-              ]
+              children: orderTitle,
           ),
         ),
       ),

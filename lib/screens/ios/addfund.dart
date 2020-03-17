@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_paystack/flutter_paystack.dart';
 import '../../services/request.dart';
 import '../../services/auth.dart';
+import 'package:NSCE/utils/constants.dart';
 // third screen
 
 class AddFundsPage extends StatefulWidget {
@@ -102,6 +103,7 @@ class _AddFundsPage extends State<AddFundsPage> {
               child: Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
+                if(Navigator.of(context).canPop())Navigator.of(context).pop();
               },
             ),
           ],
@@ -138,7 +140,7 @@ class _AddFundsPage extends State<AddFundsPage> {
   @override
   void initState(){
     super.initState();
-    PaystackPlugin.initialize(publicKey:'pk_test_9b59cebc741006f6d836576a5be330cfa34c6a3e' );
+    PaystackPlugin.initialize(publicKey: PAYSTACT_PUBLIC_KEY );
   }
   @override
   Widget build(BuildContext context) {

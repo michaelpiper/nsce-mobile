@@ -4,7 +4,9 @@ class SelectionList extends StatefulWidget{
   final Function onChange;
   final List options;
   final Widget title;
-  SelectionList(this.options,{this.onChange,this.title});
+  final String value;
+  final bool disabled;
+  SelectionList(this.options,{this.onChange,this.title,this.value,this.disabled=false});
   @override
   SelectionListState createState() => SelectionListState(this.options,onChange: this.onChange,title: this.title);
 }
@@ -13,7 +15,14 @@ class SelectionListState extends State<SelectionList>{
   final Function onChange;
   final List options;
   final Widget title;
+
   SelectionListState(this.options,{this.onChange,this.title});
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    active=widget.value;
+  }
   void setActive(String idx){
     setState(() {
       active=idx;
@@ -28,6 +37,7 @@ class SelectionListState extends State<SelectionList>{
         Card(
           child: ListTile(
             onTap: (){
+              if(!widget.disabled)
               setActive(e);
             },
             title: Text(e),
@@ -39,7 +49,7 @@ class SelectionListState extends State<SelectionList>{
     return  Container(
       child: Column(
         children: <Widget>[
-          title,
+          title==null?Container():title,
           Column(
               children: listBody
           )

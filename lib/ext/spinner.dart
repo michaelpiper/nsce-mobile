@@ -6,7 +6,7 @@ class Spinner extends StatefulWidget {
   const Spinner({
     Key key,
     @required this.icon,
-    this.duration = const Duration(milliseconds: 1800),
+    this.duration = const Duration(milliseconds: 2400),
   }) : super(key: key);
 
   @override
@@ -21,7 +21,7 @@ class _SpinnerState extends State<Spinner> with SingleTickerProviderStateMixin {
   void initState() {
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 2000),
+      duration: widget.duration,
     )..repeat();
     _child = Icon(widget.icon);
 

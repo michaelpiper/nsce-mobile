@@ -13,7 +13,6 @@ class QuarryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     quarry = ModalRoute.of(context).settings.arguments;
     Color color = Theme.of(context).primaryColor;
-
     Widget buttonSection = Container(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -72,6 +71,13 @@ class QuarryPage extends StatelessWidget {
         ),
       ),
     );
+    Widget textSection = Container(
+      padding: const EdgeInsets.all(32),
+      child: Text(
+            quarry['description'],
+        softWrap: true,
+      ),
+    );
     return Scaffold(
         appBar: AppBar(
           elevation: 0,
@@ -81,7 +87,8 @@ class QuarryPage extends StatelessWidget {
         body: ListView(
             children: [
               buttonSection,
-              shippingSection
+              shippingSection,
+              textSection
             ]
         )
     );
