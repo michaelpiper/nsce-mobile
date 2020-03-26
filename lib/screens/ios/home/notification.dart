@@ -1,8 +1,9 @@
+import 'dart:async';
 import 'package:NSCE/ext/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:NSCE/services/request.dart';
 import 'package:NSCE/ext/smartalert.dart';
-import 'package:NSCE/ext/spinner.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 // Notification screen
 class NotificationScreen extends StatefulWidget {
   NotificationScreenState createState()=>  NotificationScreenState();
@@ -10,6 +11,22 @@ class NotificationScreen extends StatefulWidget {
 class NotificationScreenState extends State<NotificationScreen>{
   bool _loading=true;
   List <Map<String,dynamic>> _notifications = [];
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    // initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
+    // If you have skipped STEP 3 then change app_icon to @mipmap/ic_launcher
+    var initializationSettingsAndroid =
+    new AndroidInitializationSettings('app_icon');
+    var initializationSettingsIOS = new IOSInitializationSettings();
+    var initializationSettings = new InitializationSettings(
+        initializationSettingsAndroid, initializationSettingsIOS);
+    flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
+    flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
   void _loadNotifications() {
     _changeLoading(true);
     f(notification){
@@ -39,6 +56,7 @@ class NotificationScreenState extends State<NotificationScreen>{
   Widget build(BuildContext context) {
     if(_loading){
       _loadNotifications();
+      _showNotificationWithoutSound();
     }
     _buildList(e){
       return Card(
@@ -73,4 +91,32 @@ class NotificationScreenState extends State<NotificationScreen>{
       )
     );
   }
+  Future _showNotificationWithoutSound() async {
+    var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
+        'your channel id', 'your channel name', 'your channel description',
+        playSound: false, importance: Importance.Max, priority: Priority.High);
+    var iOSPlatformChannelSpecifics =
+    new IOSNotificationDetails(presentSound: false);
+    var platformChannelSpecifics = new NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      'New Post',
+      'How to Show Notification in Flutter',
+      platformChannelSpecifics,
+      payload: 'No_Sound',
+    );
+  }
+  Future onSelectNotification(String payload) async {
+    showDialog(
+      context: context,
+      builder: (_) {
+        return new AlertDialog(
+          title: Text("PayLoad"),
+          content: Text("Payload : $payload"),
+        );
+      },
+    );
+  }
 }
+

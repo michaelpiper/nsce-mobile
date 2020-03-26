@@ -45,6 +45,7 @@ class AppDrawer extends StatelessWidget {
           ListTile(
             onTap: (){
               Navigator.of(context).popUntil((route) => route.isFirst);
+              if(Navigator.of(context).canPop())Navigator.of(context).pop();
             },
             title:Text('Home',style: TextStyle(color: noteColor),) ,
             leading: Icon(Icons.home,color: Colors.blue,size:30 ,),
