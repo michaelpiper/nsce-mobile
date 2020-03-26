@@ -4,7 +4,6 @@ import 'package:localstorage/localstorage.dart';
 import 'package:NSCE/utils/constants.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pdf;
 import 'package:printing/printing.dart';
 
 // third screen
@@ -16,7 +15,7 @@ class TransactionPage extends StatelessWidget {
   final oCcy = new NumberFormat("#,##0.00", "en_US");
   TransactionPage({this.trnId}){
     _transaction = storage.getItem(STORAGE_TRANSACTION_KEY);
-    print(_transaction);
+    // print(_transaction);
   }
 
   Widget _build(){

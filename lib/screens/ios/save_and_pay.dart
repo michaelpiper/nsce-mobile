@@ -115,7 +115,7 @@ class SaveAndPay extends StatelessWidget {
                   f(buyRes){
                     dialogMan.hide();
                     if(buyRes is Map && buyRes['error']==false){
-                      print(buyRes);
+                      // print(buyRes);
                       showDialog(
                           context: context,
                           builder: (BuildContext context) =>SmartAlert(
@@ -141,7 +141,7 @@ class SaveAndPay extends StatelessWidget {
                   f(buyRes){
                     dialogMan.hide();
                     if(buyRes is Map && buyRes['error']==false){
-                      print(buyRes);
+                      // print(buyRes);
                       showDialog(
                           context: context,
                           builder: (BuildContext context) =>SmartAlert(

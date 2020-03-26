@@ -76,7 +76,7 @@ buildAndroid(context){
     ),
     onGenerateRoute: (settings){
       List data=settings.name.split('/');
-      print(data);
+      // print(data);
       if(data[1]=='home' && data[2]!=null){
         return MaterialPageRoute(builder: (context){
           return  HomePage(currentIndex :int.parse(data[2]));

@@ -4,8 +4,10 @@ import 'package:flutter/widgets.dart';
 import '../../utils/colors.dart';
 import '../../utils/constants.dart';
 import 'package:intl/intl.dart';
+import 'package:NSCE/ext/smartalert.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:NSCE/services/request.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 // Notification screen
 class OrderPage extends StatefulWidget {
   final int index;
@@ -17,6 +19,8 @@ class OrderPage extends StatefulWidget {
 class _OrderPageState extends State<OrderPage>{
   final int index;
   int currentStep;
+  String _rating;
+  String _comment;
   final oCcy = new NumberFormat("#,##0.00", "en_US");
   final LocalStorage storage = new LocalStorage(STORAGE_KEY);
   Map<String,dynamic> _order= {'name':'stone','quantity':'2000','amount':'180,000.00','measurement':'Tonnes','id':'12343232','image':'images/sample2.png','createdAt':'2012 12:00pm','shippingMethod':'Pick up at Quarry'};
@@ -34,7 +38,7 @@ class _OrderPageState extends State<OrderPage>{
     currentStep=2;
     _order = storage.getItem(STORAGE_ORDER_KEY);
     _date = DateTime.parse(_order['createdAt']).toLocal();
-    print(_order);
+    // print(_order);
   }
   @override
   Widget build(BuildContext context) {
@@ -57,15 +61,15 @@ class _OrderPageState extends State<OrderPage>{
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Text('trnRef',style:TextStyle(color:primaryTextColor,fontSize: 18,textBaseline: TextBaseline.alphabetic)),
-                      Text('Quantity',style:TextStyle(color:primaryTextColor,fontSize: 18,textBaseline: TextBaseline.alphabetic))
+                      Text('trnRef',style:TextStyle(color:primaryTextColor,fontSize: 15,textBaseline: TextBaseline.alphabetic)),
+                      Text('Quantity',style:TextStyle(color:primaryTextColor,fontSize: 15,textBaseline: TextBaseline.alphabetic))
                     ],
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Expanded(child:Text(_order['trnRef'],overflow: TextOverflow.ellipsis,maxLines: 5,style:TextStyle(color:primaryTextColor,fontSize: 22,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),),
-                      Text(_order['quantity'].toString()+' ',style:TextStyle(color:primaryTextColor,fontSize: 22,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700))
+                      Expanded(child:Text(_order['trnRef'],overflow: TextOverflow.ellipsis,maxLines: 5,style:TextStyle(color:primaryTextColor,fontSize: 15,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),),
+                      Text(_order['quantity'].toString()+' ',style:TextStyle(color:primaryTextColor,fontSize: 18,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700))
                     ],
                   )
                 ],
@@ -79,15 +83,15 @@ class _OrderPageState extends State<OrderPage>{
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text('Shipping method',style:TextStyle(color:primaryTextColor,fontSize: 18,textBaseline: TextBaseline.alphabetic)),
-                      Text(_order['pickup']==1?"Pick up at Quarry":"Site Delivery",style:TextStyle(color:primaryTextColor,fontSize: 22,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),
+                      Text('Shipping method',style:TextStyle(color:primaryTextColor,fontSize: 14,textBaseline: TextBaseline.alphabetic)),
+                      Text(_order['pickup']==1?"Pick up at Quarry":"Site Delivery",style:TextStyle(color:primaryTextColor,fontSize: 18,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),
                     ],
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text('Status',style:TextStyle(color:primaryTextColor,fontSize: 18,textBaseline: TextBaseline.alphabetic)),
-                      Text(_order['status'],style:TextStyle(color:primaryTextColor,fontSize: 22,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),
+                      Text('Status',style:TextStyle(color:primaryTextColor,fontSize: 15,textBaseline: TextBaseline.alphabetic)),
+                      Text(_order['status'],style:TextStyle(color:primaryTextColor,fontSize: 18,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),
                     ],
                   )
                 ]
@@ -95,7 +99,7 @@ class _OrderPageState extends State<OrderPage>{
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  Text('Total    ....',style:TextStyle(color:primaryTextColor,fontSize: 18,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),
+                  Text('Total    ....',style:TextStyle(color:primaryTextColor,fontSize: 15,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),
                   Expanded(child: Text(CURRENCY['sign']+''+ oCcy.format(_order['totalPrice']+_order['shippingFee']),style:TextStyle(color:primaryTextColor,fontSize: 18,fontWeight: FontWeight.w700),textAlign: TextAlign.right,),)
                 ],
               ),
@@ -119,8 +123,8 @@ class _OrderPageState extends State<OrderPage>{
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text('Created at',style:TextStyle(color: primaryTextColor,fontSize: 20.0),textAlign: TextAlign.left,),
-                  Text(("${_date.day}-${_date.month}-${_date.year} ${_date.hour>12?_date.hour-12:_date.hour}:${_date.minute} "+(_date.hour>12?'p':'a')+"m"),style:TextStyle(color: primaryTextColor,fontSize: 20.0),textAlign: TextAlign.left,),
+                  Text('Created at',style:TextStyle(color: primaryTextColor,fontSize: 15.0),textAlign: TextAlign.left,),
+                  Text(("${_date.day}-${_date.month}-${_date.year} ${_date.hour>12?_date.hour-12:_date.hour}:${_date.minute} "+(_date.hour>12?'p':'a')+"m"),style:TextStyle(color: primaryTextColor,fontSize: 15.0),textAlign: TextAlign.left,),
                 ],
               ),
               Expanded(
@@ -132,16 +136,128 @@ class _OrderPageState extends State<OrderPage>{
       );
     }
     Widget status(){
-      return Expanded(
-        child:Card(
-          color: Colors.white,
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15.0)
-          ),
-          child: Dispatch(index),
-        ),
-      );
+
+      switch(_order['status']){
+        case 'Completed':
+          return Expanded(
+            child:ButtonBar(
+              children: <Widget>[
+                MaterialButton(
+                  onPressed: (){
+
+                  },
+                  padding: EdgeInsets.all(20.0),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                          top: Radius.elliptical(15.0,15.0),
+                          bottom: Radius.elliptical(15.0,15.0)
+                      ),
+                      side: BorderSide(color: primarySwatch,)
+                  ),
+                  child: Text('Continue Shopping',style: TextStyle(color: primaryColor)),
+                ),
+                MaterialButton(
+                  color: primaryColor,
+                  onPressed: (){
+                    showDialog<void>(context: context,barrierDismissible: false,builder: (BuildContext context){
+                      f()async {
+                        await likeOrders(index.toString(),
+                            {'rating': _rating.toString(), 'comment': _comment.toString()})
+                            .then((res) {
+                          String message=res['message']!=null?res['message']:'Raview submited';
+                          showDialog<void>(context: context,barrierDismissible: false,builder: (BuildContext context){
+                            completed(){
+                              if(Navigator.of(context).canPop())Navigator.of(context).pop();
+                            }
+                            return SmartAlert(title:"Alert",description:message,onOk: completed,);
+                          }
+                          );
+                        });
+                      }
+                      return AlertDialog(
+                        title: Text('Rate this Order'),
+                        shape:  RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(
+                              top: Radius.elliptical(10.0,10.0),
+                              bottom: Radius.elliptical(10.0,10.0)
+                          ),
+                        ),
+                        content: SingleChildScrollView(
+                          child: ListBody(
+                              children: <Widget>[
+                                RatingBar(
+                                  initialRating: 3,
+                                  minRating: 1,
+                                  direction: Axis.horizontal,
+                                  allowHalfRating: false,
+                                  itemCount: 5,
+                                  itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                                  itemBuilder: (context, _) => Icon(
+                                    Icons.star,
+                                    color: Colors.amber,
+                                  ),
+                                  onRatingUpdate: (rating) {
+                                    setState(() {
+                                      _rating=rating.toString();
+                                    });
+                                  },
+                                ),
+                                TextField(
+                                    decoration: InputDecoration(
+                                        labelText:'Comments'
+                                    ),
+                                    onChanged: (e){
+                                      setState(() {
+                                        _comment=e;
+                                      });
+                                    }
+                                )
+                              ]
+                          ),
+                        ),
+                        actions: <Widget>[
+                          FlatButton(
+                            child: Text('CANCEL',style: TextStyle(color: Colors.red),),
+                            onPressed: () {
+                              if(Navigator.of(context).canPop())Navigator.of(context).pop();
+                            },
+                          ),
+                          FlatButton(
+                            child: Text('OK'),
+                            onPressed: () {
+                              f();
+                            },
+                          )
+                        ],
+                      );
+                    });
+                  },
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                          top: Radius.elliptical(15.0,15.0),
+                          bottom: Radius.elliptical(15.0,15.0)
+                      ),
+                      side: BorderSide(color: primarySwatch,)
+                  ),
+                  padding: EdgeInsets.symmetric(vertical:20.0,horizontal: 45.0),
+                  child: Text('Rate Order',style: TextStyle(color: primaryTextColor),),
+                )
+              ],
+            )
+          );
+        default:
+          return Expanded(
+            child:Card(
+              color: Colors.white,
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0)
+              ),
+              child: Dispatch(index),
+            ),
+          );
+      }
+
     }
     return Scaffold(
       appBar: AppBar(
@@ -163,7 +279,7 @@ class _OrderPageState extends State<OrderPage>{
 }
 
 class Dispatch extends StatefulWidget{
-  int orderId;
+  final int orderId;
   Dispatch(this.orderId);
   @override
   _Dispatch createState() => _Dispatch();

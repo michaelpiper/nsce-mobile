@@ -5,6 +5,7 @@ const STORAGE_CART_KEY = "@user-cart-data";
 const STORAGE_CART_CHECKOUT_KEY = "@user-cart-checkout-data";
 const STORAGE_USER_DETAILS_KEY = "@user-details-data";
 const STORAGE_ORDER_KEY = "@user-order-details-data";
+const STORAGE_QUARRY_KEY = "@user-quarries-data";
 const STORAGE_TRANSACTION_KEY = "@user-transaction-data";
 const STORAGE_DRIVER_DISPATCH_KEY = "@user-driver-dispatch-data";
 const CURRENCY = {"sign": "₦", "code": "NGN"};

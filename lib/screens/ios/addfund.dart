@@ -30,7 +30,7 @@ class _AddFundsPage extends State<AddFundsPage> {
     form.save();
 
     if (_formKey.currentState.validate()) {
-      print('Paystack connected');
+      // print('Paystack connected');
       if(_loading) {
         return;
       }
@@ -48,8 +48,8 @@ class _AddFundsPage extends State<AddFundsPage> {
         }
         Map<dynamic, dynamic> userDetails = value;
         var user = await (new AuthService()).getUser();
-        print(userDetails);
-        print(user);
+        // print(userDetails);
+        // print(user);
         PaymentCard card = PaymentCard(number: _cardNumber,
             cvc: _cvv,
             expiryYear: _expiryYear,
@@ -63,18 +63,18 @@ class _AddFundsPage extends State<AddFundsPage> {
         PaystackPlugin.chargeCard(context,
             charge: charge,
             beforeValidate: (transaction) {
-              print(transaction.reference);
+              // print(transaction.reference);
             },
             onError: (err, transaction) {
-              print(err);
+              // print(err);
               _returnError();
               setState(() {
                 _loading=false;
               });
             },
             onSuccess: (transaction) {
-//            print(transaction.reference);
-              print(_amount);
+//            // print(transaction.reference);
+              // print(_amount);
               _returnState("Your payment was received and it been process");
               setState(() {
                 _loading=false;

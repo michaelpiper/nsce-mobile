@@ -68,7 +68,7 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
         return Future.value(false);
       }
       if( product['data'] is Map){
-        print(product['data']);
+        // print(product['data']);
         setState(() {
           _product = product['data'];
           _productLoaded();
@@ -394,7 +394,7 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
     var act = await Provider.of<AuthService>(context).getUser();
     var act2 = checkAuth();
     act2.then((value) {
-      print(value['data']);
+      // print(value['data']);
       if(value is Map &&  value.containsKey('data')){
         Map <String,dynamic> contact = value['data'];
         post['productId']=id.toString();

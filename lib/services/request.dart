@@ -16,8 +16,8 @@ createAuth(Map<String,String> body) async {
   */
   try{
     var response = await http.post(API_AUTH_URL, body: body );
-    print(response);
-    print(response.request);
+    // print(response);
+    // print(response.request);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -25,16 +25,16 @@ createAuth(Map<String,String> body) async {
     }
   }
   catch(e){
-    print(e);
+    // print(e);
     return false;
   }
 }
 destroyAuth(body) async {
-  print(API_AUTH_URL);
+  // print(API_AUTH_URL);
   Map<String, String> headers={'Authorization':body};
   try{
     var response = await http.delete(API_AUTH_URL, headers: headers);
-    print(response.body);
+    // print(response.body);
 
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
@@ -57,7 +57,7 @@ startAuth(body) async {
     this cannot be overridden.
     encoding defaults to utf8.
   */
-  print(API_AUTH_URL);
+  // print(API_AUTH_URL);
   var bytes = convert.utf8.encode(body['username']+':'+body['password']);
   var base64Str = convert.base64.encode(bytes);
   Map<String, String> headers={'Authorization':'Basic '+base64Str};
@@ -70,7 +70,7 @@ startAuth(body) async {
     }
   }
   catch(e){
-    print(e);
+    // print(e);
     return false;
   }
 
@@ -100,8 +100,8 @@ checkAuth() async {
 
   try{
     var response = await http.get(API_AUTH_URL, headers: headers);
-//    print(response.body);
-    print(response.request.url);
+//    // print(response.body);
+    // print(response.request.url);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -116,8 +116,8 @@ recoverAuth(body)async{
   Map<String, String> headers={};
   try{
     var response = await http.patch(API_AUTH_URL,body:body,headers: headers);
-    print(response.body);
-    print(response.request.url);
+    // print(response.body);
+    // print(response.request.url);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -125,13 +125,13 @@ recoverAuth(body)async{
     }
   }
   catch(e){
-    print(e);
+    // print(e);
     return false;
   }
 }
 buyItem(body)async{
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  print(body);
+  // print(body);
   Map<String, String> headers={};
   if(prefs.containsKey(STORAGE_USER_KEY)) {
     var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
@@ -141,8 +141,8 @@ buyItem(body)async{
   }
   try{
     var response = await http.post(API_TRANSACTION_URL,body:body,headers: headers);
-    print(response.body);
-    print(response.request.url);
+    // print(response.body);
+    // print(response.request.url);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -150,7 +150,7 @@ buyItem(body)async{
     }
   }
   catch(e){
-    print(e);
+    // print(e);
     return false;
   }
 }
@@ -166,8 +166,8 @@ createTrn(body)async{
   }
   try{
     var response = await http.post(API_TRANSACTION_REF_URL,body:body,headers: headers);
-    print(response.body);
-    print(response.request.url);
+    // print(response.body);
+    // print(response.request.url);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -175,7 +175,7 @@ createTrn(body)async{
     }
   }
   catch(e){
-    print(e);
+    // print(e);
     return false;
   }
 }
@@ -190,8 +190,8 @@ verifyTrn(trnRef)async{
   }
   try{
     var response = await http.get(API_TRANSACTION_REF_URL+'/'+trnRef,headers: headers);
-    print(response.body);
-    print(response.request.url);
+    // print(response.body);
+    // print(response.request.url);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -219,7 +219,7 @@ fetchTrn({id=false})async{
     }else{
       response = await http.get(API_TRANSACTION_URL , headers: headers);
     }
-//    print(response.body);
+//    // print(response.body);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -252,8 +252,8 @@ fetchAccount({id=false})async{
     else {
       response = await http.get(API_ACCOUNT_URL , headers: headers);
     }
-//    print(API_ACCOUNT_URL);
-//    print(response.body);
+//    // print(API_ACCOUNT_URL);
+//    // print(response.body);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -276,8 +276,8 @@ updateAccount(Map body)async{
   }
   try{
     var response = await http.put(API_ACCOUNT_URL , headers: headers,body:body);
-    print(response.request.url);
-//    print(response.body);
+    // print(response.request.url);
+//    // print(response.body);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -299,8 +299,8 @@ patchAccount(Map body)async{
   }
   try{
     var response = await http.patch(API_ACCOUNT_URL , headers: headers,body:body);
-    print(response.request.url);
-//    print(response.body);
+    // print(response.request.url);
+//    // print(response.body);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -308,7 +308,7 @@ patchAccount(Map body)async{
     }
   }
   catch(e){
-    print(e);
+    // print(e);
     return false;
   }
 }
@@ -463,7 +463,7 @@ fetchOrderDispatch({id=false})async{
     else {
       response = await http.get(API_DISPATCH_URL , headers: headers);
     }
-    print(response.request.url);
+    // print(response.request.url);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -492,7 +492,7 @@ fetchOrderWithDispatches({id=false})async{
     else {
       response = await http.get(API_DISPATCH_URL , headers: headers);
     }
-    print(response.request.url);
+    // print(response.request.url);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -536,7 +536,7 @@ fetchAdverts({id=false})async{
 
 scheduleOrder(body)async{
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  print(body);
+  // print(body);
   Map<String, String> headers={};
   if(prefs.containsKey(STORAGE_USER_KEY)) {
     var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
@@ -546,8 +546,8 @@ scheduleOrder(body)async{
   }
   try{
     var response = await http.post(API_SCHEDULE_URL,body:body,headers: headers);
-    print(response.body);
-    print(response.request.url);
+    // print(response.body);
+    // print(response.request.url);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -555,14 +555,14 @@ scheduleOrder(body)async{
     }
   }
   catch(e){
-    print(e);
+    // print(e);
     return false;
   }
 }
 // cart
 addToCart(body)async{
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  print(body);
+  // print(body);
   Map<String, String> headers={};
   if(prefs.containsKey(STORAGE_USER_KEY)) {
     var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
@@ -572,8 +572,8 @@ addToCart(body)async{
   }
   try{
     var response = await http.post(API_CART_URL,body:body,headers: headers);
-    print(response.body);
-    print(response.request.url);
+    // print(response.body);
+    // print(response.request.url);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -581,7 +581,7 @@ addToCart(body)async{
     }
   }
   catch(e){
-    print(e);
+    // print(e);
     return false;
   }
 }
@@ -658,7 +658,7 @@ fetchCartWithParents(id)async{
 }
 
 destroyCart(id) async {
-  print(API_CART_URL);
+  // print(API_CART_URL);
   SharedPreferences prefs = await SharedPreferences.getInstance();
   Map<String, String> headers={};
   if(prefs.containsKey(STORAGE_USER_KEY)) {
@@ -669,7 +669,7 @@ destroyCart(id) async {
   }
   try{
     var response = await http.delete(API_CART_URL+'/'+id.toString(), headers: headers);
-    print(response.body);
+    // print(response.body);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -719,8 +719,8 @@ addToFavoriteItems(String id)async{
   }
   try{
     var response = await http.post(API_FAVORITE_ITEMS_URL,body:{'productId':id},headers: headers);
-    print(response.body);
-    print(response.request.url);
+    // print(response.body);
+    // print(response.request.url);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -728,7 +728,7 @@ addToFavoriteItems(String id)async{
     }
   }
   catch(e){
-    print(e);
+    // print(e);
     return false;
   }
 }
@@ -743,8 +743,8 @@ removeFromFavoriteItems(String id)async{
   }
   try{
     var response = await http.delete(API_FAVORITE_ITEMS_URL+'/'+id,headers: headers);
-    print(response.body);
-    print(response.request.url);
+    // print(response.body);
+    // print(response.request.url);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -752,7 +752,7 @@ removeFromFavoriteItems(String id)async{
     }
   }
   catch(e){
-    print(e);
+    // print(e);
     return false;
   }
 }
@@ -816,8 +816,8 @@ likeQuarries(String id,Map<String,String> body)async{
   }
   try{
     var response = await http.post(API_QUARRIES_URL+'/'+id.toString()+'/like',body:body,headers: headers);
-    print(response.body);
-    print(response.request.url);
+    // print(response.body);
+    // print(response.request.url);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -825,7 +825,7 @@ likeQuarries(String id,Map<String,String> body)async{
     }
   }
   catch(e){
-    print(e);
+    // print(e);
     return false;
   }
 }
@@ -840,8 +840,8 @@ unlikeQuarries(String id)async{
   }
   try{
     var response = await http.delete(API_QUARRIES_URL+'/'+id.toString()+'/like',headers: headers);
-    print(response.body);
-    print(response.request.url);
+    // print(response.body);
+    // print(response.request.url);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -849,7 +849,7 @@ unlikeQuarries(String id)async{
     }
   }
   catch(e){
-    print(e);
+    // print(e);
     return false;
   }
 }
@@ -892,8 +892,8 @@ markAsReadNotifications(id)async{
   }
   try{
     var response = await http.post(API_NOTIFICATION_URL+ '/' + id.toString(),headers: headers);
-    print(response.body);
-    print(response.request.url);
+    // print(response.body);
+    // print(response.request.url);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -901,7 +901,7 @@ markAsReadNotifications(id)async{
     }
   }
   catch(e){
-    print(e);
+    // print(e);
     return false;
   }
 }
@@ -916,8 +916,8 @@ markAsUnreadNotifications(id)async{
   }
   try{
     var response = await http.delete(API_NOTIFICATION_URL+ '/' + id.toString(),headers: headers);
-    print(response.body);
-    print(response.request.url);
+    // print(response.body);
+    // print(response.request.url);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -925,7 +925,7 @@ markAsUnreadNotifications(id)async{
     }
   }
   catch(e){
-    print(e);
+    // print(e);
     return false;
   }
 }
@@ -953,3 +953,81 @@ searchAddress(String address)async{
     return false;
   }
 }
+
+fetchOrderLike({id=false})async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  Map<String, String> headers={};
+  if(prefs.containsKey(STORAGE_USER_KEY)) {
+    var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
+    if(wait.containsKey('authorization')) {
+      headers['Authorization']=wait['authorization'];
+    }
+  }
+  try{
+    var response;
+    if(id!=false) {
+      response = await http.get(API_ORDER_URL + '/' + id.toString()+'/like', headers: headers);
+    }
+    else {
+      response = await http.get(API_ORDER_URL , headers: headers);
+    }
+    if (response.statusCode == 200) {
+      return convert.jsonDecode(response.body);
+    } else {
+      return false;
+    }
+  }
+  catch(e){
+    return false;
+  }
+}
+likeOrders(String id,Map<String,String> body)async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  Map<String, String> headers={};
+  if(prefs.containsKey(STORAGE_USER_KEY)) {
+    var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
+    if(wait.containsKey('authorization')) {
+      headers['Authorization']=wait['authorization'];
+    }
+  }
+  try{
+    var response = await http.post(API_ORDER_URL+'/'+id.toString()+'/like',body:body,headers: headers);
+    // print(response.body);
+    // print(response.request.url);
+    if (response.statusCode == 200) {
+      return convert.jsonDecode(response.body);
+    } else {
+      return false;
+    }
+  }
+  catch(e){
+    // print(e);
+    return false;
+  }
+}
+unlikeOrders(String id)async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  Map<String, String> headers={};
+  if(prefs.containsKey(STORAGE_USER_KEY)) {
+    var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
+    if(wait.containsKey('authorization')) {
+      headers['Authorization']=wait['authorization'];
+    }
+  }
+  try{
+    var response = await http.delete(API_ORDER_URL+'/'+id.toString()+'/like',headers: headers);
+    // print(response.body);
+    // print(response.request.url);
+    if (response.statusCode == 200) {
+      return convert.jsonDecode(response.body);
+    } else {
+      return false;
+    }
+  }
+  catch(e){
+    // print(e);
+    return false;
+  }
+}
+
+

@@ -7,7 +7,7 @@ import '../utils/helper.dart';
 import '../utils/constants.dart';
 class AuthService with ChangeNotifier{
   AuthService(){
-    print('new Service');
+    // print('new Service');
 
   }
   static Future getAccount({id=false})async  {
@@ -20,7 +20,7 @@ class AuthService with ChangeNotifier{
   }
   static Future getUserDetails() async {
     var result = await checkAuth();
-//    print(result);
+//    // print(result);
     if(result == false){
       return Future.value({});
     }
@@ -78,7 +78,7 @@ class AuthService with ChangeNotifier{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if(prefs.containsKey(STORAGE_USER_KEY)){
       var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
-      print(wait);
+      // print(wait);
       if(wait.containsKey('authorization')){
         destroyAuth(wait['authorization']);
       }
@@ -90,7 +90,7 @@ class AuthService with ChangeNotifier{
   Future createUser(formData) async{
     if(formData['username'] !='' && formData['password']!='' && formData['phone']!=''){
       var result = await createAuth(formData);
-      print(result);
+      // print(result);
       if(result == false){
         return Future.value('No internet connection');
       }
@@ -112,7 +112,7 @@ class AuthService with ChangeNotifier{
     }
     else if(username !='' && password!=''){
       var result = await startAuth({'username':username,'password':password});
-      print(result);
+      // print(result);
       if(result == false){
         return Future.value('No internet connection');
       }

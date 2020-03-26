@@ -62,7 +62,7 @@ class  SearchPageState extends State<SearchPage>{
             _loadSearch(e);
           },
           onSubmitted: (e){
-            print(e);
+            // print(e);
           },
           cursorColor: secondaryColor,
           style: TextStyle(

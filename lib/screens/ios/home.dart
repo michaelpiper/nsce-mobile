@@ -69,7 +69,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void _handleSelected() {
     setState(() {
      _title = _children[_controller.index].title;
-     print(_title);
+     // print(_title);
     });
   }
   void _onTabTapped(int index) {
@@ -113,7 +113,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       Provider.of<AuthService>(context).logout();
                       if(Navigator.canPop(context)) Navigator.pop(context);
                     }
-                    print(result);
+                    // print(result);
                   },
                   itemBuilder: (BuildContext context)=><PopupMenuEntry>[
                     const PopupMenuItem(value:'if-i-catch-u',child: Text('Logout')),
@@ -153,7 +153,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
     act2 = checkAuth();
     act2.then((value){
-//      print(value);
+//      // print(value);
       if(value == false){
         return;
       }

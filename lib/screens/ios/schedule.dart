@@ -31,7 +31,7 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
     _loadingScheduleIndicator=true;
     final _selectedDay = DateTime.now();
 
-    print(_selectedDay.millisecond);
+    // print(_selectedDay.millisecond);
     _schedule=localStorage.getItem(STORAGE_SCHEDULE_KEY);
     _events={
       _selectedDay.subtract(Duration(days: 1)):[{'time':'12:00 - 12:30','title':'Event 90'}],

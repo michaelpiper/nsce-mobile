@@ -50,11 +50,12 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
   }
   @override
   Widget build(BuildContext context) {
+    dialogMan.buildContext(context);
     fn(res){
       _loading = false;
       dialogMan.hide();
-      print(res);
-      print('i am here');
+      // print(res);
+      // print('i am here');
       if(res is bool || res['error']==true){
         showDialog<void>(
           context: context,
@@ -315,11 +316,11 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                             if(_loading){
                               dialogMan.show();
                             }
-
-
-                            patchAccount(_userDetails).then(fn).catchError((e){print(e);}) ;
+                            patchAccount(_userDetails).then(fn).catchError((e){
+                              // print(e);
+                            });
                           }else{
-                            print('am here');
+                            // print('am here');
                           }
                         },
                         child:Text('Update', style: TextStyle(color: primaryColor,fontSize: 16.0),textAlign: TextAlign.right,)

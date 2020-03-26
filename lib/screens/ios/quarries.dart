@@ -5,6 +5,8 @@ import 'package:NSCE/ext/smartalert.dart';
 import 'package:NSCE/services/request.dart';
 import 'package:NSCE/ext/loading.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:localstorage/localstorage.dart';
+import 'package:NSCE/utils/constants.dart';
 // Notification screen
 class QuarriesPage extends StatefulWidget {
   QuarriesPageState createState()=> QuarriesPageState();
@@ -12,6 +14,7 @@ class QuarriesPage extends StatefulWidget {
 class QuarriesPageState extends State<QuarriesPage>{
   bool _loadingStateIndicator=true;
   List <Map<String,dynamic>> _quarriesItem=[];
+  final LocalStorage storage = new LocalStorage(STORAGE_KEY);
   final DialogMan dialogMan =DialogMan(child: Scaffold(
     backgroundColor: Colors.transparent,
     body:Center(
@@ -22,7 +25,7 @@ class QuarriesPageState extends State<QuarriesPage>{
   String _comment;
   void _loadQuarries(){
     fetchQuarries().then((quarries){
-      print(quarries);
+      // print(quarries);
       if(quarries is bool){
         showDialog<void>(context: context,barrierDismissible: false,builder: (BuildContext context){
           return SmartAlert(title: "Error",description: "couldn't load page",onOk: (){ if(Navigator.of(context).canPop())Navigator.of(context).pop();},);
@@ -67,7 +70,9 @@ class QuarriesPageState extends State<QuarriesPage>{
         children:_quarriesItem.map<Widget>((e)=> Card(
           child: ListTile(
             onTap: (){
-              Navigator.pushNamed(context, '/quarry/'+e['id'].toString(),arguments: e);
+              storage.setItem(STORAGE_QUARRY_KEY, e).then((v){
+                Navigator.pushNamed(context, '/quarry/'+e['id'].toString());
+              });
             },
            title:Text( e['lga']+' '+e['state']+' '+e['country']),
            subtitle:Text( e['description']),

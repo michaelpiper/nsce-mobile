@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_paystack/flutter_paystack.dart';
-import 'package:NSCE/services/request.dart';
-import 'package:NSCE/services/auth.dart';
+import 'package:NSCE/services/driver_request.dart';
 import 'package:NSCE/utils/colors.dart';
 import 'package:NSCE/utils/constants.dart';
 import 'package:localstorage/localstorage.dart';
+import 'package:NSCE/ext/dialogman.dart';
 // third screen
 
 class DriverDispatchPage extends StatefulWidget {
@@ -20,6 +18,12 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
   String _title='Task';
   Map _dispatch;
   final LocalStorage storage = new LocalStorage(STORAGE_KEY);
+  final DialogMan dialogMan = DialogMan(child: Scaffold(
+      backgroundColor: Colors.transparent,
+      body:Center(
+          child:CircularProgressIndicator()
+      )
+  ));
   @override
   void initState() {
     // TODO: implement initState
@@ -29,6 +33,7 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
   }
 
   _fillHead(e){
+    DateTime _datee = DateTime.parse(e['dateScheduled']??'');
     return  Padding(
       padding: EdgeInsets.symmetric(vertical: 3.0,horizontal: 2.0),
       child:Card(
@@ -42,10 +47,10 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
               SizedBox(height: 7,),
               Text('Customer name',style: TextStyle(color: secondaryTextColor),),
               SizedBox(height: 7,),
-              Text(e['contactPerson'],style: TextStyle(color: noteColor),),
+              Text(e['Order']['contactPerson'],style: TextStyle(color: noteColor),),
               Text('Address',style: TextStyle(color: secondaryTextColor),),
               SizedBox(height: 7,),
-              Text(e['shippingAddress'],style: TextStyle(color: noteColor),),
+              Text(e['Order']['address'],style: TextStyle(color: noteColor),),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
@@ -57,9 +62,9 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text(e['vehicleId'],style: TextStyle(color:  noteColor),),
+                  Text(e['Vehicle']['uniqueIdentifier'],style: TextStyle(color:  noteColor),),
                   SizedBox(width: 7,),
-                  Text(e['schedule'],style: TextStyle(color:  noteColor),),
+                  Text("${_datee.day}-${_datee.month}-${_datee.year} ${_datee.hour>12?_datee.hour-12:_datee.hour}:${_datee.minute} "+(_datee.hour>12?'p':'a')+"m",style: TextStyle(color:  noteColor),),
                 ],
               )
             ],
@@ -69,22 +74,154 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
     );
   }
   _fillButton(){
-    return Padding(
-        padding: EdgeInsets.symmetric(vertical: 3.0,horizontal: 2.0),
-      child: MaterialButton(
-        onPressed: (){
-          print(1);
-        },
-        color: primaryColor,
-        child: Text('Start', style: TextStyle(color: primaryTextColor),),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(
-                top: Radius.elliptical(15.0,15.0),
-                bottom: Radius.elliptical(15.0,15.0)
-            )
-        ),
-      ),
-    );
+    switch(_dispatch['status']){
+      case 'Completed':
+        return Center(
+          child: Container(
+            child: Text('Dispatch completed'),
+          ),
+        );
+      case 'On-Transit':
+        return Padding(
+          padding: EdgeInsets.symmetric(vertical: 3.0,horizontal: 2.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Row(
+                children: <Widget>[
+                  Expanded(child: MaterialButton(
+                    onPressed: (){
+                      dialogMan.show();
+                      fn(res){
+                        dialogMan.hide();
+                        setState((){
+                          _dispatch['status']='Failed';
+                        });
+                        storage.setItem(STORAGE_DRIVER_DISPATCH_KEY, _dispatch).then((v){
+
+                        });
+                      }
+                      updateDispatch(_dispatch['id'],{'status':'Failed'}).then(fn);
+                    },
+                    color: primaryColor,
+                    child: Text('Failed', style: TextStyle(color: primaryTextColor),),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                            top: Radius.elliptical(15.0,15.0),
+                            bottom: Radius.elliptical(15.0,15.0)
+                        )
+                    ),
+                  ),),
+                  Expanded(child: MaterialButton(
+                    onPressed: (){
+                      dialogMan.show();
+                      fn(res){
+                        dialogMan.hide();
+                        setState((){
+                          _dispatch['status']='Cancel';
+                        });
+                        storage.setItem(STORAGE_DRIVER_DISPATCH_KEY, _dispatch).then((v){
+
+                        });
+                      }
+                      updateDispatch(_dispatch['id'],{'status':'Cancel'}).then(fn);
+                    },
+                    color: primaryColor,
+                    child: Text('Cancel', style: TextStyle(color: primaryTextColor),),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                            top: Radius.elliptical(15.0,15.0),
+                            bottom: Radius.elliptical(15.0,15.0)
+                        )
+                    ),
+                  ),),
+                ],
+              ),
+              MaterialButton(
+                onPressed: (){
+                  dialogMan.show();
+                  fn(res){
+                    dialogMan.hide();
+
+                    setState(() {
+                      _dispatch['status']='Completed';
+                    });
+                    storage.setItem(STORAGE_DRIVER_DISPATCH_KEY, _dispatch).then((v){
+                    });
+                  }
+                  updateDispatch(_dispatch['id'],{'status':'Completed'}).then(fn);
+                },
+                color: primaryColor,
+                child: Text('Completed', style: TextStyle(color: primaryTextColor),),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(
+                        top: Radius.elliptical(15.0,15.0),
+                        bottom: Radius.elliptical(15.0,15.0)
+                    )
+                ),
+              ),
+            ],
+          )
+        );
+      case 'Pending':
+        return Padding(
+          padding: EdgeInsets.symmetric(vertical: 3.0,horizontal: 2.0),
+          child: MaterialButton(
+            onPressed: (){
+              dialogMan.show();
+              fn(res){
+                // print(res);
+                dialogMan.hide();
+
+                setState(() {
+                  _dispatch['status']='On-Transit';
+                });
+                storage.setItem(STORAGE_DRIVER_DISPATCH_KEY, _dispatch).then((v){
+
+                });
+              }
+              updateDispatch(_dispatch['id'],{'status':'On-Transit'}).then(fn);
+            },
+            color: primaryColor,
+            child: Text('Start', style: TextStyle(color: primaryTextColor),),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(
+                    top: Radius.elliptical(15.0,15.0),
+                    bottom: Radius.elliptical(15.0,15.0)
+                )
+            ),
+          ),
+        );
+      default:
+        return Padding(
+          padding: EdgeInsets.symmetric(vertical: 3.0,horizontal: 2.0),
+          child: MaterialButton(
+            onPressed: (){
+              dialogMan.show();
+              fn(res){
+                // print(res);
+                dialogMan.hide();
+                setState(() {
+                  _dispatch['status']='Completed';
+                });
+                storage.setItem(STORAGE_DRIVER_DISPATCH_KEY, _dispatch).then((v){
+                  Navigator.of(context).setState((){});
+                });
+              }
+              updateDispatch(_dispatch['id'],{'status':'Completed'}).then(fn);
+            },
+            color: primaryColor,
+            child: Text('Completed', style: TextStyle(color: primaryTextColor),),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(
+                    top: Radius.elliptical(15.0,15.0),
+                    bottom: Radius.elliptical(15.0,15.0)
+                )
+            ),
+          ),
+        );
+    }
   }
   _buildBody(){
     return  Column(
@@ -92,6 +229,18 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children:<Widget>[
           _fillHead(_dispatch),
+          Card(
+            child: ListTile(
+              title: Text('Contact Details'),
+              subtitle: Text(_dispatch['Order']['contactPhone']??'nil'),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              title: Text('Dispatch Status'),
+              subtitle: Text(_dispatch['status']??'Pending'),
+            ),
+          ),
           _fillButton()
       ]
     );
@@ -118,6 +267,7 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
+    dialogMan.buildContext(context);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,

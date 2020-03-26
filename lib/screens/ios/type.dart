@@ -40,7 +40,7 @@ class _TypePageState extends State<TypePage> with TickerProviderStateMixin {
         return Future.value(false);
       if(types['data'] is List){
         List data=types['data'];
-        print(data);
+        // print(data);
         setState(() {
           if(data.length>0 && index==null){
             index=data[0]['id'];

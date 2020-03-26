@@ -22,7 +22,7 @@ class FavoritePageState extends State<FavoritePage>{
 
   void _loadFav(){
     fetchFavoriteItems().then((fav){
-      print(fav);
+      // print(fav);
       if(fav is bool){
         showDialog<void>(context: context,barrierDismissible: false,builder: (BuildContext context){
           return SmartAlert(title: "Error",description: "couldn't load page",onOk: (){ if(Navigator.of(context).canPop())Navigator.of(context).pop();},);

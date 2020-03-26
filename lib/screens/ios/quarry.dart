@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import '../../utils/colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share/share.dart';
+import 'package:localstorage/localstorage.dart';
+import 'package:NSCE/utils/constants.dart';
 // Notification screen
 class QuarryPage extends StatelessWidget {
   final int index;
+  final LocalStorage storage = new LocalStorage(STORAGE_KEY);
   Map<String,dynamic> quarry;
   QuarryPage({this.index:0}){
-
+       quarry = storage.getItem(STORAGE_QUARRY_KEY);
   }
   @override
   Widget build(BuildContext context) {

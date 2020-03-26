@@ -77,7 +77,7 @@ class _AddressPickerState extends State<AddressPicker> {
               _loadSearch(e);
             },
             onSubmitted: (e) {
-              print(e);
+              // print(e);
             },
             cursorColor: secondaryColor,
             style: TextStyle(

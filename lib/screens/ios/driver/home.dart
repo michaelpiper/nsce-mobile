@@ -1,6 +1,6 @@
+import 'package:NSCE/ext/loading.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:NSCE/services/request.dart';
+import 'package:NSCE/services/driver_request.dart';
 import 'package:NSCE/ext/spinner.dart';
 import 'package:NSCE/utils/colors.dart';
 import 'package:NSCE/utils/constants.dart';
@@ -16,10 +16,17 @@ class DriverHomePage extends StatefulWidget {
 class _DriverHomePage extends State<DriverHomePage> {
   List<Map<String,dynamic>> _dispatchList=[];
   String _title='Task';
+  var refreshKey = GlobalKey<RefreshIndicatorState>();
   bool _loadingDispatchIndicator=true;
   final LocalStorage storage = new LocalStorage(STORAGE_KEY);
+  @override
+  void initState() {
+    super.initState();
+    _loadDispatch();
+  }
   _buildDispatch(){
     f(e){
+      DateTime _datee = DateTime.parse(e['dateScheduled']??'');
       return InkWell(
         onTap: (){
           storage.setItem(STORAGE_DRIVER_DISPATCH_KEY, e).then((val){
@@ -39,10 +46,10 @@ class _DriverHomePage extends State<DriverHomePage> {
                     SizedBox(height: 7,),
                     Text('Customer name',style: TextStyle(color: secondaryTextColor),),
                     SizedBox(height: 7,),
-                    Text(e['contactPerson'],style: TextStyle(color: noteColor),),
+                    Text(e['Order']['contactPerson'],style: TextStyle(color: noteColor),),
                     Text('Address',style: TextStyle(color: secondaryTextColor),),
                     SizedBox(height: 7,),
-                    Text(e['shippingAddress'],style: TextStyle(color: noteColor),),
+                    Text(e['Order']['address'],style: TextStyle(color: noteColor),),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
@@ -54,9 +61,9 @@ class _DriverHomePage extends State<DriverHomePage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        Text(e['vehicleId'],style: TextStyle(color:  noteColor),),
+                        Text(e['Vehicle']['uniqueIdentifier'],style: TextStyle(color:  noteColor),),
                         SizedBox(width: 7,),
-                        Text(e['schedule'],style: TextStyle(color:  noteColor),),
+                        Text("${_datee.day}-${_datee.month}-${_datee.year} ${_datee.hour>12?_datee.hour-12:_datee.hour}:${_datee.minute} "+(_datee.hour>12?'p':'a')+"m",style: TextStyle(color:  noteColor),),
                       ],
                     )
                   ],
@@ -94,12 +101,22 @@ class _DriverHomePage extends State<DriverHomePage> {
       ),
     ];
   }
-  void _loadDispatch(){
+  Future<Null> _loadDispatch()async{
+    refreshKey.currentState?.show(atTop: false);
     _dispatchList=[];
-    for(var i=0; i<10;i++){
-      _dispatchList.add({"id":77777+i,"shippingAddress":"MadilasHouse Marina lagos","contactPerson":"Chidima gold","schedule":"23-01-2019 09:30 pm",'vehicleId':"DFSEQ12"});
+    fn(res){
+      _dispatchLoaded();
+      if(res is Map && res['data'] is List){
+        setState(() {
+          _dispatchList = res['data'].map<Map<String, dynamic>>((e)=>Map<String, dynamic>.from(e)).toList();
+        });
+      }
     }
-    _dispatchLoaded();
+    _dispatchLoaded(state: false);
+    fetchDispatch().then(fn).catchError((e){
+      // print(e);
+    });
+    return null;
   }
   void _dispatchLoaded({bool state:true}){
     setState(() {
@@ -108,10 +125,6 @@ class _DriverHomePage extends State<DriverHomePage> {
   }
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    if(_loadingDispatchIndicator){
-      _loadDispatch();
-    }
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -119,7 +132,11 @@ class _DriverHomePage extends State<DriverHomePage> {
         iconTheme: IconThemeData(color:primaryTextColor),
         actions: _buildActions(),
       ),
-      body: _loadingDispatchIndicator?Center(child:Spinner(icon: Icons.sync,) ,):_buildBody(),
+      body: RefreshIndicator(
+        key: refreshKey,
+        child:  _loadingDispatchIndicator?Center(child:Loading()):_buildBody(),
+        onRefresh: _loadDispatch,
+      ),
     );
   }
 }

@@ -31,7 +31,7 @@ class OrdersPageState extends State<OrdersPage>{
   void _loadOrder(){
     f(res){
       if(res is Map && res['data'] is List){
-        print(res['data']);
+        // print(res['data']);
         setState(() {
           _cacheOrder=res['data'].map<Map<String,dynamic>>((e)=>new Map<String, dynamic>.from(e)).toList();
           _orders = res['data'].map<Map<String,dynamic>>((e)=>new Map<String, dynamic>.from(e)).toList();
@@ -93,13 +93,13 @@ class OrdersPageState extends State<OrdersPage>{
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            Text("Order#"+e['id'].toString(),style:TextStyle(color:noteColor,fontSize: 26,fontWeight: FontWeight.w800,textBaseline: TextBaseline.alphabetic)),
+                            Text("Order#"+e['id'].toString(),style:TextStyle(color:noteColor,fontSize: 20,fontWeight: FontWeight.w800,textBaseline: TextBaseline.alphabetic)),
                             Column(
                               children: <Widget>[
                                 Row(
                                   children: <Widget>[
                                     Padding(padding: EdgeInsets.only(right:1.0),),
-                                    SizedBox(width: 100,child: Text('Placed on: ',style:TextStyle(color:noteColor,fontSize: 20,textBaseline: TextBaseline.alphabetic)),),
+                                    SizedBox(width: 100,child: Text('Placed on: ',style:TextStyle(color:noteColor,fontSize: 15,textBaseline: TextBaseline.alphabetic)),),
                                     Padding(padding: EdgeInsets.only(right:3.0),),
                                     Expanded(child:Text(("${_date.day}-${_date.month}-${_date.year} ${_date.hour>12?_date.hour-12:_date.hour}:${_date.minute} "+(_date.hour>12?'p':'a')+"m"),style:TextStyle(color:noteColor,fontSize: 20,textBaseline: TextBaseline.alphabetic)))
                                   ],
@@ -107,9 +107,9 @@ class OrdersPageState extends State<OrdersPage>{
                                 Row(
                                   children: <Widget>[
                                     Padding(padding: EdgeInsets.only(right:1.0),),
-                                    SizedBox(width: 100,child: Text('Total',style:TextStyle(color:textColor,fontSize: 26,fontWeight: FontWeight.w900,textBaseline: TextBaseline.alphabetic)),),
+                                    SizedBox(width: 100,child: Text('Total',style:TextStyle(color:textColor,fontSize: 20,fontWeight: FontWeight.w900,textBaseline: TextBaseline.alphabetic)),),
                                     Padding(padding: EdgeInsets.only(right:3.0),),
-                                    Expanded(child:Text(CURRENCY['sign']+' '+ oCcy.format(e['totalPrice']+e['shippingFee']),style:TextStyle(color:textColor,fontSize: 26,fontWeight: FontWeight.w900,textBaseline: TextBaseline.alphabetic)))
+                                    Expanded(child:Text(CURRENCY['sign']+' '+ oCcy.format(e['totalPrice']+e['shippingFee']),style:TextStyle(color:textColor,fontSize: 20,fontWeight: FontWeight.w900,textBaseline: TextBaseline.alphabetic)))
                                   ],
                                 )
                               ],
@@ -121,8 +121,8 @@ class OrdersPageState extends State<OrdersPage>{
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: <Widget>[
                                 Expanded(child: Container(),),
-                                Icon(Icons.check_circle,size: 22,color: primaryColor),
-                                Text(e['status'],style:TextStyle(color:primaryColor,fontSize: 22,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w600)),
+                                Icon(Icons.check_circle,size: 19,color: primaryColor),
+                                Text(e['status'],style:TextStyle(color:primaryColor,fontSize: 19,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w600)),
                               ],
                             ),
                           ],
@@ -156,51 +156,57 @@ class OrdersPageState extends State<OrdersPage>{
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Container(color:liteColor,child: Center(child: ButtonBar(
-              alignment: MainAxisAlignment.center,
-              children: <Widget>[
-                FlatButton(
-                  onPressed: (){
-                    _sort("All");
-                  },
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(5))
-                  ),
-                  color: _name=='All'?primaryColor:liteColor,
-                  child: Text('All',style: TextStyle(color: _name=='All'?primaryTextColor:liteTextColor),),
-                ),
-                FlatButton(
-                  onPressed: (){
-                    _sort("Pending");
-                  },
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(5))
-                  ),
-                  color: _name=='Pending'?primaryColor:liteColor,
-                  child: Text('Pending',style: TextStyle(color: _name=='Pending'?primaryTextColor:liteTextColor),),
-                ),
-                FlatButton(
-                  onPressed: (){
-                    _sort("Processing");
-                  },
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(5))
-                  ),
-                  color: _name=='Processing'?primaryColor:liteColor,
-                  child: Text('Processing',style: TextStyle(color: _name=='Processing'?primaryTextColor:liteTextColor),),
-                ),
-                FlatButton(
-                  onPressed: (){
-                    _sort("Completed");
-                  },
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(5))
-                  ),
-                  color: _name=='Completed'?primaryColor:liteColor,
-                  child: Text('Completed',style: TextStyle(color:_name=='Completed'?primaryTextColor:liteTextColor),),
-                )
-              ],
-            ),),),
+            Container(
+              color:liteColor,
+              child: Center(
+                child:
+                  ButtonBar(
+                      alignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        FlatButton(
+                          onPressed: (){
+                            _sort("All");
+                          },
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(5))
+                          ),
+                          color: _name=='All'?primaryColor:liteColor,
+                          child: Text('All',style: TextStyle(color: _name=='All'?primaryTextColor:liteTextColor),),
+                        ),
+                        FlatButton(
+                          onPressed: (){
+                            _sort("Pending");
+                          },
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(5))
+                          ),
+                          color: _name=='Pending'?primaryColor:liteColor,
+                          child: Text('Pending',style: TextStyle(color: _name=='Pending'?primaryTextColor:liteTextColor),),
+                        ),
+//                        FlatButton(
+//                          onPressed: (){
+//                            _sort("Processing");
+//                          },
+//                          shape: RoundedRectangleBorder(
+//                              borderRadius: BorderRadius.all(Radius.circular(5))
+//                          ),
+//                          color: _name=='Processing'?primaryColor:liteColor,
+//                          child: Text('Processing',style: TextStyle(color: _name=='Processing'?primaryTextColor:liteTextColor),),
+//                        ),
+                        FlatButton(
+                          onPressed: (){
+                            _sort("Completed");
+                          },
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(5))
+                          ),
+                          color: _name=='Completed'?primaryColor:liteColor,
+                          child: Text('Completed',style: TextStyle(color:_name=='Completed'?primaryTextColor:liteTextColor),),
+                        )
+                      ],
+                    )
+              ),
+            ),
             Expanded(
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 12.0, horizontal:10.0 ),
