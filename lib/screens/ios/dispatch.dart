@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import '../../utils/colors.dart';
 import '../../utils/constants.dart';
 // Notification screen
-class OrderChildPage extends StatefulWidget {
+class DispatchPage extends StatefulWidget {
   final int index;
-  OrderChildPage({this.index});
+  DispatchPage({this.index});
 
   @override
-  _OrderChildPageState createState()=>_OrderChildPageState(index:this.index);
+  _DispatchPageState createState()=>_DispatchPageState(index:this.index);
 }
 
-class _OrderChildPageState extends State<OrderChildPage>{
+class _DispatchPageState extends State<DispatchPage>{
   final int index;
   int currentStep;
   Map<String,dynamic> e = {'name':'stone','quantity':'2000','amount':'180,000.00','measurement':'Tonnes','id':'12343232','image':'images/sample2.png','createdAt':'2012 12:00pm','shippingMethod':'Pick up at Quarry'};
-  _OrderChildPageState({this.index});
+  _DispatchPageState({this.index});
   List <Step>_steps=[
     Step(
         title: const Text('Shippined'),

@@ -1,27 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../../services/request.dart';
-//import 'package:intl/intl.dart';
+import 'package:intl/intl.dart';
 import '../../../utils/timehelper.dart';
 import 'package:NSCE/utils/constants.dart';
-//'₦'
-import 'package:NSCE/ext/spinner.dart';
+import 'package:localstorage/localstorage.dart';
 // third screen
-import '../../../ext/loading.dart';
-//Card(
-//elevation: 3.0,
-//shape:RoundedRectangleBorder(
-//borderRadius: BorderRadius.circular(
-//15.0,
-//),
-//),
-//child:  ListTile(
-//title:Row(children: <Widget>[Text('Payment for'),Text(' Order # 123',style: TextStyle(color: primaryColor),)],),
-//subtitle: Text('3rd Jul, 20 3:00pm'),
-//trailing: Text(CURRENCY['sign']+' 180,000'),
-//),
-//);
 class TransactionsScreen extends StatefulWidget {
-  int length;
+  final int length;
   TransactionsScreen({Key key,this.length}) : super(key: key);
   @override
   _TransactionsScreen createState() => new _TransactionsScreen();
@@ -29,6 +14,8 @@ class TransactionsScreen extends StatefulWidget {
 class _TransactionsScreen extends State<TransactionsScreen> {
   List transList;
   bool _loadingIndicator;
+  final LocalStorage storage = new LocalStorage(STORAGE_KEY);
+  final oCcy = new NumberFormat("#,##0.00", "en_US");
   _TransactionsScreen(){
 
     fetchTrn().then((tran){
@@ -39,18 +26,16 @@ class _TransactionsScreen extends State<TransactionsScreen> {
              String type;
              String subtile;
              Color color;
-             String amount=list['amount'].toString()+' NGN';
              if(list['typeId']==1){
                type="Funding wallet";
                subtile=" ";
                color = Colors.black45;
              }else{
                type="Payment for";
-               subtile=' transId # '+list['trnRef'];
+               subtile='#'+list['trnRef'];
                color = Colors.orangeAccent;
              }
              var now =  DateTime.parse(list['createdAt']);
-//             print((new DateTime.now()).timeZoneName);
              var bart = Bart(now);
              String formatted = bart.diffNow();
              listToPush.add(
@@ -63,12 +48,13 @@ class _TransactionsScreen extends State<TransactionsScreen> {
                    ),
                    child:  ListTile(
                      onTap: (){
-                       Scaffold.of(context).showSnackBar(SnackBar(content:Text("opening transaction")));
-                       Navigator.of(context).pushNamed('/transaction/'+list['id'].toString());
+                       storage.setItem(STORAGE_TRANSACTION_KEY,list).then((v){
+                         Navigator.of(context).pushNamed('/transaction/'+list['id'].toString());
+                       });
                      },
                      title:Row(children: <Widget>[Text(type),SizedBox(width: 10,),Text(subtile,style: TextStyle(color: color),)],),
                      subtitle: Text(formatted),
-                     trailing: Text(CURRENCY['sign']+ amount.toString(),style: TextStyle(color: color)),
+                     trailing: Text(CURRENCY['sign']+' '+ oCcy.format(list['amount']),style: TextStyle(color: color)),
                    ),
                  )
              );
@@ -110,14 +96,16 @@ class _TransactionsScreen extends State<TransactionsScreen> {
   @override
   Widget build(BuildContext context) {
     if(_loadingIndicator){
-      return Center(child: Spinner(icon: Icons.sync,),);
+      return Center(child: CircularProgressIndicator(),);
     }
-    return Container(
+    return transList.length==0?Center(child: Text('No transaction')):Container(
       padding: EdgeInsets.all(10.0),
       width: MediaQuery.of(context).size.width,
-      child: ListView(
-//        shrinkWrap: false,
-        children: transList,
+      child: ListView.builder(
+        itemCount: transList.length,
+        itemBuilder: (BuildContext ctxt, int index) {
+          return transList[index];
+        },
       ),
     );
   }

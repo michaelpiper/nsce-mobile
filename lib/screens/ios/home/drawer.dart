@@ -7,7 +7,8 @@ import '../../../utils/colors.dart';
 class AppDrawer extends StatelessWidget {
   final Map currentUser;
   final Map userDetails;
-  AppDrawer({this.userDetails:const {},this.currentUser:const {}});
+  Function onTabTapped;
+  AppDrawer({this.userDetails:const {},this.currentUser:const {},this.onTabTapped});
   @override
   Widget build(BuildContext context) {
     Widget headerSegment = Container(
@@ -43,7 +44,8 @@ class AppDrawer extends StatelessWidget {
         children: <Widget>[
           ListTile(
             onTap: (){
-              Navigator.pushNamed(context, '/home');
+              Navigator.of(context).popUntil((route) => route.isFirst);
+              Navigator.pop(context);
             },
             title:Text('Home',style: TextStyle(color: noteColor),) ,
             leading: Icon(Icons.home,color: Colors.blue,size:30 ,),
@@ -53,7 +55,7 @@ class AppDrawer extends StatelessWidget {
             onTap: (){
               Navigator.pushNamed(context, '/type');
             },
-            title:Text('Type',style: TextStyle(color: noteColor),) ,
+            title:Text('Products',style: TextStyle(color: noteColor),) ,
             leading: Icon(Icons.view_list,color: Colors.pinkAccent,size:30 ,),
             trailing: Icon(Icons.arrow_right,color: Colors.black54,),
           ),
@@ -69,7 +71,7 @@ class AppDrawer extends StatelessWidget {
             onTap: (){
               Navigator.pushNamed(context, '/quarries');
             },
-            title:Text('Quarry',style: TextStyle(color: noteColor),) ,
+            title:Text('Yard',style: TextStyle(color: noteColor),) ,
             leading: Icon(Icons.shopping_basket,color: Colors.yellowAccent,size:30 ,),
             trailing: Icon(Icons.arrow_right,color: Colors.black54,),
           ),
@@ -83,7 +85,8 @@ class AppDrawer extends StatelessWidget {
           ),
           ListTile(
             onTap: (){
-              Navigator.popAndPushNamed(context, '/home/3');
+              if(onTabTapped is Function) onTabTapped(3);
+              Navigator.pop(context);
             },
             title:Text('Wallet',style: TextStyle(color: noteColor),) ,
             leading: Icon(Icons.credit_card,color: Colors.blue,size:30 ,),

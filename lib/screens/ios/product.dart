@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -11,7 +12,9 @@ import 'package:localstorage/localstorage.dart';
 import 'package:NSCE/ext/smartalert.dart';
 import 'package:NSCE/services/auth.dart';
 import 'package:provider/provider.dart';
-import 'dart:convert' as convert;
+import 'package:NSCE/ext/dialogman.dart';
+import 'package:NSCE/ext/search.dart';
+import 'package:intl/intl.dart';
 class ProductPage extends StatefulWidget {
   final int id;
 
@@ -28,7 +31,14 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
   Map<String,dynamic>  _product;
   final LocalStorage storage = new LocalStorage(STORAGE_KEY);
   TextEditingController _txtController = TextEditingController();
+  final oCcy = new NumberFormat("#,##0.00", "en_US");
   Map post={'productId':'','quantity':'','schedule':'','pickup':'','contactPerson':'','contactPhone':''};
+  final DialogMan dialogMan =DialogMan(child: Scaffold(
+      backgroundColor: Colors.transparent,
+      body:Center(
+          child:CircularProgressIndicator()
+      )
+  ));
   ProductStatePage({this.id});
   @override
   void initState() {
@@ -51,6 +61,7 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
       _txtController.text=unit.toString();
     });
   }
+
   Future _loadProduct() async {
     fetchProductWithParents(id).then((product){
       if(product==false || product==null){
@@ -83,6 +94,7 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
       });
       return Loading();
     }
+    dialogMan.buildContext(context);
     Widget titleSection = Container(
         padding: EdgeInsets.only(
             top: 0.12,
@@ -194,14 +206,14 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
               ),
               Row(
                   children: <Widget>[
-                    Expanded(child: Text('${CURRENCY['sign']} '+percentage(_product['price'],_product['discount']).toString()+'/'+_product['measuredIn'],style: TextStyle(fontWeight: FontWeight.w600,fontSize: 20,color: textColor),),)
+                    Expanded(child: Text('${CURRENCY['sign']} '+percentage(_product['price'],_product['discount']).toString()+'/'+_product['unit'],style: TextStyle(fontWeight: FontWeight.w600,fontSize: 20,color: textColor),),)
                   ]
               ),
               _product['discount']==0?
               Container() :
               Row(
                   children: <Widget>[
-                    Expanded(child: Text('${CURRENCY['sign']} '+_product['price'].toString(),style: TextStyle(fontWeight: FontWeight.w300,fontSize: 20,color: textColor,decoration: TextDecoration.lineThrough,decorationColor: noteColor),),),
+                    Expanded(child: Text('${CURRENCY['sign']} '+oCcy.format(_product['price']),style: TextStyle(fontWeight: FontWeight.w300,fontSize: 20,color: textColor,decoration: TextDecoration.lineThrough,decorationColor: noteColor),),),
                     Text(_product['discount'].toString()+'% Off',style: TextStyle(color: rejectColor,fontWeight: FontWeight.w600),)
                   ]
               ),
@@ -275,11 +287,10 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
                               IconButton(
                                 padding: EdgeInsets.all(0.0),
                                 iconSize: 16,
-
-                                icon: Icon(Icons.add),
-                                tooltip: 'Increase volume by 1',
+                                icon: Icon(Icons.remove),
+                                tooltip: 'Decrease volume by 1',
                                 onPressed: () {
-                                  increament();
+                                  decreament();
                                 },
                               ),
                               Padding(
@@ -308,10 +319,11 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
                               IconButton(
                                 padding: EdgeInsets.all(0.0),
                                 iconSize: 16,
-                                icon: Icon(Icons.remove),
-                                tooltip: 'Decrease volume by 1',
+
+                                icon: Icon(Icons.add),
+                                tooltip: 'Increase volume by 1',
                                 onPressed: () {
-                                  decreament();
+                                  increament();
                                 },
                               ),
                             ],)
@@ -391,7 +403,8 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
         post['pickup']= selectedMethod=="Site Delivery"?'0':'1';
         post['contactPerson']=contact['firstName']+' '+contact['lastName'];
         post['contactPhone']=act['phone'];
-        storage.setItem(STORAGE_SCHEDULE_KEY, convert.jsonEncode({'post':post,'product':_product})).then<void>((value){
+        storage.setItem(STORAGE_SCHEDULE_KEY, {'post':post,'product':_product}).then<void>((value){
+          dialogMan.hide();
           Navigator.pushNamed(context, '/schedule');
         });
       }
@@ -463,6 +476,7 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
                     );
                   }else{
                     Navigator.pop(context);
+                    dialogMan.show();
                     continueToAdd();
                   }
                 },
@@ -520,98 +534,23 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20.0),
-        ),
-        height: 300.0,
-        width: 300.0,
-        child: Stack(
-          children: <Widget>[
-            Container(
-              width: double.infinity,
-              height: 300,
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(12.0),
-                image: DecorationImage(image: AssetImage('images/map.png'),fit: BoxFit.fill)
-              ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 5,horizontal: 10),
-                child: ListView(
-                  children: <Widget>[
-                    SizedBox(height: 40,),
-                    Card(
-                      child: ListTile(onTap:(){
-                        post['contactPhone']="";
-                        post['address'] = "Ogba Bus Stop, 29, College Road, Alhaji Haruna Bus-Stop(Beside Mr. Biggs), Ogba,, Ifako Agege, Ikeja, Nigeria";
-                        List arrAddress =post['address'].split(',');
-                        post['country'] = arrAddress[arrAddress.length-1];
-                        post['state'] = arrAddress[arrAddress.length-2];
-                        post['geolocation'] = "6.6394141, 3.3322259";
-                        Navigator.of(context).pop();
-                      },title: Text('lagos',style: TextStyle(color: textColor),),),
-                    ),
-                  ],
-                )
-              ),
-            ),
-            Container(
-              width: double.infinity,
-              height: 50,
-              alignment: Alignment.bottomCenter,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
-                ),
-              ),
-              child: Align(
-                alignment: Alignment.center,
-                child:
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10,vertical: 4),
-                  child:  TextField(
-                    decoration: InputDecoration(
-                        hintText: 'Lagos',
-                        suffixIcon: Icon(Icons.search),
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: Colors.red,
-                                width: 5.0
-                            ),
-                            borderRadius: BorderRadius.all(Radius.circular(12))
-                        )
-                    ),
-                  ),
-                ),
-
-              ),
-            ),
-            Align(
-              // These values are based on trial & error method
-              alignment: Alignment(1.05, -1.05),
-              child: InkWell(
-                onTap: () {
-                  Navigator.pop(context);
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.close,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      child: Search(
+        initValue:post['address'] ==null?'':post['address'] ,
+      onSelect: (e){
+        post['contactPhone']="";
+        post['contactPerson']="";
+        post['address'] = e['address'];
+        List arrAddress =post['address'].split(',');
+        post['country'] = arrAddress[arrAddress.length-1];
+        post['state'] = arrAddress[arrAddress.length-2];
+        post['geolocation'] = e['geolocation'];
+        Navigator.of(context).pop();
+      },)
     );
+
     showDialog(
         context: context, builder: (BuildContext context) => fancyDialog, barrierDismissible: false);
   }
 }
+
+

@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:localstorage/localstorage.dart';
 import 'package:NSCE/utils/colors.dart';
 import 'package:provider/provider.dart';
-import '../../ext/badge.dart';
+import 'package:NSCE/utils/constants.dart';
 // import services here
 import '../../services/auth.dart';
 import '../../services/request.dart';
@@ -43,13 +44,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Map<String, dynamic> currentUser={'phone':''};
   Map<String, dynamic> userDetails={'balance':0000};
   int currentIndex;
-  String _title;
+  String _title="";
   List _children = <TabContent>[ ];
   TabController _controller;
   Future act;
   Future act2;
-  int _cartCount =0;
-  Timer _updateme;
+  final LocalStorage storage = new LocalStorage(STORAGE_KEY);
   _HomePageState({this.currentIndex = 0}){
     _refresh();
   }
@@ -60,48 +60,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _title = _children[currentIndex].title;
     _controller.addListener(_handleSelected);
     _initMe();
-    _updateme=new Timer(const Duration(seconds: 5),updateBalance);
   }
   @override
   void dispose(){
-    _updateme.cancel();
     super.dispose();
   }
-  void updateBalance(){
-    fetchAccount(id:'balance')
-        .then((value){
-//          print(value);
-          if(value == false){
-            return;
-          }
-          if(value.containsKey('error') && value['error']) {
-            return;
-          }
-          if(value.containsKey('data') && value['data']==null) {
-            return ;
-          }
-          if ( value['data'] !=userDetails['balance']){
-            setState(() {
-              userDetails['balance']=value['data'];
-            });
-          }
-        });
-    count(cartCount){
-      if(cartCount is bool || cartCount == null){
-        return;
-      }
-      if(cartCount['error']==false && cartCount['data'] is int){
-        _changeCartCount(cartCount['data']);
-      }
-    }
-    fetchCart(id:'count').then(count);
 
-  }
-  void _changeCartCount(e){
-    setState(() {
-      _cartCount=e;
-    });
-  }
   void _handleSelected() {
     setState(() {
      _title = _children[_controller.index].title;
@@ -117,16 +81,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   _foriOS(){
     return
       Scaffold(
-        drawer:AppDrawer(userDetails:userDetails,currentUser: currentUser),
+        drawer:AppDrawer(userDetails:userDetails,currentUser: currentUser,onTabTapped:_onTabTapped),
         appBar: AppBar(
           elevation: 0,
-          title: Text(_title,style: TextStyle(color: Colors.white,)),
+          title:_title=="Home" ?Image.asset('images/icon_white.png',width: 102,height: 35,)
+              :Text(_title,style: TextStyle(color: Colors.white,)),
           iconTheme: IconThemeData(color:primaryTextColor),
           actions: <Widget>[
             SizedBox(
               height: 25.0,
             ),
-            Padding(
+            _title=="Home" ?Container():Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child:IconButton(
                   color: primaryTextColor,
@@ -136,37 +101,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   },
                 )
             ),
-            Stack(
-              children: <Widget>[
-                Positioned(
-                  right: 8,
-                  top: 10,
-                  child:_cartCount==0?SizedBox():Container(
-                    decoration: BoxDecoration(
-                      color: Colors.green,
-                      shape: BoxShape.circle
-                    ),
-                    padding: EdgeInsets.all(3),
-                    child: Text(_cartCount.toString(),style: TextStyle(color: primaryTextColor),),
-                  )
-                ),
-                Align(
-                  child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      child:IconButton(
-                        color: primaryTextColor,
-                        icon:Icon(Icons.shopping_cart),
-                        onPressed: (){
-                          Navigator.pushNamed(context, '/cart');
-                        },
-                      )
-                  ),
-                ),
-
-
-              ],
-            ),
-            Padding(
+            CartLength(),
+            _title=="Home" ?Container():Padding(
               padding: const EdgeInsets.symmetric(vertical:16.0),
               child:PopupMenuButton(
                   color: primaryTextColor,
@@ -209,6 +145,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       );
   }
   _initMe(){
+    act = AuthService.staticGetUser();
+    act.then ((value){
+      setState(() {
+        currentUser=value;
+      });
+    });
     act2 = checkAuth();
     act2.then((value){
 //      print(value);
@@ -223,6 +165,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       }
       setState(() {
         userDetails = value['data'];
+        storage.setItem(STORAGE_USER_DETAILS_KEY, userDetails).then<void>((value){});
       });
     });
   }
@@ -236,13 +179,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
   @override
   Widget build(BuildContext context) {
-    act = Provider.of<AuthService>(context).getUser();
-    act.then ((value){
-      setState(() {
-//        print(currentUser);
-        currentUser=value;
-      });
-    });
     _refresh();
 
     // This method is rerun every time setState is called, for instance as done
@@ -255,5 +191,78 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 //    return _forAndroid();
     return _foriOS();
 
+  }
+}
+
+
+class CartLength extends StatefulWidget{
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    return _CartLength();
+  }
+}
+
+class _CartLength extends State<CartLength> {
+  int _cartCount=0;
+  Timer _updateme;
+  void updateCart(){
+    count(cartCount){
+      if(cartCount is bool || cartCount == null){
+        return;
+      }
+      if(cartCount['error']==false && cartCount['data'] is int){
+
+        setState(() {
+          _cartCount=cartCount['data'];
+        });
+      }
+    }
+    fetchCart(id:'count').then(count);
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    updateCart();
+    _updateme=new Timer(const Duration(seconds: 5),updateCart);
+  }
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _updateme.cancel();
+  }
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return Stack(
+      children: <Widget>[
+        Positioned(
+            right: 8,
+            top: 10,
+            child:_cartCount==0?SizedBox():Container(
+              decoration: BoxDecoration(
+                  color: Colors.green,
+                  shape: BoxShape.circle
+              ),
+              padding: EdgeInsets.all(3),
+              child: Text(_cartCount.toString(),style: TextStyle(color: primaryTextColor),),
+            )
+        ),
+        Align(
+          child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child:IconButton(
+                color: primaryTextColor,
+                icon:Icon(Icons.shopping_cart),
+                onPressed: (){
+                  Navigator.pushNamed(context, '/cart');
+              },
+            )
+          ),
+        ),
+      ],
+    );
   }
 }

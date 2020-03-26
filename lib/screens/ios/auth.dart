@@ -42,8 +42,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   bool _eye_signup=true;
   bool _eye_signin=true;
   List <Widget> _countryList=[];
-  Map<String, dynamic> _signUpData={'fullname':null,'country':null,'company':null,'email':null,'phone':null,'password':null,'confirm_password':null};
-   _MyStatefulWidgetState(){
+  Map<String, String> _signUpData={'firstname':'','lastname':'','fullname':'','country':null,'company':'','email':'','phone':'','password':'','confirm_password':''};
+  _MyStatefulWidgetState(){
      f(e){
        return DropdownMenuItem(
          child: Text(e['name'],style:TextStyle(color: textColor),),
@@ -62,21 +62,21 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     var size=MediaQuery.of(context).size;
 
     if(size.height>630){
-      margin=(size.height-(size.height-10))/2;
+      margin=500;
     }
     else if(size.height>610){
-      margin=(size.height-610)/2;
+      margin=500;
     }
     else if(size.height>510){
-      margin=(size.height-(size.height-10))/2;
+      margin=450;
     }
     else if(size.height>410){
-      margin=(size.height-400)/2;
+      margin=400;
     }
-    else if(size.height>310){
-      margin=(size.height-300)/2;
+    else if(size.height>340){
+      margin=320;
     }else{
-      margin=1;
+      margin=300;
     }
 
     Widget _body = Container(
@@ -97,10 +97,11 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         ),
         child:Card(
             elevation: 4.0,
-            margin: EdgeInsets.only(top:0.0,left: 22.0),
+            margin: EdgeInsets.only(top:0.0,left: 20.0,right: 20.0),
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.horizontal(
                   left: Radius.elliptical(20.0,20.0),
+                  right: Radius.elliptical(20.0,20.0)
                 ),
                 side: BorderSide(color: Colors.black12)),
             child:Form(
@@ -111,7 +112,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      // Padding(padding:,)
+                      Padding(padding:EdgeInsets.only(top: 20),),
                       Text(
                         'Login',
                         style: TextStyle(fontFamily: "Lato",fontStyle:FontStyle.normal,fontWeight: FontWeight.normal,fontSize: 20),
@@ -178,7 +179,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                           ]
                       ),
                       SizedBox(
-                        height: 25.0,
+                        height: margin-430.0,
                       ),
                       Row(
                         children: <Widget>[
@@ -288,69 +289,42 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     );
     return
       ListView(
-        shrinkWrap: false,
+        shrinkWrap: true,
         children: <Widget>[
           Container(
-            color: primaryTextColor,
-            constraints: BoxConstraints(minHeight:MediaQuery.of(context).size.height,maxHeight: MediaQuery.of(context).size.height ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            width: MediaQuery.of(context).size.width,
+            height:  margin,
+            child: Center(child: Stack(
+
               children: <Widget>[
-                Image(
-                  image: AssetImage('images/auth-header.png'),
-                  fit: BoxFit.fill,
-                  width: 1000.0,
-                  height: 90,
-                ),
-                SizedBox(
-                  height: margin,
-                ),
-
-                Container(
+                Positioned(
+                  top: 40,
                   width: MediaQuery.of(context).size.width,
-                  height: 420,
-                  child: Stack(
-
-                    children: <Widget>[
-                      Positioned(
-                          top: 40,
-                          width: MediaQuery.of(context).size.width,
-                          child: _body,
+                  child: _body,
+                ),
+                Positioned(
+                  top:0,
+                  child: Container(
+                    alignment: Alignment(0,0),
+                    width: MediaQuery.of(context).size.width,
+                    child:  Center(
+                      child: Image(
+                        image: AssetImage('images/icon.png'),
+                        fit: BoxFit.fill,
+                        width: 80.0,
+                        height: 80.0,
                       ),
-                      Positioned(
-                        top:0,
-                        child: Container(
-                          alignment: Alignment(0,0),
-                          width: MediaQuery.of(context).size.width,
-                          child:  Center(
-                            child: Image(
-                              image: AssetImage('images/icon.png'),
-                              fit: BoxFit.fill,
-                              width: 80.0,
-                              height: 80.0,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-                SizedBox(
-                  height: margin,
-                ),
-                Image(
-                  image: AssetImage('images/auth-footer.png'),
-                  fit: BoxFit.fill,
-                  width: 1000.0,
-                  height: 100,
-                ),
               ],
-            ),
+            ),),
           ),
         ],
       );
   }
   Widget signUp(){
+    dynamic _country=_signUpData['country'];
     Widget _body =  Container(
       decoration: BoxDecoration(
         boxShadow: [
@@ -367,11 +341,12 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       ),
       child:Card(
           elevation: 4.0,
-          margin: EdgeInsets.only(top:0.0,left: 22.0),
+          margin: EdgeInsets.only(top:0.0,left: 20.0,right: 20.0),
 
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.horizontal(
                 left: Radius.elliptical(20.0,20.0),
+                right: Radius.elliptical(20.0,20.0)
               ),
               side: BorderSide(color: Colors.black12)),
           child: Form(
@@ -381,10 +356,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
-                        // Padding(padding:,)
-                        SizedBox(
-                          height: 15.0,
-                        ),
+                        Padding(padding:EdgeInsets.only(top: 20),),
                         Text(
                           'Create Account',
                           style: TextStyle(fontFamily: "Lato",fontStyle:FontStyle.normal,fontWeight: FontWeight.normal,fontSize: 20),
@@ -393,65 +365,56 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                         SizedBox(
                           height: 15.0,
                         ),
-                        TextFormField(
+                        Row(
+                          children: <Widget>[
+                            Expanded(child: TextFormField(
 
-                          initialValue: _signUpData['fullname'] ,
-                          onSaved: (value)=> _signUpData['fullname'] = value,
-                          decoration: const InputDecoration(
-                            prefixIcon: Icon(Icons.person,color: secondaryTextColor),
-                            labelText: 'Fullname',
-                            labelStyle: TextStyle(
-                              color: secondaryTextColor,
-                            ),
-                          ),
-                          keyboardType: TextInputType.text,
-                          // textInputAction: TextInputAction.continueAction,
-                          onChanged: (v) => _signUpData['fullname'] = v,
-                          validator: (value) {
-                            if (value.isEmpty) {
-                              return 'Please enter your fullname';
-                            }
-                            return null;
-                          },
-                        ),
-                      Stack(
-                        alignment: Alignment(1.0,0.0), // right & center
-                        children: <Widget>[
-                          Padding(
-                            padding: EdgeInsets.only(left: 50.0),
-                            child:DropdownButton(
-                              icon:Padding(
-                                padding:EdgeInsets.symmetric(
-                                    vertical: 21
+                              initialValue: _signUpData['firstname'] ,
+                              onSaved: (value)=> _signUpData['firstname'] = value,
+                              decoration: const InputDecoration(
+                                prefixIcon: Icon(Icons.person,color: secondaryTextColor),
+                                labelText: 'Firstame',
+                                labelStyle: TextStyle(
+                                  color: secondaryTextColor,
                                 ),
-                                child:SizedBox(width:30.0,height: 30.0,),),
-                              iconSize: 30.0,
-                              value: _signUpData['country'],
-                              hint: Text(_signUpData['country']==null?'Country':_signUpData['country']),
-                              isExpanded: true,
-                              style: TextStyle(color: Colors.white70),
-                              onChanged: (v){
-                                for (var i=0;i<simpleCountryCode.length;i++){
-                                  Map e = simpleCountryCode[i];
-                                  if(e['name']==v){
-                                    return setState(() {
-                                      _signUpData['country'] = v;
-                                      _signUpData['phone'] = e['code'];
-                                    });
-                                  }
+                              ),
+                              keyboardType: TextInputType.text,
+                              // textInputAction: TextInputAction.continueAction,
+                              onChanged: (v) => _signUpData['firstname'] = v,
+                              validator: (value) {
+                                if (value.isEmpty) {
+                                  return 'Please enter your first name';
                                 }
-
+                                return null;
                               },
-                              items:_countryList,
+                            ),),
+                            SizedBox(width: 4,),
+                            Expanded(
+                              child: TextFormField(
+
+                                initialValue: _signUpData['lastname'] ,
+                                onSaved: (value)=> _signUpData['lastname'] = value,
+                                decoration: const InputDecoration(
+                                  prefixIcon: Icon(Icons.person,color: secondaryTextColor),
+                                  labelText: 'Lastname',
+                                  labelStyle: TextStyle(
+                                    color: secondaryTextColor,
+                                  ),
+                                ),
+                                keyboardType: TextInputType.text,
+                                // textInputAction: TextInputAction.continueAction,
+                                onChanged: (v) => _signUpData['lastname'] = v,
+                                validator: (value) {
+                                  if (value.isEmpty) {
+                                    return 'Please enter your lastname';
+                                  }
+                                  return null;
+                                },
+                              ),
                             )
-                          ),
-                          Positioned(
-                            left: 11,
-                            height:30,
-                            child:  Icon(Icons.map,color: secondaryTextColor),
-                          ),
-                        ],
-                      ),
+
+                          ],
+                        ),
 
 //                        TextFormField(
 //                          initialValue: _signUpData['company'] ,
@@ -493,6 +456,44 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                             return null;
                           },
                         ),
+                        Stack(
+                          alignment: Alignment(1.0,0.0), // right & center
+                          children: <Widget>[
+                            Padding(
+                                padding: EdgeInsets.only(left: 50.0),
+                                child:DropdownButton(
+                                  icon:Padding(
+                                    padding:EdgeInsets.symmetric(
+                                        vertical: 21
+                                    ),
+                                    child:SizedBox(width:30.0,height: 30.0,),),
+                                  iconSize: 30.0,
+                                  value: _country,
+                                  hint: Text(_signUpData['country']==null?'Country':_signUpData['country']),
+                                  isExpanded: true,
+                                  style: TextStyle(color: Colors.white70),
+                                  onChanged: (v){
+                                    for (var i=0;i<simpleCountryCode.length;i++){
+                                      Map e = simpleCountryCode[i];
+                                      if(e['name']==v){
+                                        return setState(() {
+                                          _signUpData['country'] = v;
+                                          _signUpData['phone'] = e['code'];
+                                        });
+                                      }
+                                    }
+
+                                  },
+                                  items:_countryList,
+                                )
+                            ),
+                            Positioned(
+                              left: 11,
+                              height:30,
+                              child:  Icon(Icons.map,color: secondaryTextColor),
+                            ),
+                          ],
+                        ),
                         TextFormField(
                           key: UniqueKey(),
                           initialValue: _signUpData['phone'],
@@ -514,6 +515,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                             return null;
                           },
                         ),
+
                         Stack(
                             alignment: Alignment(1.0,0.0), // right & center
                             children: <Widget>[
@@ -645,7 +647,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                               setState(() {
                                 _loading=true;
                               });
-
+                              _signUpData['fullname']=_signUpData['firstname']+' '+_signUpData['lastname'];
                               var wait=Provider.of<AuthService>(context).createUser(_signUpData);
                               wait.then((status){
                                 setState(() {
@@ -740,26 +742,10 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       shrinkWrap: false,
       children: <Widget>[
         Container(
-          color: primaryTextColor,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Image(
-                image: AssetImage('images/auth-header.png'),
-                fit: BoxFit.fill,
-                width: 1000.0,
-                height: 90,
-              ),
-              SizedBox(
-                height:10,
-              ),
-              Container(
                 width: MediaQuery.of(context).size.width,
                 height: 710,
                 child: Stack(
-
                   children: <Widget>[
-
                     Positioned(
                       top: 40,
                       width: MediaQuery.of(context).size.width,
@@ -783,18 +769,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   ],
                 ),
               ),
-              SizedBox(
-                height: 10,
-              ),
-              Image(
-                image: AssetImage('images/auth-footer.png'),
-                fit: BoxFit.fill,
-                width: 1000.0,
-                height: 100,
-              ),
-            ],
-          ),
-        ),
       ],
     );
   }
@@ -803,21 +777,21 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     var size=MediaQuery.of(context).size;
 
     if(size.height>630){
-      margin=(size.height-(size.height-10))/2;
+      margin=500;
     }
     else if(size.height>610){
-      margin=(size.height-610)/2;
+      margin=500;
     }
     else if(size.height>510){
-      margin=(size.height-(size.height-10))/2;
+      margin=450;
     }
     else if(size.height>410){
-      margin=(size.height-400)/2;
+      margin=400;
     }
-    else if(size.height>310){
-      margin=(size.height-300)/2;
+    else if(size.height>340){
+      margin=320;
     }else{
-      margin=1;
+      margin=300;
     }
 
     Widget _body = Container(
@@ -839,10 +813,11 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
 
         child:Card(
             elevation: 4.0,
-            margin: EdgeInsets.only(top:0.0,left: 22.0),
+            margin: EdgeInsets.only(top:0.0,left: 20.0,right: 20.0),
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.horizontal(
                   left: Radius.elliptical(20.0,20.0),
+                  right: Radius.elliptical(20.0,20.0)
                 ),
                 side: BorderSide(color: Colors.black12)),
             child:Form(
@@ -853,7 +828,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      // Padding(padding:,)
+                      Padding(padding:EdgeInsets.only(top: 20),),
                       Text(
                         'Forget Password',
                         style: TextStyle(fontFamily: "Lato",fontStyle:FontStyle.normal,fontWeight: FontWeight.normal,fontSize: 17),
@@ -883,7 +858,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                         },
                       ),
                       SizedBox(
-                        height: 25.0,
+                        height: margin-350.0,
                       ),
                       Row(
                         children: <Widget>[
@@ -907,7 +882,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                         ],
                       ),
                       SizedBox(
-                        height: 25.0,
+                        height: 25,
                       ),
                       MaterialButton(
 
@@ -1010,66 +985,36 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     );
     return
       ListView(
-        shrinkWrap: false,
+        shrinkWrap: true,
         children: <Widget>[
           Container(
-            color: primaryTextColor,
-            constraints: BoxConstraints(minHeight:MediaQuery.of(context).size.height,maxHeight: MediaQuery.of(context).size.height ),
+            width: MediaQuery.of(context).size.width,
+            height:  margin,
+            child: Center(child: Stack(
 
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Image(
-                  image: AssetImage('images/auth-header.png'),
-                  fit: BoxFit.fill,
-                  width: 1000.0,
-                  height: 90,
-                ),
-                SizedBox(
-                  height: margin,
-                ),
-
-                Container(
+                Positioned(
+                  top: 40,
                   width: MediaQuery.of(context).size.width,
-                  child: Stack(
-
-                    children: <Widget>[
-                      Container(
-                        width: 300,
-                        height: 400,
+                  child: _body,
+                ),
+                Positioned(
+                  top:0,
+                  child: Container(
+                    alignment: Alignment(0,0),
+                    width: MediaQuery.of(context).size.width,
+                    child:  Center(
+                      child: Image(
+                        image: AssetImage('images/icon.png'),
+                        fit: BoxFit.fill,
+                        width: 80.0,
+                        height: 80.0,
                       ),
-                      Positioned(
-                        top: 40,
-                        width: MediaQuery.of(context).size.width,
-                        child: _body,
-                      ),
-                      Positioned(
-                        child: Align(
-                          alignment: Alignment(0,0),
-                          child:  Center(
-                            child: Image(
-                              image: AssetImage('images/icon.png'),
-                              fit: BoxFit.fill,
-                              width: 80.0,
-                              height: 80.0,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-                SizedBox(
-                  height: margin,
-                ),
-                Image(
-                  image: AssetImage('images/auth-footer.png'),
-                  fit: BoxFit.fill,
-                  width: 1000.0,
-                  height: 100,
-                ),
               ],
-            ),
+            ),),
           ),
         ],
       );
@@ -1103,8 +1048,15 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       body:Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
-        child:buildBody() ,
-        color: primaryColor,
+//        constraints: BoxConstraints(minHeight:MediaQuery.of(context).size.height,maxHeight: MediaQuery.of(context).size.height ),
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("images/bg.png"),
+            fit: BoxFit.fill,
+          ),
+//          color: primaryColor,
+        ),
+        child:Center(child: buildBody(),),
       )
     );
   }

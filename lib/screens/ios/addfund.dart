@@ -9,7 +9,9 @@ import 'package:NSCE/utils/constants.dart';
 // third screen
 
 class AddFundsPage extends StatefulWidget {
-  AddFundsPage({Key key}) : super(key: key);
+  final int amount;
+  final Function onDone;
+  AddFundsPage({Key key,this.amount,this.onDone}) : super(key: key);
   @override
   _AddFundsPage createState() => new _AddFundsPage();
 }
@@ -73,7 +75,7 @@ class _AddFundsPage extends State<AddFundsPage> {
             onSuccess: (transaction) {
 //            print(transaction.reference);
               print(_amount);
-              _returnState();
+              _returnState("Your payment was received and it been process");
               setState(() {
                 _loading=false;
               });
@@ -84,7 +86,7 @@ class _AddFundsPage extends State<AddFundsPage> {
       });
     }
   }
-  void _returnState() async {
+  void _returnState(msg) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -94,7 +96,7 @@ class _AddFundsPage extends State<AddFundsPage> {
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text('Your payment was succesful.'),
+                Text(msg??'Your payment was succesful.'),
               ],
             ),
           ),
@@ -103,6 +105,7 @@ class _AddFundsPage extends State<AddFundsPage> {
               child: Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
+                if(widget.onDone is Function)return widget.onDone();
                 if(Navigator.of(context).canPop())Navigator.of(context).pop();
               },
             ),
@@ -141,6 +144,7 @@ class _AddFundsPage extends State<AddFundsPage> {
   void initState(){
     super.initState();
     PaystackPlugin.initialize(publicKey: PAYSTACT_PUBLIC_KEY );
+    _amount=widget.amount==null?500:widget.amount;
   }
   @override
   Widget build(BuildContext context) {
@@ -203,6 +207,7 @@ class _AddFundsPage extends State<AddFundsPage> {
 
                   initialValue: _cvv,
                   maxLength: 3,
+
                   onChanged: (v) => _cvv =v,
                   decoration: InputDecoration(
                     prefixIcon: Icon(Icons.lock),
@@ -221,6 +226,7 @@ class _AddFundsPage extends State<AddFundsPage> {
                 TextFormField(
                   initialValue: _amount.toString(),
                   onChanged: (v) => _amount = int.parse(v),
+                  readOnly: widget.amount==null?false:true,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     prefixIcon: Icon(Icons.present_to_all),

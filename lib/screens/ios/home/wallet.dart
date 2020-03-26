@@ -1,14 +1,20 @@
 import 'package:NSCE/utils/constants.dart';
 import 'package:flutter/material.dart';
 import '../../../utils/colors.dart';
+import '../../../services/request.dart';
 import 'transactions.dart';
+import 'package:intl/intl.dart';
+import 'dart:async';
 // Notification screen
 class WalletScreen extends StatelessWidget {
-  Function reload;
+  final Function reload;
+  final oCcy = new NumberFormat("#,##0.00", "en_US");
   Map<String, dynamic> userDetails={'balance':0};
   Map<String, dynamic> currentUser={'phone':''};
-  WalletScreen({this.currentUser=const {'phone':''} ,this.userDetails=const {'balance':0},this.reload});
-
+  WalletScreen({this.currentUser=const {'phone':''} ,this.userDetails=const {'balance':0},this.reload}){
+//    if(this.reload is Function)
+//      Future.delayed(Duration(seconds: 15), this.reload());
+  }
   Widget _buildHead(context){
 
     return Container(
@@ -38,7 +44,7 @@ class WalletScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Text('NGN '+userDetails['balance'].toString(),style: TextStyle(color: Colors.white,fontSize: 20),),
+                    Balance(initialValue: userDetails['balance'],),
                     Text('Balance',style: TextStyle(color: Colors.white,fontSize: 16),)
                   ],
                 ),
@@ -112,3 +118,58 @@ class WalletScreen extends StatelessWidget {
     );
   }
 }
+
+class Balance extends StatefulWidget{
+  int initialValue=0;
+  Balance({this.initialValue});
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    return _Balance();
+  }
+}
+
+class _Balance extends State<Balance> {
+  int balance=0;
+  Timer _updateme;
+  final oCcy = new NumberFormat("#,##0.00", "en_US");
+  void updateBalance(){
+    fetchAccount(id:'balance')
+        .then((value){
+        if(value == false){
+        return;
+        }
+        if(value.containsKey('error') && value['error']) {
+        return;
+        }
+        if(value.containsKey('data') && value['data']==null) {
+        return;
+        }
+        if (value['data'] != balance){
+          setState(() {
+            balance=value['data'];
+          });
+        }
+    });
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    updateBalance();
+    _updateme=new Timer(const Duration(seconds: 15),updateBalance);
+    balance=widget.initialValue;
+  }
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _updateme.cancel();
+  }
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return  Text(CURRENCY['code']+' '+oCcy.format(balance),style: TextStyle(color: Colors.white,fontSize: 20),);
+  }
+}
+

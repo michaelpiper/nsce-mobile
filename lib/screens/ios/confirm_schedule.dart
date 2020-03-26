@@ -6,9 +6,9 @@ import '../../utils/constants.dart';
 import '../../ext/selectionlist.dart';
 import '../../ext/smartalert.dart';
 import 'package:localstorage/localstorage.dart';
-import 'dart:convert' as convert;
 import 'package:NSCE/utils/helper.dart';
 import 'package:NSCE/ext/dialogman.dart';
+import 'package:intl/intl.dart';
 // Notification screen
 class ConfirmSchedulePage extends StatefulWidget {
   ConfirmSchedulePageState createState() => ConfirmSchedulePageState();
@@ -19,6 +19,7 @@ class ConfirmSchedulePageState extends State<ConfirmSchedulePage>{
   String selectedMethod='';
   Map _schedule={};
   List<Map<String,dynamic>> _dispatch=[];
+  final oCcy = new NumberFormat("#,##0.00", "en_US");
   final DialogMan dialogMan =DialogMan(child: Scaffold(
       backgroundColor: Colors.transparent,
       body:Center(
@@ -29,7 +30,7 @@ class ConfirmSchedulePageState extends State<ConfirmSchedulePage>{
   void initState() {
     // TODO: implement initState
     super.initState();
-    _schedule=convert.jsonDecode(localStorage.getItem(STORAGE_SCHEDULE_KEY));
+    _schedule=localStorage.getItem(STORAGE_SCHEDULE_KEY);
     if(_schedule['post']['schedule']!=null && _schedule['post']['quantity']!=null && _schedule['timePerProduct']!=null){
       _dispatch=[];
       int qty = int.tryParse(_schedule['post']['quantity']);
@@ -63,10 +64,10 @@ class ConfirmSchedulePageState extends State<ConfirmSchedulePage>{
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text('Product name: '+_schedule['product']['name']),
-                  Text('Qty: ${_schedule['product']['quantity'].toString()} ${_schedule['product']['measuredIn']}'),
-                  Text('Total Qty: ${(_schedule['product']['quantity']*int.tryParse(_schedule['post']['quantity'])).toString()} ${_schedule['product']['measuredIn']}'),
-                  Text('Price: '+CURRENCY['sign']+(_schedule['product']['price']-_schedule['product']['discount']).toString()+'/'+_schedule['product']['measuredIn']),
-                  Text('Total Price '+CURRENCY['sign']+((_schedule['product']['price']-_schedule['product']['discount']) * int.tryParse(_schedule['post']['quantity'])).toString()+'/'+_schedule['product']['measuredIn'])
+                  Text('Qty: ${_schedule['product']['quantity'].toString()} ${_schedule['product']['unit']}'),
+                  Text('Total Qty: ${oCcy.format(_schedule['product']['quantity']*int.tryParse(_schedule['post']['quantity']))}'),
+                  Text('Price: '+CURRENCY['sign']+oCcy.format(_schedule['product']['price']-_schedule['product']['discount'])),
+                  Text('Total Price '+CURRENCY['sign']+oCcy.format((_schedule['product']['price']-_schedule['product']['discount']) * int.tryParse(_schedule['post']['quantity'])))
                 ],
               ),
             )
@@ -80,6 +81,9 @@ class ConfirmSchedulePageState extends State<ConfirmSchedulePage>{
           padding: EdgeInsets.all(20),
           child: ListBody(
             children: <Widget>[
+              _schedule['post']['pickup']=='1'? ListTile(title:Text('Pickup at Quarry'),subtitle: Text(_schedule['product']['Category']['Quarry']['address']),): ListTile(
+                title: Text('Shipping Address'),
+                subtitle:Text(_schedule['post']['address']),),
               TextFormField(
                 initialValue:_schedule['post']['contactPerson'],
                 onSaved: (value)=> _schedule['post']['contactPerson']  = value,

@@ -1,14 +1,13 @@
-
-import 'dart:async';
 import 'package:NSCE/ext/loading.dart';
+import 'package:localstorage/localstorage.dart';
 import 'package:NSCE/services/request.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../utils/colors.dart';
 import '../../ext/smartalert.dart';
 import '../../ext/dialogman.dart';
-import 'package:provider/provider.dart';
-import 'package:NSCE/services/auth.dart';
+import 'package:NSCE/ext/search.dart';
+import 'package:NSCE/utils/constants.dart';
 // Notification screen
 class CheckoutPage extends StatefulWidget {
   @override
@@ -18,28 +17,30 @@ class CheckoutPageState extends State<CheckoutPage>{
   String warning;
   bool _loading;
   final _formKey = GlobalKey<FormState>();
-  final DialogMan dialogMan =DialogMan(child: Scaffold(
+  TextEditingController _txtController = TextEditingController();
+  final LocalStorage storage = new LocalStorage(STORAGE_KEY);
+  final DialogMan dialogMan = DialogMan(child: Scaffold(
       backgroundColor: Colors.transparent,
       body:Center(
           child:CircularProgressIndicator()
       )
   ));
-  Map<String, dynamic> _billingData;
+  Map<String, String> _billingData;
   @override
   void initState(){
     // TODO: implement initState
     super.initState();
     _loading=false;
+
   }
   _loadCustomer()async{
-    var user = await Provider.of<AuthService>(context).getUser();
     var act = checkAuth();
     act.then((res){
       if(res is Map && res.containsKey('data')){
+        _billingData={};
         setState(() {
-          _billingData.addAll(res['data']);
-          _billingData.addAll(user);
-          print(_billingData);
+          res['data'].forEach((k,v){_billingData[k]=v.toString();});
+          _txtController.text=_billingData['address'];
         });
       }
     });
@@ -51,13 +52,6 @@ class CheckoutPageState extends State<CheckoutPage>{
       _loadCustomer();
       return Loading();
     }
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: liteColor,
-      systemNavigationBarIconBrightness: Brightness.light,
-      statusBarIconBrightness: Brightness.light,
-      statusBarBrightness: Brightness.light,
-      systemNavigationBarColor: liteColor,
-    )) ;
     dialogMan.buildContext(context);
     Widget _checkout=Container(
         color: Colors.transparent,
@@ -77,7 +71,7 @@ class CheckoutPageState extends State<CheckoutPage>{
                       },
                     );
                   }
-                  return Navigator.pushNamed(context, '/confirm_order');
+                  return Navigator.popAndPushNamed(context, '/confirm_order');
                 },
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.vertical(
@@ -206,8 +200,8 @@ class CheckoutPageState extends State<CheckoutPage>{
                 height: 4,
               ),
               TextFormField(
-                initialValue:_billingData['companyname'] ,
-                onSaved: (value)=> _billingData['companyname']  = value,
+                initialValue:_billingData['company'] ,
+                onSaved: (value)=> _billingData['company']  = value,
                 decoration: const InputDecoration(
                     prefixIcon: Icon(Icons.person,color: secondaryTextColor),
                     labelText: 'Company name',
@@ -237,8 +231,42 @@ class CheckoutPageState extends State<CheckoutPage>{
                 height: 4,
               ),
               TextFormField(
-                initialValue:_billingData['address'] ,
-                onSaved: (value)=> _billingData['address']  = value,
+                initialValue:_billingData['country'] ,
+                onSaved: (value)=> _billingData['country']  = value,
+                decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.person,color: secondaryTextColor),
+                    labelText: 'country',
+                    labelStyle: TextStyle(
+                      color:  secondaryTextColor,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                        borderSide:BorderSide(color: Colors.black12,width:2)
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                        borderSide:BorderSide(color: Colors.grey,width:2)
+                    )
+                ),
+                keyboardType: TextInputType.text,
+                textInputAction: TextInputAction.done,
+                onChanged: (v) => _billingData['country'] = v,
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please enter your country';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(
+                height: 4,
+              ),
+              TextFormField(
+                controller: _txtController,
+                readOnly: true,
+                onTap: (){
+                  showFancyCustomDialogForAddress(context);
+                },
                 decoration: const InputDecoration(
                     prefixIcon: Icon(Icons.person,color: secondaryTextColor),
                     labelText: 'Address',
@@ -256,14 +284,14 @@ class CheckoutPageState extends State<CheckoutPage>{
                 ),
                 keyboardType: TextInputType.text,
                 textInputAction: TextInputAction.done,
-                onChanged: (v) => _billingData['address'] = v,
                 validator: (value) {
                   if (value.isEmpty) {
-                    return 'Please enter your address';
+                    return 'Please enter your country';
                   }
                   return null;
                 },
               ),
+
               SizedBox(
                 height: 14,
               ),
@@ -289,11 +317,43 @@ class CheckoutPageState extends State<CheckoutPage>{
                             if(_loading){
                               dialogMan.show();
                             }
-                            Future.delayed(Duration(seconds: 3), () =>
-                                setState(() {
-                                  _loading = false;
-                                  dialogMan.hide();
-                                }));
+                            f(res){
+                              _loading = false;
+                              dialogMan.hide();
+                              if(res is bool || res['error']==true){
+                                showDialog<void>(
+                                  context: context,
+                                  barrierDismissible: false, // user must tap button!
+                                  builder: (BuildContext context) {
+                                    return  SmartAlert(title:"Warning",description:"Please retry");
+                                  },
+                                );
+                              }else{
+                                showDialog<void>(
+                                  context: context,
+                                  barrierDismissible: false, // user must tap button!
+                                  builder: (BuildContext context) {
+                                   var  act2 = checkAuth();
+                                    act2.then((value){
+                                      if(value == false){
+                                        return;
+                                      }
+                                      if(value.containsKey('error') && value['error']) {
+                                        return;
+                                      }
+                                      if(value.containsKey('data') && value['data']==null) {
+                                        return ;
+                                      }
+                                      storage.setItem(STORAGE_USER_DETAILS_KEY, value['data']).then<void>((value){});
+                                    });
+                                    return  SmartAlert(title:"Alert",description:"Billing info saved sucessfully");
+                                  },
+                                );
+                              }
+                            }
+                            patchAccount(_billingData).then(f);
+
+
                           }
                         },
                         child:Text('Change', style: TextStyle(color: primaryColor,fontSize: 16.0),textAlign: TextAlign.right,)
@@ -331,5 +391,22 @@ class CheckoutPageState extends State<CheckoutPage>{
       body:_buildBody(),
       bottomNavigationBar: _checkout,
     );
+  }
+  void showFancyCustomDialogForAddress(BuildContext context) {
+
+    Dialog fancyDialog = Dialog(
+        shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+    ),
+    child:Search(onSelect: (value) {
+      Navigator.of(context).pop();
+      setState(() {
+        _billingData['address'] = value['address'];
+        _txtController.text=value['address'];
+      });
+    },initValue: _billingData['address']??'Address',),
+    );
+    showDialog(
+        context: context, builder: (BuildContext context) => fancyDialog, barrierDismissible: false);
   }
 }

@@ -57,7 +57,7 @@ class QuarriesPageState extends State<QuarriesPage>{
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text("Quarries",style: TextStyle(color: primaryTextColor),),
+        title: Text("Yards",style: TextStyle(color: primaryTextColor),),
         iconTheme: IconThemeData(color: primaryTextColor),
       ),
       body: _loadingStateIndicator?Loading():

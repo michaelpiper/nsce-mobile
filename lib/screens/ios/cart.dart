@@ -8,7 +8,6 @@ import 'package:NSCE/utils/constants.dart';
 import 'package:NSCE/services/request.dart';
 import 'package:NSCE/ext/dialogman.dart';
 import 'package:localstorage/localstorage.dart';
-import 'dart:convert' as convert;
 class CartPage extends StatefulWidget {
   @override
   CartPageState createState() =>CartPageState();
@@ -95,7 +94,7 @@ class CartPageState extends State<CartPage>{
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Text(e['Product']['name'],style: TextStyle(fontSize: 15,fontWeight: FontWeight.w500)),
-                            Text('Qty: '+(e['quantity']*e['Product']['quantity']).toString()+' '+e['Product']['measuredIn'],style: TextStyle(fontSize: 15,color: noteColor)),
+                            Text('Qty: '+(e['quantity']*e['Product']['quantity']).toString()+' '+e['Product']['unit'],style: TextStyle(fontSize: 15,color: noteColor)),
                             Text('${CURRENCY['sign']} '+((e['Product']['price']-e['Product']['discount'])*e['quantity']).toString(),style: TextStyle(fontSize: 17,fontWeight: FontWeight.w700),),
                             SizedBox(height: 10.0,),
                             Row(
@@ -229,7 +228,7 @@ class CartPageState extends State<CartPage>{
         children: <Widget>[
           MaterialButton(
             onPressed: (){
-              Navigator.popAndPushNamed(context, '/home');
+              Navigator.of(context).popUntil((route) => route.isFirst);
             },
             padding: EdgeInsets.all(20.0),
             shape: RoundedRectangleBorder(
@@ -244,7 +243,10 @@ class CartPageState extends State<CartPage>{
           MaterialButton(
             color: primaryColor,
             onPressed: (){
-              localStorage.setItem(STORAGE_CART_KEY, convert.jsonEncode(_cartList)).then<void>((value){
+              if(_cartList.length==0){
+                return;
+              }
+              localStorage.setItem(STORAGE_CART_KEY, _cartList).then<void>((value){
                 Navigator.pushNamed(context, '/checkout');
               });
             },

@@ -1,3 +1,4 @@
+import 'package:NSCE/ext/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:NSCE/services/request.dart';
 import 'package:NSCE/ext/smartalert.dart';
@@ -67,7 +68,7 @@ class NotificationScreenState extends State<NotificationScreen>{
       );
     }
     return  Center(
-      child:  _loading?Spinner(icon: Icons.sync):_notifications.length==0?Text('Notification empty'):ListView(
+      child:  _loading?Loading():_notifications.length==0?Text('No notifications available'):ListView(
         children: _notifications.map(_buildList).toList(),
       )
     );

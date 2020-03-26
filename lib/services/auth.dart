@@ -42,6 +42,17 @@ class AuthService with ChangeNotifier{
       return Future.value(null);
     }
   }
+  static Future staticGetUser() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if(prefs.containsKey(STORAGE_USER_KEY)){
+      Map<String, dynamic> dat = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
+      return Future.value(dat);
+    }else{
+      return Future.value(null);
+    }
+  }
+
+
 
   Future getUserForLaunch() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -79,11 +90,8 @@ class AuthService with ChangeNotifier{
   Future createUser(formData) async{
     if(formData['username'] !='' && formData['password']!='' && formData['phone']!=''){
       var result = await createAuth(formData);
-//      print(result);
+      print(result);
       if(result == false){
-        return Future.value('No internet connection');
-      }
-      if(result.containsKey('authorization')){
         return Future.value('No internet connection');
       }
       if(result.containsKey('error') && result['error']){

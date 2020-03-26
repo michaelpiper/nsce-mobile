@@ -74,9 +74,10 @@ class _CarouselWithIndicatorState extends State<CarouselWithIndicator> {
     return Column(children: [
       CarouselSlider(
         items: child,
-        autoPlay: true,
+        autoPlay: false,
         enlargeCenterPage: true,
         aspectRatio: 2.0,
+//        viewportFraction: 1.0,
         onPageChanged: (index) {
           setState(() {
             _current = index;

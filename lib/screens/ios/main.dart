@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 // import screen here
 import 'home.dart';
 import 'profile.dart';
@@ -14,7 +15,7 @@ import 'search.dart';
 import 'cart.dart';
 import 'quarry.dart';
 import 'quarries.dart';
-import 'orderchild.dart';
+import 'dispatch.dart';
 import 'order.dart';
 import 'orders.dart';
 import 'confirm_order.dart';
@@ -32,28 +33,42 @@ import 'driver/home.dart';
 import 'driver/profile.dart';
 // import color
 import '../../utils/colors.dart';
+import './chat.dart';
 buildAndroid(context){
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: primaryColor,
-      systemNavigationBarIconBrightness: Brightness.light,
-      statusBarIconBrightness: Brightness.light,
-      statusBarBrightness: Brightness.light,
-      systemNavigationBarColor: primaryColor,
+    statusBarColor: primaryColor,
+    systemNavigationBarIconBrightness: Brightness.light,
+    statusBarIconBrightness: Brightness.light,
+    statusBarBrightness: Brightness.light,
+    systemNavigationBarColor: primaryColor,
   )) ;
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp,DeviceOrientation.portraitDown]);
+  final navigatorKey = GlobalKey<NavigatorState>();
   return MaterialApp(
     title: 'NSCE',
+    navigatorKey: navigatorKey,
     theme: ThemeData(
       // This is the theme of your application.
       primarySwatch: primarySwatch,
       primaryColor: primaryColor,
-      appBarTheme: AppBarTheme(color: primaryColor,brightness: Brightness.light,iconTheme: IconThemeData(color: primaryTextColor))
+      appBarTheme: AppBarTheme(color: primaryColor,brightness: Brightness.light,iconTheme: IconThemeData(color: primaryTextColor)),
+      textTheme: GoogleFonts.montserratTextTheme(
+        Theme.of(context).textTheme,
+      ),
     ),
     home: FutureBuilder(
       future: Provider.of<AuthService>(context).getUserForLaunch(),
       builder: (context, AsyncSnapshot snapshot){
         if(snapshot.connectionState==ConnectionState.done){
-          return snapshot.hasData? HomePage():AuthPage();
+          if(snapshot.hasData){
+            if(snapshot.data['Role']!=null && snapshot.data['Role']['name']=="Driver"){
+              return DriverHomePage();
+            }else{
+              return HomePage();
+            }
+          }else{
+            return AuthPage();
+          }
         }else{
           return SplashPage();
         }
@@ -67,7 +82,6 @@ buildAndroid(context){
           return  HomePage(currentIndex :int.parse(data[2]));
         });
       }
-
       else if(data[1]=='transaction' && data[2]!=null){
         return MaterialPageRoute(builder: (context){
           return  TransactionPage(trnId:int.parse(data[2]));
@@ -98,17 +112,21 @@ buildAndroid(context){
           return OrderPage(index:int.parse(data[2]));
         });
       }
-      else if(data[1]=='order-child' && data[2]!=null){
+      else if(data[1]=='dispatch' && data[2]!=null){
         return MaterialPageRoute(builder: (context){
-          return OrderChildPage(index:int.parse(data[2]));
+          return DispatchPage(index:int.parse(data[2]));
         });
       }
       else if(data[1]=='driver-dispatch' && data[2]!=null){
         return MaterialPageRoute(builder: (context){
           return DriverDispatchPage(index:int.parse(data[2]));
         });
+      }else{
+        return MaterialPageRoute(builder: (context){
+          return HomePage();
+        });
       }
-      return null;
+
     },
     routes: <String, WidgetBuilder> {
       '/home': (BuildContext context) => HomePage(),
@@ -129,7 +147,8 @@ buildAndroid(context){
       '/save_and_pay':(BuildContext context) =>SaveAndPay(),
       '/schedule':   (BuildContext context) =>SchedulePage(),
       '/driver-profile':(BuildContext context) =>DriverProfilePage(),
-      '/driver-home':(BuildContext context) =>DriverHomePage()
+      '/driver-home':(BuildContext context) =>DriverHomePage(),
+      '/chat':(BuildContext context) =>ChatPage()
     },
   );
 }

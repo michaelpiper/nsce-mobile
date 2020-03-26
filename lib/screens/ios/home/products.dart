@@ -41,130 +41,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
       {'avatar':'assets/icons/payment.png','link':'/home/2','name':'Payments','color':Color.fromRGBO(242, 189, 40, 0.12)},
       {'avatar':'assets/icons/wallet.png','link':'/home/3','name':'Wallet','color':Color.fromRGBO(242, 189, 40, 0.12)},
       {'avatar':'assets/icons/invoice.png','link':'/product/1','name':'Invoice','color':Color.fromRGBO(242, 189, 40, 0.12)},
+      {'avatar':'assets/icons/chat.png','link':'/chat','name':'Chat','color':Color.fromRGBO(242, 189, 40, 0.12)},
     ];
-  }
-  void _returnState(context) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Alert!'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('Your purchase was succesful.'),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            FlatButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-  void _returnError(context) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Alert!'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('Your purchase was unsuccesful.'),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            FlatButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-  void _returnInsuf(context) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Alert!'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('Your balance is too low for this purchase try adding funds.'),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            FlatButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-  _BuyItem(amount,context) async {
-    if(_loading) {
-      Scaffold.of(context).showSnackBar(SnackBar(content:Text("An item purchase is processing please wait")));
-      return;
-    }
-    _loading=true;
-    Scaffold.of(context).showSnackBar(SnackBar(content:Text("Trying to purchase item please wait")));
-    var act2 = fetchAccount(id:'balance');
-    act2.then((value) {
-
-      if (value == false) {
-        _returnError(context);
-        _loading=false;
-        return;
-      }
-      else if (value.containsKey('error') && value['error']) {
-        _returnError(context);
-        _loading=false;
-        return;
-      }
-      else if (value.containsKey('data') && value['data'] == null) {
-        _returnError(context);
-        _loading=false;
-        return;
-      }
-      else if( value['data'] <= int.tryParse(amount)){
-        _loading=false;
-        return _returnInsuf(context);
-      }
-      buyItem({'amount': amount.toString()}).then((result) {
-        if (result['error'] == false) {
-          _returnState(context);
-          _loading = false;
-        }
-      }).catchError((e) {
-        print(e);
-        _returnError(context);
-        _loading = false;
-      });
-    }).catchError((e) {
-      print(e);
-      _returnError(context);
-      _loading = false;
-    });
   }
   Future _loadType()async{
     fetchTypes().then((types){
@@ -252,6 +130,37 @@ class _ProductsScreenState extends State<ProductsScreen> {
           shrinkWrap: false,
           children: <Widget>[
               Container(
+                color: primaryColor,
+                child:Center(
+              child: SizedBox(
+                width: 300,
+                child: TextField(
+                  onTap:(){
+                    Navigator.pushNamed(context, '/search');
+                  } ,
+                  readOnly: true,
+                  decoration: new InputDecoration(
+                        border: new OutlineInputBorder(
+                          borderRadius: const BorderRadius.all(
+                            const Radius.circular(17.0),
+                          ),
+                          borderSide: BorderSide(
+                            width: 0.00,
+                            style: BorderStyle.none,
+                          ),
+                        ),
+                        filled: true,
+                        hintStyle: new TextStyle(color: Colors.black26),
+                        hintText: "Search Materials",
+                        contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                        fillColor: Colors.white,
+                        suffixIcon: Icon(Icons.search)
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [Color.fromARGB(0, 0, 0, 0), primaryColor],
@@ -264,6 +173,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+
                     Padding(
                       padding: EdgeInsets.only(right: 10.0),
                     ),
@@ -311,7 +221,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                   onPressed: (){
                    Navigator.pushNamed(context, '/type');
                   },
-                  child: Text('Place New Order',style: TextStyle(color: primaryTextColor),),
+                  child: Text('Place Order',style: TextStyle(color: primaryTextColor),),
                 ),
               ),
               Card(

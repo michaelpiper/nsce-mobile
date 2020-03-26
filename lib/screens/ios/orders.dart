@@ -1,18 +1,76 @@
+import 'package:NSCE/services/request.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import '../../utils/colors.dart';
 import '../../utils/constants.dart';
+import 'package:intl/intl.dart';
+import 'package:localstorage/localstorage.dart';
 // Notification screen
-class OrdersPage extends StatelessWidget {
-  List<Map<String,dynamic>> _orders=[
-      {'name':'stone','quantity':'2000','amount':'180,000.00','measurement':'Tonnes','id':'12343232','image':'images/sample1.png','createdAt':'2012 12:00pm','status':'Processing'},
-    {'name':'stone','quantity':'2000','amount':'180,000.00','measurement':'Tonnes','id':'12343232','image':'images/sample2.png','createdAt':'2012 12:00pm','status':'Awaiting Payment'}
-    ];
+class OrdersPage extends StatefulWidget {
+
+  OrdersPageState createState() =>OrdersPageState();
+}
+
+class OrdersPageState extends State<OrdersPage>{
+  final oCcy = new NumberFormat("#,##0.00", "en_US");
+  final LocalStorage storage = new LocalStorage(STORAGE_KEY);
+  bool _loading;
+  String _name="All";
+  List<Map<String, dynamic>> _orders = [
+  ];
+  List<Map<String, dynamic>> _cacheOrder = [
+
+  ];
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _loading=true;
+  }
+  void _loadOrder(){
+    f(res){
+      if(res is Map && res['data'] is List){
+        print(res['data']);
+        setState(() {
+          _cacheOrder=res['data'].map<Map<String,dynamic>>((e)=>new Map<String, dynamic>.from(e)).toList();
+          _orders = res['data'].map<Map<String,dynamic>>((e)=>new Map<String, dynamic>.from(e)).toList();
+          _loading=false;
+        });
+      } else{
+        setState((){
+          _loading=false;
+        });
+      }
+    }
+    fetchOrders().then(f);
+  }
+  void _sort(n){
+    List<Map<String, dynamic>> orders=[];
+
+    f(order){
+      if (order['status']==n){
+        orders.add(order);
+      }
+    }
+    if(n=="All"){
+      orders=_cacheOrder;
+    }else{
+      _cacheOrder.forEach(f);
+    }
+    setState((){
+      _name=n;
+      _orders=orders;
+    });
+  }
   @override
   Widget build(BuildContext context) {
+    if(_loading){
+      _loadOrder();
+    }
     Widget _builList(){
       Widget f(e){
+        DateTime _date = DateTime.parse(e['createdAt']).toLocal();
         return Card(
           elevation: 0.2,
           shape: RoundedRectangleBorder(
@@ -20,7 +78,7 @@ class OrdersPage extends StatelessWidget {
           ),
           child:InkWell(
             onTap: (){
-              Navigator.pushNamed(context,'/order/'+e['id'].toString());
+              storage.setItem(STORAGE_ORDER_KEY,e).then((re)=>Navigator.pushNamed(context,'/order/'+e['id'].toString()));
             },
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 15.0, horizontal:15.0 ),
@@ -35,7 +93,7 @@ class OrdersPage extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            Text("Order#"+e['id'],style:TextStyle(color:noteColor,fontSize: 26,fontWeight: FontWeight.w800,textBaseline: TextBaseline.alphabetic)),
+                            Text("Order#"+e['id'].toString(),style:TextStyle(color:noteColor,fontSize: 26,fontWeight: FontWeight.w800,textBaseline: TextBaseline.alphabetic)),
                             Column(
                               children: <Widget>[
                                 Row(
@@ -43,7 +101,7 @@ class OrdersPage extends StatelessWidget {
                                     Padding(padding: EdgeInsets.only(right:1.0),),
                                     SizedBox(width: 100,child: Text('Placed on: ',style:TextStyle(color:noteColor,fontSize: 20,textBaseline: TextBaseline.alphabetic)),),
                                     Padding(padding: EdgeInsets.only(right:3.0),),
-                                    Expanded(child:Text(e['createdAt'],style:TextStyle(color:noteColor,fontSize: 20,textBaseline: TextBaseline.alphabetic)))
+                                    Expanded(child:Text(("${_date.day}-${_date.month}-${_date.year} ${_date.hour>12?_date.hour-12:_date.hour}:${_date.minute} "+(_date.hour>12?'p':'a')+"m"),style:TextStyle(color:noteColor,fontSize: 20,textBaseline: TextBaseline.alphabetic)))
                                   ],
                                 ),
                                 Row(
@@ -51,7 +109,7 @@ class OrdersPage extends StatelessWidget {
                                     Padding(padding: EdgeInsets.only(right:1.0),),
                                     SizedBox(width: 100,child: Text('Total',style:TextStyle(color:textColor,fontSize: 26,fontWeight: FontWeight.w900,textBaseline: TextBaseline.alphabetic)),),
                                     Padding(padding: EdgeInsets.only(right:3.0),),
-                                    Expanded(child:Text(CURRENCY['sign']+' '+e['amount'],style:TextStyle(color:textColor,fontSize: 26,fontWeight: FontWeight.w900,textBaseline: TextBaseline.alphabetic)))
+                                    Expanded(child:Text(CURRENCY['sign']+' '+ oCcy.format(e['totalPrice']+e['shippingFee']),style:TextStyle(color:textColor,fontSize: 26,fontWeight: FontWeight.w900,textBaseline: TextBaseline.alphabetic)))
                                   ],
                                 )
                               ],
@@ -77,8 +135,14 @@ class OrdersPage extends StatelessWidget {
           ),
         );
       }
-      return ListView(
-          children:_orders.map<Widget>(f).toList()
+      return _loading?
+        Center(child:CircularProgressIndicator()):_orders.length==0?
+          Center(child: Text('Empty list'),):
+      ListView.builder(
+          itemCount: _orders.length,
+          itemBuilder: (BuildContext ctxt, int index) {
+            return f(_orders[index]);
+          }
       );
     }
     return Scaffold(
@@ -92,40 +156,51 @@ class OrdersPage extends StatelessWidget {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            ButtonBar(
+            Container(color:liteColor,child: Center(child: ButtonBar(
+              alignment: MainAxisAlignment.center,
               children: <Widget>[
-                MaterialButton(
-                  onPressed: (){
-                    print('1');
-                  },
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(5))
-                  ),
-                  color: primaryColor,
-                  child: Text('All',style: TextStyle(color: primaryTextColor),),
-                ),
                 FlatButton(
                   onPressed: (){
-                    print('1');
+                    _sort("All");
                   },
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(5))
                   ),
-                  color: liteColor,
-                  child: Text('Pending',style: TextStyle(color: liteTextColor),),
+                  color: _name=='All'?primaryColor:liteColor,
+                  child: Text('All',style: TextStyle(color: _name=='All'?primaryTextColor:liteTextColor),),
                 ),
                 FlatButton(
                   onPressed: (){
-                    print('1');
+                    _sort("Pending");
                   },
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(5))
                   ),
-                  color: liteColor,
-                  child: Text('Completed',style: TextStyle(color:liteTextColor),),
+                  color: _name=='Pending'?primaryColor:liteColor,
+                  child: Text('Pending',style: TextStyle(color: _name=='Pending'?primaryTextColor:liteTextColor),),
+                ),
+                FlatButton(
+                  onPressed: (){
+                    _sort("Processing");
+                  },
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(5))
+                  ),
+                  color: _name=='Processing'?primaryColor:liteColor,
+                  child: Text('Processing',style: TextStyle(color: _name=='Processing'?primaryTextColor:liteTextColor),),
+                ),
+                FlatButton(
+                  onPressed: (){
+                    _sort("Completed");
+                  },
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(5))
+                  ),
+                  color: _name=='Completed'?primaryColor:liteColor,
+                  child: Text('Completed',style: TextStyle(color:_name=='Completed'?primaryTextColor:liteTextColor),),
                 )
               ],
-            ),
+            ),),),
             Expanded(
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 12.0, horizontal:10.0 ),
@@ -134,8 +209,6 @@ class OrdersPage extends StatelessWidget {
             )
           ],
         )
-
-
     );
   }
 }

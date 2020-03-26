@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'endpoints.dart';
 import '../utils/constants.dart';
-createAuth(body) async {
+createAuth(Map<String,String> body) async {
   // This example uses the Google Books API to search for books about http.
   // https://developers.google.com/books/docs/overview
   // Await the http get response, then decode the json-formatted response. headers: headers,
@@ -14,11 +14,10 @@ createAuth(body) async {
     this cannot be overridden.
     encoding defaults to utf8.
   */
-  print(API_AUTH_URL);
-  print(body);
   try{
     var response = await http.post(API_AUTH_URL, body: body );
     print(response);
+    print(response.request);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -26,6 +25,7 @@ createAuth(body) async {
     }
   }
   catch(e){
+    print(e);
     return false;
   }
 }
@@ -70,6 +70,7 @@ startAuth(body) async {
     }
   }
   catch(e){
+    print(e);
     return false;
   }
 
@@ -264,7 +265,53 @@ fetchAccount({id=false})async{
   }
 }
 
-
+updateAccount(Map body)async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  Map<String, String> headers={};
+  if(prefs.containsKey(STORAGE_USER_KEY)) {
+    var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
+    if(wait.containsKey('authorization')) {
+      headers['Authorization']=wait['authorization'];
+    }
+  }
+  try{
+    var response = await http.put(API_ACCOUNT_URL , headers: headers,body:body);
+    print(response.request.url);
+//    print(response.body);
+    if (response.statusCode == 200) {
+      return convert.jsonDecode(response.body);
+    } else {
+      return false;
+    }
+  }
+  catch(e){
+    return false;
+  }
+}
+patchAccount(Map body)async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  Map<String, String> headers={};
+  if(prefs.containsKey(STORAGE_USER_KEY)) {
+    var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
+    if(wait.containsKey('authorization')) {
+      headers['Authorization']=wait['authorization'];
+    }
+  }
+  try{
+    var response = await http.patch(API_ACCOUNT_URL , headers: headers,body:body);
+    print(response.request.url);
+//    print(response.body);
+    if (response.statusCode == 200) {
+      return convert.jsonDecode(response.body);
+    } else {
+      return false;
+    }
+  }
+  catch(e){
+    print(e);
+    return false;
+  }
+}
 //type
 
 fetchTypes({id=false})async{
@@ -399,7 +446,7 @@ fetchOrders({id=false})async{
   }
 }
 
-fetchOrderChild({id=false})async{
+fetchOrderDispatch({id=false})async{
   SharedPreferences prefs = await SharedPreferences.getInstance();
   Map<String, String> headers={};
   if(prefs.containsKey(STORAGE_USER_KEY)) {
@@ -411,11 +458,12 @@ fetchOrderChild({id=false})async{
   try{
     var response;
     if(id!=false) {
-      response = await http.get(API_ORDER_CHILD_URL + '/' + id.toString(), headers: headers);
+      response = await http.get(API_DISPATCH_URL + '/' + id.toString(), headers: headers);
     }
     else {
-      response = await http.get(API_ORDER_CHILD_URL , headers: headers);
+      response = await http.get(API_DISPATCH_URL , headers: headers);
     }
+    print(response.request.url);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -427,7 +475,7 @@ fetchOrderChild({id=false})async{
   }
 }
 
-fetchOrderChildren({id=false})async{
+fetchOrderWithDispatches({id=false})async{
   SharedPreferences prefs = await SharedPreferences.getInstance();
   Map<String, String> headers={};
   if(prefs.containsKey(STORAGE_USER_KEY)) {
@@ -439,11 +487,12 @@ fetchOrderChildren({id=false})async{
   try{
     var response;
     if(id!=false) {
-      response = await http.get(API_ORDER_URL + '/' + id.toString()+'/children', headers: headers);
+      response = await http.get(API_ORDER_URL + '/' + id.toString()+'/with-dispatches', headers: headers);
     }
     else {
-      response = await http.get(API_ORDER_CHILD_URL , headers: headers);
+      response = await http.get(API_DISPATCH_URL , headers: headers);
     }
+    print(response.request.url);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -892,7 +941,7 @@ searchAddress(String address)async{
     }
   }
   try{
-    var response = await http.get(API_AUTO_COMPLETE_ADDRESS_URL + '/' + address, headers: headers);
+    var response = await http.get(API_AUTO_COMPLETE_ADDRESS_URL + '/?address=' + address, headers: headers);
 
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);

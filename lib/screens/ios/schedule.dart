@@ -3,11 +3,11 @@ import 'package:flutter/widgets.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../utils/colors.dart';
 import 'package:localstorage/localstorage.dart';
-import 'dart:convert' as convert;
 
 import 'package:NSCE/utils/constants.dart';
 import 'package:NSCE/services/request.dart';
 import 'package:NSCE/utils/helper.dart';
+import 'package:intl/intl.dart';
 // Notification screen
 class SchedulePage extends StatefulWidget {
   SchedulePage();
@@ -23,6 +23,7 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
   Map _eventSchedule={};
   List _selectedEvents=[];
   bool _loadingScheduleIndicator;
+  final oCcy = new NumberFormat("#,##0.00", "en_US");
   _SchedulePageState();
   @override
   void initState(){
@@ -31,7 +32,7 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
     final _selectedDay = DateTime.now();
 
     print(_selectedDay.millisecond);
-    _schedule=convert.jsonDecode(localStorage.getItem(STORAGE_SCHEDULE_KEY));
+    _schedule=localStorage.getItem(STORAGE_SCHEDULE_KEY);
     _events={
       _selectedDay.subtract(Duration(days: 1)):[{'time':'12:00 - 12:30','title':'Event 90'}],
       _selectedDay:[{'time':'12:00 - 12:30','title':'Event 90'}],
@@ -91,8 +92,8 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
               _schedule['schedule'] = event;
               _schedule['diff'] = _eventSchedule['diff'];
               _schedule['timePerProduct'] = _eventSchedule['timePerProduct'];
-              return localStorage.setItem(STORAGE_SCHEDULE_KEY, convert.jsonEncode(_schedule)).then<void>((value){
-            Navigator.pushNamed(context, '/confirm_schedule');
+              return localStorage.setItem(STORAGE_SCHEDULE_KEY, _schedule).then<void>((value){
+            Navigator.popAndPushNamed(context, '/confirm_schedule');
             });
           },
           ),
@@ -115,7 +116,6 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
           _selectedEvents = data['schedule'].map<Map>((e)
           {
             DateTime start =DateTime.parse(e['start']).toLocal();
-            num diff = data['diff'];
             DateTime end = DateTime.parse(e['end']).toLocal();
            return {
              'schedule': start.toString(),
@@ -165,10 +165,10 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
                  crossAxisAlignment: CrossAxisAlignment.start,
                  children: <Widget>[
                    Text('Product name: '+_schedule['product']['name']),
-                   Text('Qty: ${_schedule['product']['quantity'].toString()} ${_schedule['product']['measuredIn']}'),
-                   Text('Total Qty: ${(_schedule['product']['quantity']*int.tryParse(_schedule['post']['quantity'])).toString()} ${_schedule['product']['measuredIn']}'),
-                   Text('Price: '+CURRENCY['sign']+(_schedule['product']['price']-_schedule['product']['discount']).toString()+'/'+_schedule['product']['measuredIn']),
-                   Text('Total Price '+CURRENCY['sign']+((_schedule['product']['price']-_schedule['product']['discount']) * int.tryParse(_schedule['post']['quantity'])).toString()+'/'+_schedule['product']['measuredIn'])
+                   Text('Qty: ${_schedule['product']['quantity'].toString()} ${_schedule['product']['unit']}'),
+                   Text('Total Qty: ${oCcy.format(_schedule['product']['quantity']*int.tryParse(_schedule['post']['quantity']))} '),
+                   Text('Price: '+CURRENCY['sign']+ oCcy.format(_schedule['product']['price']-_schedule['product']['discount'])),
+                   Text('Total Price '+CURRENCY['sign']+ oCcy.format((_schedule['product']['price']-_schedule['product']['discount']) * int.tryParse(_schedule['post']['quantity'])))
                  ],
                ),
              )
