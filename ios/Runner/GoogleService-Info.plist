@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>23330521835-qt1cbe88ddftmb3f33pgcfn0s74kra62.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.23330521835-qt1cbe88ddftmb3f33pgcfn0s74kra62</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDhkvy5zcFAfAyiBLBFs6IWc-9n5vPa3Zk</string>
+	<key>GCM_SENDER_ID</key>
+	<string>23330521835</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>ng.optisoft.nsce</string>
+	<key>PROJECT_ID</key>
+	<string>nsce-chat-bot-mjvqar</string>
+	<key>STORAGE_BUCKET</key>
+	<string>nsce-chat-bot-mjvqar.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:23330521835:ios:6dba617a7bb82e796574ae</string>
+	<key>DATABASE_URL</key>
+	<string>https://nsce-chat-bot-mjvqar.firebaseio.com</string>
+</dict>
+</plist>
