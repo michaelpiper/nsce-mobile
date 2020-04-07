@@ -326,7 +326,7 @@ class _Dispatch extends State<Dispatch>{
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text('scheduled',style:TextStyle(color: textColor,fontSize: 12.0)),
-              Text(("${_datee.day}-${_datee.month}-${_datee.year} ( ${_datee.hour>12?_datee.hour-12:_datee.hour}:${_datee.minute} "+(_datee.hour>12?'p':'a')+"m )"),overflow: TextOverflow.ellipsis,maxLines: 5,style:TextStyle(color: textColor,fontSize: 15.0),textAlign: TextAlign.left,),
+              Text(("${_datee.isUtc.toString()} ${_datee.day}-${_datee.month}-${_datee.year} ( ${_datee.hour>12?_datee.hour-12:_datee.hour}:${_datee.minute} "+(_datee.hour>12?'p':'a')+"m )"),overflow: TextOverflow.ellipsis,maxLines: 5,style:TextStyle(color: textColor,fontSize: 15.0),textAlign: TextAlign.left,),
             ],
           ),
         ),

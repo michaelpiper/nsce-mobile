@@ -1,0 +1,41 @@
+{
+  "project_info": {
+    "project_number": "23330521835",
+    "firebase_url": "https://nsce-chat-bot-mjvqar.firebaseio.com",
+    "project_id": "nsce-chat-bot-mjvqar",
+    "storage_bucket": "nsce-chat-bot-mjvqar.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:23330521835:android:1e5b1577cc4114986574ae",
+        "android_client_info": {
+          "package_name": "ng.com.optisoft.nsce"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "23330521835-gul4m7h2os7v6mnvdno87q8ejq6fn9jc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAViKFRviEnR7wHuNZdS3YY7nJQcSy94rE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "23330521835-gul4m7h2os7v6mnvdno87q8ejq6fn9jc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
+  

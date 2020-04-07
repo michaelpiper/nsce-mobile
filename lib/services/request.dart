@@ -129,6 +129,23 @@ recoverAuth(body)async{
     return false;
   }
 }
+sendMail(Map<String,String> body)async{
+  Map<String, String> headers={};
+  try{
+    var response = await http.post(API_SEND_MAIL_URL,body:body,headers: headers);
+    // print(response.body);
+    // print(response.request.url);
+    if (response.statusCode == 200) {
+      return convert.jsonDecode(response.body);
+    } else {
+      return false;
+    }
+  }
+  catch(e){
+    // print(e);
+    return false;
+  }
+}
 buyItem(body)async{
   SharedPreferences prefs = await SharedPreferences.getInstance();
   // print(body);

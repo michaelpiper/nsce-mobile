@@ -48,7 +48,7 @@ class _TypePageState extends State<TypePage> with TickerProviderStateMixin {
           _types=data.map((e)=>
           {
             'id':e['id'],
-            'avatar':e['image']!=null?baseURL(e['image']):null,
+            'avatar':e['image']!=null?baseURL(e['path']+e['image']):null,
             'name':e['name']
           }).toList();
           _dataLoaded();
@@ -76,7 +76,7 @@ class _TypePageState extends State<TypePage> with TickerProviderStateMixin {
         setState(() {
           _products = data.map((e) =>
           {
-            'avatar': e['image']!=null?baseURL(e['image']):null,
+            'avatar': e['image']!=null?baseURL(e['path']+e['image']):null,
             'link': '/product/' + e['id'].toString(),
             'name': e['name'],
             'price': CURRENCY['sign']+' '+e['price'].toString()

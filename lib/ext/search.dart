@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:NSCE/ext/spinner.dart';
 import 'package:NSCE/utils/colors.dart';
 import 'package:NSCE/services/request.dart';
+import 'package:flutter/rendering.dart';
 class Search extends StatefulWidget{
   final Function onSelect;
   final String initValue;
@@ -50,7 +51,7 @@ class _Search extends State<Search>{
                 image: DecorationImage(image: AssetImage('images/map.png'),fit: BoxFit.fill)
             ),
             child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 60,horizontal: 10),
+                padding: EdgeInsets.only(bottom:10, top: 65,left: 10, right: 10),
                 child: ListView(
                   children:_searchRes.map<Widget>((e)=> Card(
                     child: ListTile(onTap:(){
@@ -62,8 +63,7 @@ class _Search extends State<Search>{
             ),
           ),
           Container(
-            width: double.infinity,
-            height: 50,
+            constraints: BoxConstraints(minHeight: 50,maxHeight: 70,maxWidth:double.infinity),
             alignment: Alignment.bottomCenter,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.only(
@@ -75,11 +75,10 @@ class _Search extends State<Search>{
               alignment: Alignment.center,
               child:
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10,vertical: 4),
+                padding: EdgeInsets.symmetric(horizontal: 10,vertical: 2),
                 child:  TextField(
-//                  controller: _txtController,
+                  minLines: 1,
                   maxLines: 1,
-
                   onChanged: (e){
                     f(res){
                       if(res is Map && res['data'] is List){

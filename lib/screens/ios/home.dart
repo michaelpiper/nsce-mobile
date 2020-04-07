@@ -1,9 +1,15 @@
+import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:NSCE/utils/colors.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:NSCE/utils/local_notications_helper.dart';
 import 'package:NSCE/utils/constants.dart';
+import 'package:NSCE/ext/smartalert.dart';
 // import services here
 import '../../services/auth.dart';
 import '../../services/request.dart';
@@ -13,7 +19,57 @@ import 'home/notification.dart';
 import 'home/products.dart';
 import 'home/wallet.dart';
 import 'home/drawer.dart';
-import 'dart:async';
+
+
+
+
+final notifications = FlutterLocalNotificationsPlugin();
+final settingsAndroid = AndroidInitializationSettings('app_icon');
+final settingsIOS = IOSInitializationSettings(
+    onDidReceiveLocalNotification: (id, title, body, payload) =>
+        onSelectNotification(payload)
+);
+Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) {
+
+  if (message.containsKey('data')) {
+    // Handle data message
+    final dynamic data = message['data'];
+  }
+
+  if (message.containsKey('notification')) {
+    // Handle notification message
+    final dynamic notification = message['notification'];
+    print('Firebase notification: ${notification['title']}');
+    showOngoingNotification(notifications,
+        title: notification['title'], body: notification['body'],payload: '$notification');
+  }
+
+  // Or do other work.
+}
+Future onSelectNotification(String payload) async {
+  print('onSelectNotification: was click');
+  Builder(builder: (context){
+    Navigator.of(context).push(
+        MaterialPageRoute<String>(
+            builder: (BuildContext context) {
+              return Scaffold(
+                appBar: AppBar(
+                  title: Text('Notification',style: TextStyle(color: primaryTextColor),),
+                ),
+                body: SingleChildScrollView(
+                  child: Html(
+                      padding: EdgeInsets.all(12.0),
+                      data:payload
+                  ),
+                ),
+              );
+            }
+        )
+    );
+    return Container();
+  });
+
+}
 class TabContent {    
   final String title;    
   final Widget content;    
@@ -50,6 +106,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Future act;
   Future act2;
   final LocalStorage storage = new LocalStorage(STORAGE_KEY);
+  Timer _updateme;
   _HomePageState({this.currentIndex = 0}){
     _refresh();
   }
@@ -60,10 +117,47 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _title = _children[currentIndex].title;
     _controller.addListener(_handleSelected);
     _initMe();
+    notifications.initialize(
+        InitializationSettings(settingsAndroid, settingsIOS),
+        onSelectNotification: onSelectNotification);
+
+    final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+    _firebaseMessaging.configure(
+      onLaunch: (Map<String, dynamic> message) async {
+        print('onLaunch');
+      },
+      onBackgroundMessage: myBackgroundMessageHandler,
+      onMessage: (Map<String, dynamic> message)async{
+        print('Firebase: ${message['notification']}');
+        showSilentNotification(notifications,
+            title:  message['notification']['title'], body:  message['notification']['body'],payload: '$message');
+        showDialog(
+            context: context,
+            builder: (context){
+              return SmartAlert(title: message['notification']['title'], description: message['notification']['body']);
+            });
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print('onResume');
+      },
+    );
+    _firebaseMessaging.getToken().then((token){
+      print('Firebase Token is $token');
+      if(token!=null) {
+        patchAccount({"pushNotificationToken": token});
+        _firebaseMessaging.subscribeToTopic('all');
+      }
+    });
+    _firebaseMessaging.requestNotificationPermissions(const IosNotificationSettings(sound: true, badge: true, alert: true));
+    _firebaseMessaging.onIosSettingsRegistered.listen((IosNotificationSettings setting) {
+      print('onIosSettingsRegistered: ' + setting.toString());
+    });
   }
   @override
   void dispose(){
     super.dispose();
+    if(_updateme!=null)
+    _updateme.cancel();
   }
 
   void _handleSelected() {
@@ -151,6 +245,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         currentUser=value;
       });
     });
+    setState(() {
+      userDetails = storage.getItem(STORAGE_USER_DETAILS_KEY)??{};
+    });
     act2 = checkAuth();
     act2.then((value){
 //      // print(value);
@@ -190,7 +287,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
 //    return _forAndroid();
     return _foriOS();
-
   }
 }
 

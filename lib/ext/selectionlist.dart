@@ -6,7 +6,8 @@ class SelectionList extends StatefulWidget{
   final Widget title;
   final String value;
   final bool disabled;
-  SelectionList(this.options,{this.onChange,this.title,this.value,this.disabled=false});
+  final  EdgeInsets padding;
+  SelectionList(this.options,{this.onChange,this.title,this.value,this.disabled=false,this.padding= const EdgeInsets.symmetric(vertical: 10)});
   @override
   SelectionListState createState() => SelectionListState(this.options,onChange: this.onChange,title: this.title);
 }
@@ -35,15 +36,18 @@ class SelectionListState extends State<SelectionList>{
     // TODO: implement build
     List listBody = options.map((e)=>
         Card(
-          child: ListTile(
-            onTap: (){
-              if(!widget.disabled)
-              setActive(e);
-            },
-            title: Text(e),
-            trailing: Icon(Icons.trip_origin,color: (active==e?primaryColor:textColor),),
-            leading: Icon(Icons.arrow_forward_ios),
-          ),
+          child:Padding(
+            padding:widget.padding,
+            child:  ListTile(
+              onTap: (){
+                if(!widget.disabled)
+                  setActive(e);
+              },
+              title: Text(e),
+              trailing: Icon(Icons.trip_origin,color: (active==e?primaryColor:textColor),),
+              leading: Icon(Icons.arrow_forward_ios),
+            ),
+          )
         )
     ).toList();
     return  Container(

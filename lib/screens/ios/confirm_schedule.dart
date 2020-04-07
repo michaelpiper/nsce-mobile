@@ -55,7 +55,7 @@ class ConfirmSchedulePageState extends State<ConfirmSchedulePage>{
 
       child: Row(
         children: <Widget>[
-          _schedule['product']['image']==null?Container(height: 100,width: 100):Image.network(baseURL(_schedule['product']['image']),height: 100,width: 100,fit: BoxFit.fill),
+          _schedule['product']['image']==null?Container(height: 100,width: 100):Image.network(baseURL(_schedule['product']['path']+_schedule['product']['image']),height: 100,width: 100,fit: BoxFit.fill),
           Expanded(
             child:Container(
               padding: EdgeInsets.symmetric(horizontal: 20.0),

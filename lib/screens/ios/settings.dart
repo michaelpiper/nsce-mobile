@@ -11,15 +11,34 @@ class SettingsPage extends StatelessWidget {
         iconTheme: IconThemeData(color: Colors.white),
 
       ),
-      body: Center(
-        child: RaisedButton(
-          onPressed: () async {
-           Provider.of<AuthService>(context).logout();
-           if(Navigator.canPop(context))
-           Navigator.pop(context);
-          },
-          child: Text('Logout!'),
-        ),
+      body: ListView(
+        children: <Widget>[
+          SizedBox(
+            height: 6,
+          ),
+          ListTile(
+            onTap: () async {
+              Navigator.pushNamed(context, '/help-and-about');
+            },
+            title: Text('Help and About'),
+          ),
+          Padding(
+              padding: EdgeInsets.only(top:5.0),
+              child: Divider(thickness: 2,)
+          ),
+          ListTile(
+            onTap: () async {
+              Provider.of<AuthService>(context).logout();
+              if(Navigator.canPop(context))
+                Navigator.pop(context);
+            },
+            title: Text('Logout'),
+          ),
+          Padding(
+              padding: EdgeInsets.only(top:5.0),
+              child: Divider(thickness: 2,)
+          ),
+        ],
       ),
     );
   }

@@ -33,4 +33,5 @@ final String API_PRODUCT_URL=API_URL+"/products";
 final String API_ADVERT_URL=API_URL+"/adverts";
 final String API_NOTIFICATION_URL=API_URL+"/notifications";
 final String API_SERVICE_URL=API_URL+"/service";
+final API_SEND_MAIL_URL =API_URL+'/sendmail';
 final String API_AUTO_COMPLETE_ADDRESS_URL = API_SERVICE_URL+"/auto_complete_address";

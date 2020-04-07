@@ -104,8 +104,13 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
   }
   void _loadSchedule(DateTime day){
     _scheduleLoaded(state: false);
-    DateTime _now = day.toUtc();
-    _schedule['post']['schedule']=_now.toIso8601String();
+    DateTime  _check  = day.toUtc();
+    DateTime _now = DateTime.now().toUtc();
+    if(_check.isBefore(_now)){
+      _scheduleLoaded();
+      return;
+    }
+    _schedule['post']['schedule']=_check.toIso8601String();
     scheduleOrder(_schedule['post']).then((schedules){
       if(schedules==false || schedules==null)
         return;
@@ -156,7 +161,7 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
    Widget _buildHead=Card(
      child: Row(
        children: <Widget>[
-         _schedule['product']['image']==null?Container(height: 100,width: 100):Image.network(baseURL(_schedule['product']['image']),height: 100,width: 100,fit: BoxFit.fill),
+         _schedule['product']['image']==null?Container(height: 100,width: 100):Image.network(baseURL(_schedule['product']['path']+_schedule['product']['image']),height: 100,width: 100,fit: BoxFit.fill),
          Expanded(
              child:Container(
                padding: EdgeInsets.symmetric(horizontal: 20.0),

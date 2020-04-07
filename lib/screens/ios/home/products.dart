@@ -55,7 +55,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
           {
             'id':e['id'],
             'link':'/type/'+e['id'].toString(),
-            'avatar':e['image']!=null?baseURL(e['image']):null,
+            'avatar':e['image']!=null?baseURL(e['path']+e['image']):null,
             'name':e['name']
           }).toList();
 

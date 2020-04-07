@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:NSCE/utils/colors.dart';
 // import screen here
 import 'home.dart';
 import 'profile.dart';
@@ -34,7 +35,9 @@ import 'driver/profile.dart';
 // import color
 import '../../utils/colors.dart';
 import './chat.dart';
+
 buildAndroid(context){
+
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: primaryColor,
     systemNavigationBarIconBrightness: Brightness.light,
@@ -152,3 +155,7 @@ buildAndroid(context){
     },
   );
 }
+
+
+
+

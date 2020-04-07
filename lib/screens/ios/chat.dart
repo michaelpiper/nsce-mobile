@@ -4,9 +4,11 @@ import 'package:localstorage/localstorage.dart';
 import 'package:NSCE/utils/constants.dart';
 import 'package:NSCE/utils/colors.dart';
 class ChatPage extends StatefulWidget {
-  ChatPage({Key key, this.title}) : super(key: key);
+  ChatPage({Key key, this.title,this.userDetails,this.message}) : super(key: key);
 
   final String title;
+  final Map userDetails;
+  final String message;
 
   @override
   _ChatPage createState() => new _ChatPage();
@@ -17,8 +19,18 @@ class _ChatPage extends State<ChatPage> {
   final TextEditingController _textController = new TextEditingController();
   final LocalStorage localStorage = new LocalStorage(STORAGE_KEY);
   Map userDetails={};
-  _ChatPage(){
-    userDetails = localStorage.getItem(STORAGE_USER_DETAILS_KEY);
+  String _botName="Bot";
+  @override
+  initState(){
+    super.initState();
+    if(widget.userDetails==null){
+      userDetails = localStorage.getItem(STORAGE_USER_DETAILS_KEY);
+    }else{
+      userDetails = widget.userDetails;
+    }
+    if(widget.message!=null){
+      _handleSubmitted(widget.message);
+    }
   }
   Widget _buildTextComposer() {
     return new IconTheme(
@@ -56,9 +68,13 @@ class _ChatPage extends State<ChatPage> {
     Dialogflow(authGoogle: authGoogle, language: Language.english);
     AIResponse response = await dialogflow.detectIntent(query);
     ChatMessage message = new ChatMessage(
-      text: response.getMessage() ??
-          new CardDialogflow(response.getListMessage()[0]).title,
-      name: "Bot",
+      text: response.getMessage() ?? ListView(
+        children:response.getListMessage().map<Widget>((v){
+          CardDialogflow Res= CardDialogflow(v);
+          return ListTile(title: Text(Res.title),subtitle: Text(Res.subtitle));
+        }).toList(),
+      ),
+      name: _botName,
       type: false,
     );
     setState(() {
@@ -67,6 +83,9 @@ class _ChatPage extends State<ChatPage> {
   }
 
   void _handleSubmitted(String text) {
+    if(text==null || text.length==0){
+      return;
+    }
     _textController.clear();
     ChatMessage message = new ChatMessage(
       text: text,
@@ -133,7 +152,7 @@ class ChatMessage extends StatelessWidget {
                 style: new TextStyle(fontWeight: FontWeight.bold)),
             new Container(
               margin: const EdgeInsets.only(top: 5.0),
-              child: new Text(text),
+              child: text is String?new Text(text):text,
             ),
           ],
         ),
@@ -150,7 +169,7 @@ class ChatMessage extends StatelessWidget {
             new Text(this.name, style: Theme.of(context).textTheme.subhead),
             new Container(
               margin: const EdgeInsets.only(top: 5.0),
-              child: new Text(text),
+              child: text is String?new Text(text):text,
             ),
           ],
         ),

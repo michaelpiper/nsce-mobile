@@ -2,18 +2,22 @@
 
 // This example shows a [Form] with one [TextFormField] and a [RaisedButton]. A
 // [GlobalKey] is used here to identify the [Form] and validate input.
+import 'package:NSCE/services/request.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
-
+import 'package:flutter_beautiful_popup/main.dart';
 // import service here
 import '../../services/auth.dart';
 // import color
 import 'package:NSCE/utils/colors.dart';
 import 'package:NSCE/ext/smartalert.dart';
 import 'package:NSCE/utils/country.dart';
+import 'package:NSCE/screens/ios/chat.dart';
+import 'package:NSCE/ext/dialogman.dart';
 /// This Widget is the main application widget.
 class AuthPage extends StatelessWidget {
   // static const String _title = 'Welcome';
@@ -33,34 +37,64 @@ class MyStatefulWidget extends StatefulWidget {
 }
 
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+  _MyStatefulWidgetState(){
+    f(e){
+      return DropdownMenuItem(
+        child: Text(e['name'],style:TextStyle(color: textColor),),
+        value: e['name'],
+      );
+    }
+    _countryList=simpleCountryCode.map(f).toList();
+    _text_controller.text=_username;
+    tryRemember();
+  }
   final _formKey = GlobalKey<FormState>();
   String _username;
   String _forgetDetails;
   String _password;
+  final String _rememberme_key = "@login-remeberme";
   int _screen=1;
   bool _loading=false;
   bool _eye_signup=true;
   bool _eye_signin=true;
+  bool _rememberme=false;
+  Map<String, String> _sendMailData={};
   List <Widget> _countryList=[];
-  Map<String, String> _signUpData={'firstname':'','lastname':'','fullname':'','country':null,'company':'','email':'','phone':'','password':'','confirm_password':''};
-  _MyStatefulWidgetState(){
-     f(e){
-       return DropdownMenuItem(
-         child: Text(e['name'],style:TextStyle(color: textColor),),
-         value: e['name'],
-       );
-     }
-     _countryList=simpleCountryCode.map(f).toList();
-   }
+  TextEditingController _text_controller = TextEditingController();
+  Map<String, String> _signUpData={'firstname':'','lastname':'','fullname':'','country':null,'company':'','email':'','phone':'','password':'','confirm_password':'','remeberme':'0'};
+
+  final DialogMan dialogMan = DialogMan(child: Scaffold(
+      backgroundColor: Colors.transparent,
+      body:Center(
+          child:CircularProgressIndicator()
+      )
+  ));
   @override
   void initState(){
     super.initState();
-  }
 
+  }
+  tryRemember()async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final data = prefs.get(_rememberme_key);
+    if(data!=null){
+//      print('$data');
+      setState(() {
+        _username=data;
+        _text_controller.text=data;
+        _sendMailData['email']=data;
+      });
+    }
+  }
+  updateRememberMe(value)async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString(_rememberme_key, value).then((val){
+//      print('$val');
+    });
+  }
   Widget login(){
     double margin=0.0;
     var size=MediaQuery.of(context).size;
-
     if(size.height>630){
       margin=500;
     }
@@ -78,8 +112,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     }else{
       margin=300;
     }
-
-    Widget _body = Container(
+    return  Container(
       // Center is a layout widget. It takes a single child and positions it
       // in the middle of the parent.
         decoration: BoxDecoration(
@@ -121,8 +154,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                         height: 15.0,
                       ),
                       TextFormField(
-
-                        initialValue:_username ,
+                        controller: _text_controller,
                         onSaved: (value)=> _username = value,
                         decoration: const InputDecoration(
                           prefixIcon: Icon(Icons.person,color: secondaryTextColor),
@@ -178,6 +210,31 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                             )
                           ]
                       ),
+                      Row(
+                        children: <Widget>[
+                          Checkbox(
+                            value:_rememberme,
+                            onChanged: (v){
+                            setState((){_rememberme=!_rememberme;});
+                          },),
+                          Expanded(
+                            child: InkWell(
+
+                              onTap: (){
+                                if(_loading) {
+                                  return;
+                                }
+                                setState((){_rememberme=!_rememberme;});
+                              },
+                              child: Text("Remember me",
+                                style: TextStyle(
+                                  color:  actionColor,
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
                       SizedBox(
                         height: margin-430.0,
                       ),
@@ -195,7 +252,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                                 _screen=3;
                               });
                             },
-                            child: Text("Forget Password",
+                            child: Text("Forget Password?",
                               style: TextStyle(
                                 color:  actionColor,
                               ),
@@ -231,6 +288,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                             setState(() {
                               _loading=true;
                             });
+                            if(_rememberme){
+                              updateRememberMe(_username);
+                            }
                             var wait=Provider.of<AuthService>(context).loginUser(username: _username, password: _password);
                             wait.then((status){
                               setState(() {
@@ -287,45 +347,10 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             )
         )
     );
-    return
-      ListView(
-        shrinkWrap: true,
-        children: <Widget>[
-          Container(
-            width: MediaQuery.of(context).size.width,
-            height:  margin,
-            child: Center(child: Stack(
-
-              children: <Widget>[
-                Positioned(
-                  top: 40,
-                  width: MediaQuery.of(context).size.width,
-                  child: _body,
-                ),
-                Positioned(
-                  top:0,
-                  child: Container(
-                    alignment: Alignment(0,0),
-                    width: MediaQuery.of(context).size.width,
-                    child:  Center(
-                      child: Image(
-                        image: AssetImage('images/icon.png'),
-                        fit: BoxFit.fill,
-                        width: 80.0,
-                        height: 80.0,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),),
-          ),
-        ],
-      );
   }
   Widget signUp(){
     dynamic _country=_signUpData['country'];
-    Widget _body =  Container(
+    return Container(
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
@@ -598,10 +623,17 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                         ),
                         Row(
                           children: <Widget>[
-                            Expanded(child:
-                            Text("By clicking on Create you agree on",style: TextStyle(
-                              color:  secondaryTextColor,
-                            ),)
+                            Checkbox(
+                              value:_signUpData['remeberme']=='1'?true:false,
+                              onChanged: (v)=>setState((){
+                                _signUpData['remeberme']=v?'1':'0';
+                              }),
+                            ),
+                            Expanded(
+                              child: Text("i have read & agreed to the terms and condition",style: TextStyle(
+                                  color:  secondaryTextColor,
+                                ),
+                              )
                             ),
                             InkWell(
                               onTap: (){
@@ -708,7 +740,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                         ),
                         Row(
                           children: <Widget>[
-                            Expanded(child: Text("Have an Account?")),
+                            Expanded(child: Text("Already have an Account?")),
                             InkWell(
 
                               onTap: (){
@@ -738,39 +770,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           )
       ),
     );
-    return ListView(
-      shrinkWrap: false,
-      children: <Widget>[
-        Container(
-                width: MediaQuery.of(context).size.width,
-                height: 710,
-                child: Stack(
-                  children: <Widget>[
-                    Positioned(
-                      top: 40,
-                      width: MediaQuery.of(context).size.width,
-                      child: _body,
-                    ),
-                    Positioned(
-                      top:0,
-                      child: Container(
-                        width: MediaQuery.of(context).size.width,
-                        alignment: Alignment(0,0),
-                        child:  Center(
-                          child: Image(
-                            image: AssetImage('images/icon.png'),
-                            fit: BoxFit.fill,
-                            width: 80.0,
-                            height: 80.0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-      ],
-    );
   }
   Widget forgetPassword(){
     double margin=0.0;
@@ -794,7 +793,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       margin=300;
     }
 
-    Widget _body = Container(
+    return Container(
       // Center is a layout widget. It takes a single child and positions it
       // in the middle of the parent.
         decoration: BoxDecoration(
@@ -831,7 +830,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                       Padding(padding:EdgeInsets.only(top: 20),),
                       Text(
                         'Forget Password',
-                        style: TextStyle(fontFamily: "Lato",fontStyle:FontStyle.normal,fontWeight: FontWeight.normal,fontSize: 17),
+                        style: TextStyle(fontFamily: "Lato",fontStyle:FontStyle.normal,fontWeight: FontWeight.normal,fontSize: 20),
                       ),
                       SizedBox(
                         height: 15.0,
@@ -983,15 +982,24 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             )
         )
     );
-    return
-      ListView(
+
+  }
+  @override
+  Widget build(BuildContext context) {
+    dialogMan.buildContext(context);
+    Widget buildBody(_body,{double maxHeight}) {
+      return ListView(
         shrinkWrap: true,
         children: <Widget>[
           Container(
-            width: MediaQuery.of(context).size.width,
-            height:  margin,
-            child: Center(child: Stack(
-
+            constraints: BoxConstraints(
+              minWidth: MediaQuery.of(context).size.width,
+              maxWidth: MediaQuery.of(context).size.width,
+              minHeight: 400,
+              maxHeight: maxHeight==null? MediaQuery.of(context).size.height:maxHeight,
+            ),
+            child: Stack(
+              fit: StackFit.loose,
               children: <Widget>[
                 Positioned(
                   top: 40,
@@ -1003,7 +1011,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   child: Container(
                     alignment: Alignment(0,0),
                     width: MediaQuery.of(context).size.width,
-                    child:  Center(
+                    child: Center(
                       child: Image(
                         image: AssetImage('images/icon.png'),
                         fit: BoxFit.fill,
@@ -1014,37 +1022,158 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   ),
                 ),
               ],
-            ),),
+            ),
           ),
         ],
       );
-  }
-  @override
-  Widget build(BuildContext context) {
-    Widget buildBody() {
+    }
+    switchScreen() {
       switch (_screen) {
         case 3:
           {
-            return forgetPassword();
+            return buildBody(forgetPassword(),maxHeight:600);
           }
           break;
         case 2:
           {
-            return signUp();
+            return buildBody(signUp());
           }
           break;
         default:
           {
-            return login();
+            return buildBody(login(),maxHeight:600);
           }
           break;
       }
     }
+
+    final popup = BeautifulPopup(
+      context: context,
+      template: TemplateAuthentication,
+
+    );
+    popup.recolor(primaryColor);
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        iconTheme: IconThemeData(color: primaryTextColor),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(20.0),// here the desired height
+        child: AppBar(
+            elevation: 0,
+            brightness: Brightness.dark,
+            iconTheme: IconThemeData(color: primaryTextColor),
+        ),
       ),
+      floatingActionButton:Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+        child:  Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            Container(
+              decoration: BoxDecoration(
+                  color: Colors.black26,
+                  borderRadius: BorderRadius.all(Radius.circular(30))
+              ),
+              child: IconButton(
+                icon:Icon(Icons.message),
+                onPressed: (){
+                  popup.show(
+                    title: 'Contact us',
+                    content:ListView(
+                      children: <Widget>[
+                        TextField(
+                          onChanged: (v)=>setState((){
+                            _sendMailData['fullname']=v;
+                          }),
+                          decoration: InputDecoration(
+                              labelText: 'Full name'
+                          ),
+                        ),
+                        TextField(
+                          controller: _text_controller,
+                          onChanged: (v)=>setState((){
+                            _sendMailData['email']=v;
+                          }),
+                          decoration: InputDecoration(
+                              labelText: 'Email'
+                          ),
+                        ),
+                        TextField(
+                          onChanged: (v)=>setState((){
+                            _sendMailData['body']=v;
+                          }),
+                          onSubmitted:(v)=>setState((){
+                            _sendMailData['body']=v;
+                          }) ,
+                          decoration: InputDecoration(
+                              labelText: 'Message'
+                          ),
+                        )
+                      ],
+                    ),
+                    actions: [
+                      popup.button(
+                        label: _loading?"Sending...":'Send',
+                        onPressed: (){
+                          if(_loading) {
+                            return;
+                          }
+                          if(_sendMailData['email'] ==null || _sendMailData['fullname'] == null || _sendMailData['body']==null){
+                            showDialog(context: context,child: SmartAlert(title: 'Alert',description: 'Email, full name and message can\'t be empty'));
+                            return;
+                          }
+                          dialogMan.show();
+                          sendMail({"email":"${_sendMailData['email']}","subject":"A message from ${_sendMailData['fullname']} ","body":'${_sendMailData['fullname']} your message "${_sendMailData['body']}" \n has been received and our support will respond back to you via mail.'}).then((res){
+                            dialogMan.hide();
+                            String msg;
+                            if(res is Map && res['error']==false){
+                              msg=res['message'];
+                            }else if (res is Map){
+                              msg=res['message']??"Message not delivered please retry";
+                            }else{
+                              msg="Message not delivered please retry";
+                            }
+                            setState(() {
+                              _sendMailData['fullname'] = null;
+                            });
+                            if(Navigator.of(context).canPop())Navigator.of(context).pop();
+                            showDialog(context: context,child: SmartAlert(title: 'Alert',description: msg));
+                          }).catchError((e){
+                            print(e);
+                          });
+                        },
+                      ),
+                      popup.button(
+                        label: 'Chat',
+                        onPressed: (){
+                          if(_sendMailData['email'] == null || _sendMailData['fullname'] == null || _sendMailData['body']==null){
+                            showDialog(context: context,child: SmartAlert(title: 'Alert',description: 'Email, full name and message can\'t be empty'));
+                            return;
+                          }
+                          if(Navigator.of(context).canPop()){
+                            Navigator.of(context).pop();
+                          }
+                          Map _name=_sendMailData['fullname'].split(' ').asMap();
+                          Map _data={};
+                          _data['firstName']=_name.containsKey(0)?_name[0]:'';
+                          _data['lastName']=_name.containsKey(1)?_name[1]:'';
+                          _data['email']=_sendMailData['email'];
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => ChatPage(message: _sendMailData['body'],userDetails: _data)));
+                          setState(() {
+                            _sendMailData['fullname'] = null;
+                          });
+                        },
+                      ),
+                    ],
+                    // bool barrierDismissible = false,
+                    // Widget close,
+                  );
+                },
+              ),
+            ),
+            Text('Help')
+          ],
+        )
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       body:Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
@@ -1056,7 +1185,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           ),
 //          color: primaryColor,
         ),
-        child:Center(child: buildBody(),),
+        child:Center(child: switchScreen(),),
       )
     );
   }

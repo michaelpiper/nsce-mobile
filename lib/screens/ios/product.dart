@@ -101,7 +101,7 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
             right: 0.0,
             left: 0.0),
         child:Card(
-      child:  Padding(padding: EdgeInsets.only(right:7.0),child: Row(
+      child: Padding(padding: EdgeInsets.only(left:7.0),child: Row(
         children: [
           Expanded(
             /*1*/
@@ -116,11 +116,20 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
                     style: TextStyle(fontWeight: FontWeight.w300,fontSize: 20,color: textColor),
                   ),
                 ),
-                Text(
-                  _product['Category']['Quarry']['address']+' '+_product['Category']['Quarry']['state']+', '+_product['Category']['Quarry']['country'],
-                  style: TextStyle(
-                    color: Colors.grey[500],
-                  ),
+                Row(
+                  children: <Widget>[
+                    SizedBox(
+                      width: 25,
+                    ),
+                    Expanded(
+                      child: Text(
+                        _product['Category']['Quarry']['address']+' '+_product['Category']['Quarry']['state']+', '+_product['Category']['Quarry']['country'],
+                        style: TextStyle(
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                    )
+                  ],
                 ),
                 SizedBox(height: 15,)
               ],
@@ -157,7 +166,7 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
               elevation: 4.0,
               shape:RoundedRectangleBorder(
                   borderRadius: BorderRadius.vertical(
-                    top: Radius.elliptical(20.0,20.0),
+                    top: Radius.elliptical(50.0,50.0),
                     bottom: Radius.elliptical(12.0,12.0)
                   )
                 )
@@ -175,7 +184,7 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
                 child: _product['image']==null?
                 Container():
                 Image.network(
-                  baseURL(_product['image']),
+                  baseURL(_product['path']+_product['image']),
                   alignment: Alignment(0,-11),
                   width: 200,
                   height: 240,

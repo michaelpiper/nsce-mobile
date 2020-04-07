@@ -72,7 +72,7 @@ class FavoritePageState extends State<FavoritePage>{
             },
             leading: e['Product']['image']==null? Container(width: 200,
               height: 200,):Image(
-              image: NetworkImage(baseURL(e['Product']['image'])),
+              image: NetworkImage(baseURL(e['Product']['path']+e['Product']['image'])),
               width: 40,
               height: 40,
               fit: BoxFit.fill,
