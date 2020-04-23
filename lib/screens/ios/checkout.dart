@@ -71,7 +71,22 @@ class CheckoutPageState extends State<CheckoutPage>{
                       },
                     );
                   }
-                  return Navigator.popAndPushNamed(context, '/confirm_order');
+                  var  act2 = checkAuth();
+                  act2.then((value){
+                    if(value == false){
+                      return;
+                    }
+                    if(value.containsKey('error') && value['error']) {
+                      return;
+                    }
+                    if(value.containsKey('data') && value['data']==null) {
+                      return ;
+                    }
+                    storage.setItem(STORAGE_USER_DETAILS_KEY, value['data']).then<void>((value){
+                       Navigator.popAndPushNamed(context, '/confirm_order');
+                    });
+                  });
+                  return null;
                 },
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.vertical(
@@ -219,7 +234,7 @@ class CheckoutPageState extends State<CheckoutPage>{
                 ),
                 keyboardType: TextInputType.text,
                 textInputAction: TextInputAction.done,
-                onChanged: (v) => _billingData['companyname'] = v,
+                onChanged: (v) => _billingData['company'] = v,
                 validator: (value) {
                   if (value.isEmpty) {
                     return 'Please enter your company name';
@@ -333,19 +348,6 @@ class CheckoutPageState extends State<CheckoutPage>{
                                   context: context,
                                   barrierDismissible: false, // user must tap button!
                                   builder: (BuildContext context) {
-                                   var  act2 = checkAuth();
-                                    act2.then((value){
-                                      if(value == false){
-                                        return;
-                                      }
-                                      if(value.containsKey('error') && value['error']) {
-                                        return;
-                                      }
-                                      if(value.containsKey('data') && value['data']==null) {
-                                        return ;
-                                      }
-                                      storage.setItem(STORAGE_USER_DETAILS_KEY, value['data']).then<void>((value){});
-                                    });
                                     return  SmartAlert(title:"Alert",description:"Billing info saved sucessfully");
                                   },
                                 );

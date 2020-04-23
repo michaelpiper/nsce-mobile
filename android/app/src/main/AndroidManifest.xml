@@ -33,6 +33,6 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-        <meta-data android:name="co.paystack.android.PublicKey" android:value="pk_test_9b59cebc741006f6d836576a5be330cfa34c6a3e"/>
+<!--        <meta-data android:name="co.paystack.android.PublicKey" android:value="pk_test_9b59cebc741006f6d836576a5be330cfa34c6a3e"/>-->
     </application>
 </manifest>

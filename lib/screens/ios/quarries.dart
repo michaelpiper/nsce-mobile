@@ -65,7 +65,7 @@ class QuarriesPageState extends State<QuarriesPage>{
       ),
       body: _loadingStateIndicator?Loading():
       _quarriesItem.length==0?Center(
-        child: Text('No quarry available'),
+        child: Text('No yard available'),
       ):ListView(
         children:_quarriesItem.map<Widget>((e)=> Card(
           child: ListTile(
@@ -98,7 +98,7 @@ class QuarriesPageState extends State<QuarriesPage>{
                     });
                   }
                   return AlertDialog(
-                    title: Text('Rate this Quarry'),
+                    title: Text('Rate this Yard'),
                     shape:  RoundedRectangleBorder(
                         borderRadius: BorderRadius.vertical(
                             top: Radius.elliptical(10.0,10.0),

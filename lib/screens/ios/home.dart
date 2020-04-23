@@ -274,6 +274,25 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     // TODO: implement initState
     _children= <TabContent>[_productsScreen, _notificationScreen,_transactionsScreen,_walletScreen];
   }
+  Future<bool>_exitApp(BuildContext context){
+    return showDialog(
+      context: context,
+      child: new AlertDialog(
+        title: new Text('Do you want to exit this application?'),
+        content: new Text('We hate to see you leave...'),
+        actions: <Widget>[
+          new FlatButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: new Text('No'),
+          ),
+          new FlatButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: new Text('Yes'),
+          ),
+        ],
+      ),
+    ) ?? false;
+  }
   @override
   Widget build(BuildContext context) {
     _refresh();
@@ -286,7 +305,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     // than having to individually change instances of widgets.
 
 //    return _forAndroid();
-    return _foriOS();
+    return WillPopScope(
+        onWillPop: () => _exitApp(context),
+    child: _foriOS()
+    );
   }
 }
 

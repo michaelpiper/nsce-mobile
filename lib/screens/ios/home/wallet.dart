@@ -120,8 +120,8 @@ class WalletScreen extends StatelessWidget {
 }
 
 class Balance extends StatefulWidget{
-  int initialValue=0;
-  Balance({this.initialValue});
+  final int initialValue;
+  Balance({this.initialValue=0});
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -131,7 +131,6 @@ class Balance extends StatefulWidget{
 
 class _Balance extends State<Balance> {
   int balance=0;
-  Timer _updateme;
   final oCcy = new NumberFormat("#,##0.00", "en_US");
   void updateBalance(){
     fetchAccount(id:'balance')
@@ -151,20 +150,19 @@ class _Balance extends State<Balance> {
           });
         }
     });
+    new Timer(const Duration(seconds: 10),updateBalance);
   }
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     updateBalance();
-    _updateme=new Timer(const Duration(seconds: 15),updateBalance);
-    balance=widget.initialValue;
+    balance=widget.initialValue==null?0:widget.initialValue;
   }
   @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-    _updateme.cancel();
   }
   @override
   Widget build(BuildContext context) {

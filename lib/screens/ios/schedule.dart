@@ -1,3 +1,4 @@
+import 'package:NSCE/ext/smartalert.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -23,6 +24,7 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
   Map _eventSchedule={};
   List _selectedEvents=[];
   bool _loadingScheduleIndicator;
+  String _message;
   final oCcy = new NumberFormat("#,##0.00", "en_US");
   _SchedulePageState();
   @override
@@ -102,12 +104,19 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
       ).toList(),
     );
   }
+  void _warning(msg){
+   setState(() {
+     _message= msg ;
+   });
+  }
   void _loadSchedule(DateTime day){
     _scheduleLoaded(state: false);
+    _warning(null);
     DateTime  _check  = day.toUtc();
     DateTime _now = DateTime.now().toUtc();
     if(_check.isBefore(_now)){
       _scheduleLoaded();
+      _warning("You can't choose previous date");
       return;
     }
     _schedule['post']['schedule']=_check.toIso8601String();
@@ -125,7 +134,7 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
            return {
              'schedule': start.toString(),
              'time': (start.hour>9?start.hour.toString():'0'+start.hour.toString())+':'+(start.minute>9?start.minute.toString():'0'+start.minute.toString())+' - '+( end.hour>9?end.hour.toString():'0'+end.hour.toString())+':'+(end.minute>9?end.minute.toString():'0'+end.minute.toString()),
-            'title': 'Production will take '+e['timeTaken']
+            'title': 'You should be in yard 30 minutes before production ends'
            };
           }).toList();
           _scheduleLoaded();
@@ -208,7 +217,7 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
               ),
             ),
             const SizedBox(height: 8.0,),
-            Expanded(child:_loadingScheduleIndicator?Center(child:CircularProgressIndicator()):_buildEventList())
+            Expanded(child:_loadingScheduleIndicator?Center(child:CircularProgressIndicator()):_message==null?_buildEventList():Center(child: Text('Warning\n $_message'),))
           ],
         ),
       )

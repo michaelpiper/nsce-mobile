@@ -1,4 +1,3 @@
-import'dart:async';
 import 'package:NSCE/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -142,8 +141,8 @@ class _AddFundsPage extends State<AddFundsPage> {
   }
   @override
   void initState(){
+    PaystackPlugin.initialize(publicKey: PAYSTACK_PUBLIC_KEY );
     super.initState();
-    PaystackPlugin.initialize(publicKey: PAYSTACT_PUBLIC_KEY );
     _amount=widget.amount==null?500:widget.amount;
   }
   @override

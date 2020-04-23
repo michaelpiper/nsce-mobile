@@ -157,7 +157,7 @@ class _TypePageState extends State<TypePage> with TickerProviderStateMixin {
       ),
     );
     Widget productsBuilder(){
-      return TableBuilder(
+      return _products.length==0?Container():TableBuilder(
         _products.map<Widget>((e)=> Card(
             elevation: 4.0,
             shape: RoundedRectangleBorder(

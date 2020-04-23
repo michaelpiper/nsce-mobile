@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../services/auth.dart';
 import '../../../utils/colors.dart';
-
+import 'package:NSCE/utils/helper.dart';
 
 class AppDrawer extends StatelessWidget {
   final Map currentUser;
@@ -11,6 +11,8 @@ class AppDrawer extends StatelessWidget {
   AppDrawer({this.userDetails:const {},this.currentUser:const {},this.onTabTapped});
   @override
   Widget build(BuildContext context) {
+    String bgk=(userDetails.containsKey('image') && userDetails['image']!=null && userDetails['image']!='')?baseURL('${userDetails['image']}'):'images/avatar.png';
+    ImageProvider bgIm=(userDetails.containsKey('image') && userDetails['image']!=null && userDetails['image']!='')?NetworkImage(baseURL('${userDetails['image']}')):AssetImage('images/avatar.png');
     Widget headerSegment = Container(
       color: primaryColor,
       height: MediaQuery.of(context).size.height/3,
@@ -25,10 +27,12 @@ class AppDrawer extends StatelessWidget {
                 child: SizedBox(
                   width:120.0,
                   height: 120.0,
-                  child: CircleAvatar(backgroundImage:AssetImage('images/sample1.png'),),
+                  child: CircleAvatar(
+                    key: ValueKey(bgk),
+                    backgroundImage:bgIm,
+                  ),
                 ),
               ),
-
               SizedBox(
                 height:10.0,
               ),

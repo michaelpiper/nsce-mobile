@@ -86,7 +86,7 @@ class CartPageState extends State<CartPage>{
                 Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      e['Product']['image']==null?Container(width: 120,height: 120):Image(image:NetworkImage(baseURL(e['Product']['image'])),width: 120,height: 120,fit: BoxFit.fill,),
+                      e['Product']['image']==null?Container(width: 120,height: 120):Image(image:NetworkImage(baseURL(e['Product']['path']+e['Product']['image'])),width: 120,height: 120,fit: BoxFit.fill,),
                       SizedBox(width: 15.0,),
                       Expanded(
                         child:Column(

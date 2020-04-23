@@ -245,14 +245,23 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
             children: <Widget>[
               Row(
               children: <Widget>[
-                Expanded(child: Text('Description',style: TextStyle(fontWeight: FontWeight.w300,fontSize: 20,color: textColor),),),InkWell(child: Text('see more',style:TextStyle(color:primaryColor)))
+                Expanded(
+                  child: Text('Description',style: TextStyle(fontWeight: FontWeight.w300,fontSize: 20,color: textColor),),
+                ),
+                InkWell(
+                    onTap: (){
+                      storage.setItem(STORAGE_QUARRY_KEY, _product['Category']['Quarry']).then((v){
+                        Navigator.pushNamed(context, '/quarry/'+_product['Category']['Quarry']['id'].toString());
+                      });
+                    },
+                    child: Text('see more',style:TextStyle(color:primaryColor)))
               ]),
               Row(
 //                mainAxisAlignment: MainAxisAlignment.start,
 //                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   Padding(padding: EdgeInsets.only(right:7.0),),
-                  Expanded(child:Text(_product['descripton'].toString()+' from Quarry in\n'+_product['Category']['Quarry']['state']+', '+_product['Category']['Quarry']['country'],style:TextStyle(color:noteColor,fontSize: 16,textBaseline: TextBaseline.alphabetic)))
+                  Expanded(child:Text(_product['descripton'].toString()+' from Yard in\n'+_product['Category']['Quarry']['state']+', '+_product['Category']['Quarry']['country'],style:TextStyle(color:noteColor,fontSize: 16,textBaseline: TextBaseline.alphabetic)))
                 ],
               )
             ]
@@ -284,13 +293,12 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
                         ),
                         side: BorderSide(color: secondaryColor,)
                     ),
-                    child:
-                    SizedBox(
+                    child: SizedBox(
                       child: Stack(
                         children: <Widget>[
                           Padding(padding: EdgeInsets.only(right: 20.0),),
                           ButtonBar(
-                            buttonPadding: EdgeInsets.only(top:20.0),
+                            buttonPadding: EdgeInsets.only(top:2.0),
                             alignment: MainAxisAlignment.spaceBetween,
                             children: <Widget>[
                               IconButton(
@@ -302,28 +310,33 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
                                   decreament();
                                 },
                               ),
-                              Padding(
-                                padding: EdgeInsets.only(bottom: 7),
-                                child:  SizedBox(
-                                  width: 32,
-                                  child: TextField(
+                              InkWell(
+                                onTap: (){
+                                  return showDialog(context: context,builder: (BuildContext context){
+                                    return Dialog(
 
-                                    controller: _txtController,
-                                    keyboardType: TextInputType.number,
-                                    decoration: InputDecoration(
-                                      border: InputBorder.none
-                                    ),
-                                    onChanged: (e)=>setState(() {
-                                      unit=int.tryParse(e);
-                                    }),
-                                    onSubmitted: (e)=>setState(() {
-                                      unit=int.tryParse(e);
-                                    }),
-                                    style: TextStyle(
-                                      textBaseline: TextBaseline.alphabetic,
-                                    ),
-                                  ),
-                                ),
+                                      child: TextField(
+                                        controller: _txtController,
+                                        autofocus: true,
+                                        keyboardType: TextInputType.number,
+                                        decoration: InputDecoration(
+                                            border: InputBorder.none
+                                        ),
+                                        onChanged: (e)=>setState(() {
+                                          unit=int.tryParse(e);
+                                        }),
+                                        onSubmitted: (e)=>setState(() {
+                                          unit=int.tryParse(e);
+                                          Navigator.of(context).pop();
+                                        }),
+                                        style: TextStyle(
+                                          textBaseline: TextBaseline.alphabetic,
+                                        ),
+                                      ),
+                                    );
+                                  });
+                                },
+                                child: Text('$unit'),
                               ),
                               IconButton(
                                 padding: EdgeInsets.all(0.0),
@@ -339,10 +352,10 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
                         ],
                       ),
 
-                      width: 130,
+                      width: 150,
                       height: 40,),
                   ),
-                  Text('x1 unit',
+                  Text('X 1 Unit',
                     style: TextStyle(color: noteColor),
                     textAlign: TextAlign.left,
                   ),
@@ -444,7 +457,7 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
               child: Padding(
                 padding: EdgeInsets.only(top: 50),
                 child: SelectionList(
-                  ['Site Delivery','Pick up at Quarry'],
+                  ['Site Delivery','Pick up at Yard'],
                   onChange: (e)=>changeMethod(e),
 
                 ),

@@ -13,7 +13,7 @@ class DispatchPage extends StatefulWidget {
 class _DispatchPageState extends State<DispatchPage>{
   final int index;
   int currentStep;
-  Map<String,dynamic> e = {'name':'stone','quantity':'2000','amount':'180,000.00','measurement':'Tonnes','id':'12343232','image':'images/sample2.png','createdAt':'2012 12:00pm','shippingMethod':'Pick up at Quarry'};
+  Map<String,dynamic> e = {'name':'stone','quantity':'2000','amount':'180,000.00','measurement':'Tonnes','id':'12343232','image':'images/sample2.png','createdAt':'2012 12:00pm','shippingMethod':'Pick up at Yard'};
   _DispatchPageState({this.index});
   List <Step>_steps=[
     Step(

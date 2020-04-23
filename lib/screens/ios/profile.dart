@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import '../../utils/colors.dart';
-import '../../ext/loading.dart';
-import 'package:NSCE/ext/loading.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:NSCE/services/request.dart';
 import 'package:NSCE/utils/constants.dart';
 import 'package:NSCE/ext/search.dart';
 import 'package:NSCE/ext/dialogman.dart';
 import 'package:NSCE/ext/smartalert.dart';
+import 'package:NSCE/utils/helper.dart';
+import 'package:NSCE/screens/ios/update_profile.dart';
 // Notification screen
 class ProfilePage extends StatefulWidget {
 
@@ -19,7 +19,6 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin {
 
   bool _loading;
-  bool _loadingIndicator;
   final _formKey = GlobalKey<FormState>();
   TextEditingController _txtController = TextEditingController();
   final LocalStorage storage = new LocalStorage(STORAGE_KEY);
@@ -34,19 +33,10 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
 
   @override
   void initState() {
-    _loadingIndicator=true;
     _userDetails=storage.getItem(STORAGE_USER_DETAILS_KEY) ?? {};
     _userDetails= _userDetails.map((k,v)=>MapEntry(k,v.toString()));
     _loading=false;
     _txtController.text=_userDetails['address'];
-  }
-  Future _done()async{
-    _dataLoaded();
-  }
-  void _dataLoaded(){
-    setState(() {
-      _loadingIndicator = false;
-    });
   }
   @override
   Widget build(BuildContext context) {
@@ -333,6 +323,8 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
         )
     );
     Widget bodyBuilder(){
+      String bgk=(_userDetails.containsKey('image') && _userDetails['image']!=null && _userDetails['image']!='null' && _userDetails['image']!='' )?baseURL('${_userDetails['image']}'):'images/avatar.png';
+      ImageProvider bgIm=(_userDetails.containsKey('image') && _userDetails['image']!=null && _userDetails['image']!='null' && _userDetails['image']!='' )?NetworkImage(baseURL('${_userDetails['image']}')):AssetImage('images/avatar.png');
       return ListView(
           children: [
             SizedBox(height: 20.0,),
@@ -342,15 +334,31 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                   children: <Widget>[
                     InkWell(
                       onTap: (){
-
+                        onOk()async{
+                          Navigator.of(context).popAndPushNamed('/profile');
+                        }
+                        showDialog(context: context,builder: (BuildContext context){
+                          return UpdateProfile();
+                        }).then((success){
+                          if(success)showDialog<void>(
+                            context: context,
+                            barrierDismissible: false, // user must tap button!
+                            builder: (BuildContext context) {
+                              return  SmartAlert(title:"Alert",description:"Profile picture updated",onOk: onOk,);
+                            },
+                          );
+                        });
                       },
                       child: SizedBox(
                         width:120.0,
                         height: 120.0,
-                        child: CircleAvatar(backgroundImage:AssetImage('images/sample1.png'),),
+                        child: CircleAvatar(
+                          key: ValueKey(bgk),
+                          backgroundImage: bgIm,
+                          child: Icon(Icons.camera_alt)
+                        ),
                       ),
                     ),
-
                     SizedBox(
                       height:10.0,
                     ),

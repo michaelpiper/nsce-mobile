@@ -41,7 +41,7 @@ class ConfirmSchedulePageState extends State<ConfirmSchedulePage>{
         _time = _time.add(Duration(minutes:dit.toInt()));
       }
     }
-    selectedMethod = _schedule['post']['pickup']=="0"?'Site Delivery':'Pick up at Quarry';
+    selectedMethod = _schedule['post']['pickup']=="0"?'Site Delivery':'Pick up at Yard';
   }
   void changeMethod(e){
     setState(() {
@@ -81,7 +81,7 @@ class ConfirmSchedulePageState extends State<ConfirmSchedulePage>{
           padding: EdgeInsets.all(20),
           child: ListBody(
             children: <Widget>[
-              _schedule['post']['pickup']=='1'? ListTile(title:Text('Pickup at Quarry'),subtitle: Text(_schedule['product']['Category']['Quarry']['address']),): ListTile(
+              _schedule['post']['pickup']=='1'? ListTile(title:Text('Pickup at Yard'),subtitle: Text(_schedule['product']['Category']['Quarry']['address']),): ListTile(
                 title: Text('Shipping Address'),
                 subtitle:Text(_schedule['post']['address']),),
               TextFormField(
@@ -175,7 +175,7 @@ class ConfirmSchedulePageState extends State<ConfirmSchedulePage>{
                     );
                   }
                   dialogMan.show();
-                  if(selectedMethod=='Pick up at Quarry'){
+                  if(selectedMethod=='Pick up at Yard'){
                     _schedule['post']['pickup']='1';
                   }else{
                     _schedule['post']['pickup']='0';
@@ -225,10 +225,10 @@ class ConfirmSchedulePageState extends State<ConfirmSchedulePage>{
         )
     );
     Widget _shippingMethods =SelectionList(
-        ['Site Delivery','Pick up at Quarry'],
+        ['Site Delivery','Pick up at Yard'],
       title:Text('Shipping Methods'),
       disabled: true,
-      value:_schedule['post']['pickup']=="0"?'Site Delivery':'Pick up at Quarry',
+      value:_schedule['post']['pickup']=="0"?'Site Delivery':'Pick up at Yard',
       onChange: (e)=>changeMethod(e),
 
     );

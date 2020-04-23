@@ -6,14 +6,28 @@ bool get isInDebugMode{
 }
 
 String baseURL(String path,{replace:false}){
-  if(path.substring(0,8)=="https://" || path.substring(0,7)=="http://"){
-    if(replace){
-      path = path.replaceFirst("https://", '').replaceFirst("http://", '').split('/')[1]??'';
-    }else{
-      return path;
-    }
+  if(path==null){
+    path='';
   }
-  return (path.substring(0,1)=='/')?BASE_URL+path:BASE_URL+'/'+path;
+  else if(path.length>=7){
+    if ( path.indexOf("https://")>=0){
+      if(replace){
+        path = path.replaceFirst("https://", '').split('/')[1]??'';
+      }else {
+        return path;
+      }
+    }
+    else if (replace &&  path.indexOf("http://")>=0){
+      if(replace) {
+        path = path.replaceFirst("http://", '').split('/')[1] ?? '';
+      }else {
+        return path;
+      }
+    }
+    return (path.substring(0,1)=='/')?BASE_URL+path:BASE_URL+'/'+path;
+  }else{
+    return (path.indexOf('/')==0)?BASE_URL+path:BASE_URL+'/'+path;
+  }
 }
 
 double percentage(num amount,num per,{divider:100}){

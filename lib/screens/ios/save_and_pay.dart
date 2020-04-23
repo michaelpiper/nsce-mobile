@@ -20,6 +20,119 @@ class SaveAndPay extends StatelessWidget {
   SaveAndPay(){
      _transaction=localStorage.getItem(STORAGE_CART_CHECKOUT_KEY);
   }
+  payWithCheque(BuildContext context){
+    return Card(
+      elevation: 4.0,
+      child:ListTile(
+        onTap: (){
+          dialogMan.show();
+          f(buyRes){
+            dialogMan.hide();
+            if(buyRes is Map && buyRes['error']==false){
+              // print(buyRes);
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) =>SmartAlert(
+                    title: "Alert",
+                    description: buyRes['message'],
+                    onOk: (){
+                      localStorage.deleteItem(STORAGE_CART_CHECKOUT_KEY);
+                      Navigator.of(context).popAndPushNamed('/home');
+                    },));
+            }
+          }
+          buyItem({'amount':_transaction['totalPrice'].toString(),'typeId':'3','trnRef':_transaction['trnRef']}).then(f);
+        },
+        leading: Image.asset('images/cheque.png'),
+        title: Text('pay with Cheque',),
+      ),
+    );
+  }
+  payWithCard(BuildContext context){
+    return  Card(
+      elevation: 4.0,
+      child:ListTile(
+        onTap: (){
+          dialogMan.show();
+          f(res){
+            dialogMan.hide();
+            if(res is Map &&res['error']==false){
+              fn(buyRes){
+                if(buyRes is Map && buyRes['error']==false){
+                  dialogMan.hide();
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) =>SmartAlert(
+                        title: "Alert",
+                        description: buyRes['message'],
+                        onOk: (){
+                          localStorage.deleteItem(STORAGE_CART_CHECKOUT_KEY);
+                          Navigator.of(context).popAndPushNamed('/home');
+                        },));
+                }
+              }
+              onDone(){
+                dialogMan.show();
+                buyItem({'amount':_transaction['totalPrice'].toString(),'typeId':'2','trnRef':_transaction['trnRef']}).then(fn);
+              }
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    String des="";
+                    if(res['data']>=_transaction['totalPrice']){
+                      des ="You will be charged "+_transaction['currency']+' '+oCcy.format(_transaction['totalPrice'])+" from your wallet";
+                    }else{
+                      des ="You current wallet balance is ${CURRENCY['sign']} "+oCcy.format(res['data'])+"  will be charged ${CURRENCY['sign']} "+oCcy.format(_transaction['totalPrice']-res['data'])+" from your card";
+                    }
+                    return SmartAlert(
+                        title: "Confirm Payment",
+                        description: des,
+                        onOk: (){
+                          if(res['data']>=_transaction['totalPrice']){
+                            onDone();
+                          }else{
+                            Navigator.of(context).push(MaterialPageRoute(builder:(context) => AddFundsPage(onDone:onDone,amount:(_transaction['totalPrice']-res['data']))));
+                          }
+                        });
+                  }, barrierDismissible: false);
+
+            }
+          }
+          fetchAccount(id:'balance').then(f);
+        },
+        leading: Image.asset('images/wallet.png'),
+        title: Text('pay with Wallet',),
+      ),
+    );
+  }
+  payWithBank(BuildContext context){
+    return Card(
+      elevation: 4.0,
+      child:ListTile(
+          onTap: (){
+//            dialogMan.show();
+//            f(buyRes){
+//              dialogMan.hide();
+//              if(buyRes is Map && buyRes['error']==false){
+//                // print(buyRes);
+//                showDialog(
+//                    context: context,
+//                    builder: (BuildContext context) =>SmartAlert(
+//                      title: "Alert",
+//                      description: buyRes['message'],
+//                      onOk: (){
+//                        localStorage.deleteItem(STORAGE_CART_CHECKOUT_KEY);
+//                        Navigator.of(context).popAndPushNamed('/home');
+//                      },));
+//              }
+//            }
+//            buyItem({'amount':_transaction['totalPrice'].toString(),'typeId':'4','trnRef':_transaction['trnRef']}).then(f);
+          },
+          leading: Image.asset('images/bank.png'),
+          title: Text('pay with Bank transfer',)
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     dialogMan.buildContext(context);
@@ -32,7 +145,7 @@ class SaveAndPay extends StatelessWidget {
       leading: IconButton(
         icon: Icon(Icons.home),
         onPressed: (){
-          Navigator.popUntil(context, ModalRoute.withName('/home'));
+          Navigator.of(context).popUntil((route) => route.isFirst);
         },
       ),
     ),
@@ -52,113 +165,8 @@ class SaveAndPay extends StatelessWidget {
             SizedBox(
               height: 21.0,
             ),
-            Card(
-              elevation: 4.0,
-              child:ListTile(
-                onTap: (){
-                  dialogMan.show();
-                  f(res){
-                    dialogMan.hide();
-                    if(res is Map &&res['error']==false){
-                        fn(buyRes){
-                          if(buyRes is Map && buyRes['error']==false){
-                            dialogMan.hide();
-                            showDialog(
-                                context: context,
-                                builder: (BuildContext context) =>SmartAlert(
-                                  title: "Alert",
-                                  description: buyRes['message'],
-                                  onOk: (){
-                                    localStorage.deleteItem(STORAGE_CART_CHECKOUT_KEY);
-                                    Navigator.of(context).popAndPushNamed('/home');
-                                  },));
-                          }
-                        }
-                        onDone(){
-                          dialogMan.show();
-                          buyItem({'amount':_transaction['totalPrice'].toString(),'typeId':'2','trnRef':_transaction['trnRef']}).then(fn);
-                        }
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              String des="";
-                              if(res['data']>=_transaction['totalPrice']){
-                                des ="You will be charged "+_transaction['currency']+' '+oCcy.format(_transaction['totalPrice'])+" from your wallet";
-                              }else{
-                                des ="You current wallet balance is ${CURRENCY['sign']} "+oCcy.format(res['data'])+"  will be charged ${CURRENCY['sign']} "+oCcy.format(_transaction['totalPrice']-res['data'])+" from your card";
-                              }
-                              return SmartAlert(
-                                title: "Confirm Payment",
-                                description: des,
-                                onOk: (){
-                                if(res['data']>=_transaction['totalPrice']){
-                                  onDone();
-                                }else{
-                                  Navigator.of(context).push(MaterialPageRoute(builder:(context) => AddFundsPage(onDone:onDone,amount:(_transaction['totalPrice']-res['data']))));
-                                }
-                            });
-                        }, barrierDismissible: false);
-
-                    }
-                  }
-                  fetchAccount(id:'balance').then(f);
-                },
-                leading: Image.asset('images/wallet.png'),
-                title: Text('pay with Wallet',),
-              ),
-            ),
-            Card(
-              elevation: 4.0,
-              child:ListTile(
-                onTap: (){
-                  dialogMan.show();
-                  f(buyRes){
-                    dialogMan.hide();
-                    if(buyRes is Map && buyRes['error']==false){
-                      // print(buyRes);
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) =>SmartAlert(
-                            title: "Alert",
-                            description: buyRes['message'],
-                            onOk: (){
-                              localStorage.deleteItem(STORAGE_CART_CHECKOUT_KEY);
-                              Navigator.of(context).popAndPushNamed('/home');
-                            },));
-                    }
-                  }
-                  buyItem({'amount':_transaction['totalPrice'].toString(),'typeId':'3','trnRef':_transaction['trnRef']}).then(f);
-                },
-                leading: Image.asset('images/cheque.png'),
-                title: Text('pay with Cheque',),
-              ),
-            ),
-            Card(
-              elevation: 4.0,
-              child:ListTile(
-                onTap: (){
-                  dialogMan.show();
-                  f(buyRes){
-                    dialogMan.hide();
-                    if(buyRes is Map && buyRes['error']==false){
-                      // print(buyRes);
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) =>SmartAlert(
-                            title: "Alert",
-                            description: buyRes['message'],
-                            onOk: (){
-                              localStorage.deleteItem(STORAGE_CART_CHECKOUT_KEY);
-                              Navigator.of(context).popAndPushNamed('/home');
-                            },));
-                    }
-                  }
-                  buyItem({'amount':_transaction['totalPrice'].toString(),'typeId':'4','trnRef':_transaction['trnRef']}).then(f);
-                },
-                leading: Image.asset('images/bank.png'),
-                title: Text('pay with Bank transfer',)
-              ),
-            )
+            payWithCard(context),
+            payWithBank(context),
           ]
         ),
       )

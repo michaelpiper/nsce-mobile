@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -297,6 +298,45 @@ updateAccount(Map body)async{
 //    // print(response.body);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
+    } else {
+      return false;
+    }
+  }
+  catch(e){
+    return false;
+  }
+}
+updateAccountProfilePicture(File filename)async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  Map<String, String> headers={};
+  if(prefs.containsKey(STORAGE_USER_KEY)) {
+    var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
+    if(wait.containsKey('authorization')) {
+      headers['Authorization']=wait['authorization'];
+    }
+  }
+  try{
+    var request = http.MultipartRequest('POST', Uri.parse(API_ACCOUNT_URL+'/profile-picture'));
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if(prefs.containsKey(STORAGE_USER_KEY)) {
+      var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
+      if(wait.containsKey('authorization')) {
+        request.headers['Authorization']=wait['authorization'];
+      }
+    }
+    request.files.add(
+        http.MultipartFile(
+            'picture',
+            filename.readAsBytes().asStream(),
+            filename.lengthSync(),
+            filename: filename.path.split("/").last
+        )
+    );
+    var response = await request.send();
+    print(response.statusCode);
+    var body = await response.stream.bytesToString();
+    if (response.statusCode == 200) {
+      return convert.jsonDecode(body);
     } else {
       return false;
     }

@@ -23,7 +23,7 @@ class _OrderPageState extends State<OrderPage>{
   String _comment;
   final oCcy = new NumberFormat("#,##0.00", "en_US");
   final LocalStorage storage = new LocalStorage(STORAGE_KEY);
-  Map<String,dynamic> _order= {'name':'stone','quantity':'2000','amount':'180,000.00','measurement':'Tonnes','id':'12343232','image':'images/sample2.png','createdAt':'2012 12:00pm','shippingMethod':'Pick up at Quarry'};
+  Map<String,dynamic> _order= {'name':'stone','quantity':'2000','amount':'180,000.00','measurement':'Tonnes','id':'12343232','image':'images/sample2.png','createdAt':'2012 12:00pm','shippingMethod':'Pick up at Yard'};
   DateTime _date;
   _OrderPageState({this.index});
   goTo(step){
@@ -84,7 +84,7 @@ class _OrderPageState extends State<OrderPage>{
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text('Shipping method',style:TextStyle(color:primaryTextColor,fontSize: 14,textBaseline: TextBaseline.alphabetic)),
-                      Text(_order['pickup']==1?"Pick up at Quarry":"Site Delivery",style:TextStyle(color:primaryTextColor,fontSize: 18,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),
+                      Text(_order['pickup']==1?"Pick up at Yard":"Site Delivery",style:TextStyle(color:primaryTextColor,fontSize: 18,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),
                     ],
                   ),
                   Column(

@@ -84,7 +84,7 @@ class ConfirmOrderPage extends StatelessWidget {
                 Row(
                     children: <Widget>[
                       Expanded(child: Text('Billing Info',style: TextStyle(fontWeight: FontWeight.w300,fontSize: 20,color: textColor),),),
-                      InkWell(child: Text('Edit',style:TextStyle(color:primaryColor)))
+                      InkWell(onTap:(){Navigator.pushNamed(context, '/checkout');},child: Text('Edit',style:TextStyle(color:primaryColor)))
                     ]
                 ),
                 SizedBox(
@@ -144,7 +144,6 @@ class ConfirmOrderPage extends StatelessWidget {
                 Row(
                   children: <Widget>[
                     Expanded(child: Text('Shipping Info',style: TextStyle(fontWeight: FontWeight.w300,fontSize: 20,color: textColor),),),
-                    InkWell(child: Text('Edit',style:TextStyle(color:primaryColor)))
                   ]
                 ),
                 Row(
@@ -162,7 +161,7 @@ class ConfirmOrderPage extends StatelessWidget {
                     Padding(padding: EdgeInsets.only(right:7.0),),
                     SizedBox(width: 20,),
                     Padding(padding: EdgeInsets.only(right:5.0),),
-                    Expanded(child:Text('20 Mn. GSB(Granule Sub Base) Wetmix Coarse Aggregates. from Quarry in Abekuta',style:TextStyle(color:noteColor,fontSize: 16,textBaseline: TextBaseline.alphabetic)))
+                    Expanded(child:Text('from Yard',style:TextStyle(color:noteColor,fontSize: 16,textBaseline: TextBaseline.alphabetic)))
                   ],
                 )
               ]

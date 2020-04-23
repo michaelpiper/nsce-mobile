@@ -15,19 +15,20 @@ class TableBuilder extends StatelessWidget{
       if(built.length!=row+1){
         built.add([]);
       }
-      built[row].add(data[i]);
+      built[row].add(TableCell(child:data[i]));
       count++;
     }
-    return built.map<Widget>((body)=> Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: body,
+    while(built[built.length-1].length<column){
+      built[built.length-1].add(TableCell(child:Container()));
+    }
+    return built.map<TableRow>((body)=> TableRow(
+        children: body
     )).toList();
   }
   @override
   Widget build(BuildContext context) {
-    return  Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children:_rowBuilder()
+    return  Table(
+        children:_rowBuilder()
     );
   }
 }

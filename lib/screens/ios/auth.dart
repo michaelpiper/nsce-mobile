@@ -47,6 +47,21 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     _countryList=simpleCountryCode.map(f).toList();
     _text_controller.text=_username;
     tryRemember();
+    _titleList.add(
+        DropdownMenuItem(
+      child: Text("Mr",style:TextStyle(color: textColor),),
+      value: "Mr",
+    ));
+    _titleList.add(
+        DropdownMenuItem(
+          child: Text("Mrs",style:TextStyle(color: textColor),),
+          value: "Mrs",
+        ));
+    _titleList.add(
+        DropdownMenuItem(
+          child: Text("Miss",style:TextStyle(color: textColor),),
+          value: "Miss",
+        ));
   }
   final _formKey = GlobalKey<FormState>();
   String _username;
@@ -60,6 +75,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   bool _rememberme=false;
   Map<String, String> _sendMailData={};
   List <Widget> _countryList=[];
+  List <DropdownMenuItem> _titleList=[];
   TextEditingController _text_controller = TextEditingController();
   Map<String, String> _signUpData={'firstname':'','lastname':'','fullname':'','country':null,'company':'','email':'','phone':'','password':'','confirm_password':'','remeberme':'0'};
 
@@ -82,6 +98,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       setState(() {
         _username=data;
         _text_controller.text=data;
+        _signUpData['remeberme']='1';
+        _rememberme=true;
         _sendMailData['email']=data;
       });
     }
@@ -238,31 +256,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                       SizedBox(
                         height: margin-430.0,
                       ),
-                      Row(
-                        children: <Widget>[
-                          Expanded(child: Text("")),
-                          InkWell(
-
-                            onTap: (){
-                              if(_loading) {
-                                return;
-                              }
-                              setState(() {
-                                // Process data.
-                                _screen=3;
-                              });
-                            },
-                            child: Text("Forget Password?",
-                              style: TextStyle(
-                                color:  actionColor,
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                      SizedBox(
-                        height: 25.0,
-                      ),
                       MaterialButton(
 
                         color: primaryColor,
@@ -322,7 +315,24 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                       ),
                       Row(
                         children: <Widget>[
-                          Expanded(child: Text("New on NSCE?")),
+                          Expanded(
+                            child: InkWell(
+                              onTap: (){
+                                if(_loading) {
+                                  return;
+                                }
+                                setState(() {
+                                  // Process data.
+                                  _screen=3;
+                                });
+                              },
+                              child: Text("Forgot Password?",
+                                style: TextStyle(
+                                  color:  actionColor,
+                                ),
+                              ),
+                            ),
+                          ),
                           InkWell(
                             onTap: (){
                               if(_loading) {
@@ -392,27 +402,48 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                         ),
                         Row(
                           children: <Widget>[
-                            Expanded(child: TextFormField(
-
-                              initialValue: _signUpData['firstname'] ,
-                              onSaved: (value)=> _signUpData['firstname'] = value,
-                              decoration: const InputDecoration(
-                                prefixIcon: Icon(Icons.person,color: secondaryTextColor),
-                                labelText: 'Firstame',
-                                labelStyle: TextStyle(
-                                  color: secondaryTextColor,
+                            Expanded(
+                              child: DropdownButtonFormField(
+                                decoration: InputDecoration(
+                                    prefixIcon:  Icon(Icons.map,color: secondaryTextColor),
+                                    contentPadding: EdgeInsets.symmetric(vertical: 5)
                                 ),
+                                iconSize: 30.0,
+                                value: _signUpData['title'],
+                                hint: Text(_signUpData['title']==null?'Ti':_signUpData['title']),
+                                isExpanded: true,
+                                style: TextStyle(color: Colors.white70),
+                                onChanged: (v){
+                                  return setState(() {
+                                    _signUpData['title'] = v;
+                                  });
+                                },
+                                items:_titleList,
                               ),
-                              keyboardType: TextInputType.text,
-                              // textInputAction: TextInputAction.continueAction,
-                              onChanged: (v) => _signUpData['firstname'] = v,
-                              validator: (value) {
-                                if (value.isEmpty) {
-                                  return 'Please enter your first name';
-                                }
-                                return null;
-                              },
-                            ),),
+                            ),
+                            SizedBox(width: 4,),
+                            Expanded(
+                              child: TextFormField(
+                                initialValue: _signUpData['firstname'] ,
+                                onSaved: (value)=> _signUpData['firstname'] = value,
+                                decoration: const InputDecoration(
+                                  prefixIcon: Icon(Icons.person,color: secondaryTextColor),
+                                  labelText: 'Firstname',
+                                  labelStyle: TextStyle(
+                                    color: secondaryTextColor,
+                                  ),
+                                ),
+                                keyboardType: TextInputType.text,
+                                // textInputAction: TextInputAction.continueAction,
+                                onChanged: (v) => _signUpData['firstname'] = v,
+                                validator: (value) {
+                                  if (value.isEmpty) {
+                                    return 'Please enter your first name';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
                             SizedBox(width: 4,),
                             Expanded(
                               child: TextFormField(
@@ -440,27 +471,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
 
                           ],
                         ),
-
-//                        TextFormField(
-//                          initialValue: _signUpData['company'] ,
-//                          onSaved: (value)=> _signUpData['company'] = value,
-//                          decoration: const InputDecoration(
-//                            prefixIcon: Icon(Icons.person,color: secondaryTextColor,),
-//                            labelText: 'Company Name',
-//                            labelStyle: TextStyle(
-//                              color: secondaryTextColor,
-//                            ),
-//                          ),
-//                          keyboardType: TextInputType.text,
-//                          // textInputAction: TextInputAction.continueAction,
-//                          onChanged: (v) => _signUpData['company'] = v,
-//                          validator: (value) {
-//                            if (value.isEmpty) {
-//                              return 'Please enter your company name';
-//                            }
-//                            return null;
-//                          },
-//                        ),
                         TextFormField(
                           initialValue: _signUpData['email'] ,
                           onSaved: (value)=> _signUpData['email'] = value,
@@ -481,43 +491,28 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                             return null;
                           },
                         ),
-                        Stack(
-                          alignment: Alignment(1.0,0.0), // right & center
-                          children: <Widget>[
-                            Padding(
-                                padding: EdgeInsets.only(left: 50.0),
-                                child:DropdownButton(
-                                  icon:Padding(
-                                    padding:EdgeInsets.symmetric(
-                                        vertical: 21
-                                    ),
-                                    child:SizedBox(width:30.0,height: 30.0,),),
-                                  iconSize: 30.0,
-                                  value: _country,
-                                  hint: Text(_signUpData['country']==null?'Country':_signUpData['country']),
-                                  isExpanded: true,
-                                  style: TextStyle(color: Colors.white70),
-                                  onChanged: (v){
-                                    for (var i=0;i<simpleCountryCode.length;i++){
-                                      Map e = simpleCountryCode[i];
-                                      if(e['name']==v){
-                                        return setState(() {
-                                          _signUpData['country'] = v;
-                                          _signUpData['phone'] = e['code'];
-                                        });
-                                      }
-                                    }
-
-                                  },
-                                  items:_countryList,
-                                )
-                            ),
-                            Positioned(
-                              left: 11,
-                              height:30,
-                              child:  Icon(Icons.map,color: secondaryTextColor),
-                            ),
-                          ],
+                        DropdownButtonFormField(
+                          decoration: InputDecoration(
+                            prefixIcon:  Icon(Icons.map,color: secondaryTextColor),
+                            contentPadding: EdgeInsets.symmetric(vertical: 5)
+                          ),
+                          iconSize: 30.0,
+                          value: _country,
+                          hint: Text(_signUpData['country']==null?'Country':_signUpData['country']),
+                          isExpanded: true,
+                          style: TextStyle(color: Colors.white70),
+                          onChanged: (v){
+                            for (var i=0;i<simpleCountryCode.length;i++){
+                              Map e = simpleCountryCode[i];
+                              if(e['name']==v){
+                                return setState(() {
+                                  _signUpData['country'] = v;
+                                  _signUpData['phone'] = e['code'];
+                                });
+                              }
+                            }
+                          },
+                          items:_countryList,
                         ),
                         TextFormField(
                           key: UniqueKey(),
@@ -540,7 +535,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                             return null;
                           },
                         ),
-
                         Stack(
                             alignment: Alignment(1.0,0.0), // right & center
                             children: <Widget>[
@@ -772,27 +766,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     );
   }
   Widget forgetPassword(){
-    double margin=0.0;
-    var size=MediaQuery.of(context).size;
-
-    if(size.height>630){
-      margin=500;
-    }
-    else if(size.height>610){
-      margin=500;
-    }
-    else if(size.height>510){
-      margin=450;
-    }
-    else if(size.height>410){
-      margin=400;
-    }
-    else if(size.height>340){
-      margin=320;
-    }else{
-      margin=300;
-    }
-
     return Container(
       // Center is a layout widget. It takes a single child and positions it
       // in the middle of the parent.
@@ -829,7 +802,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     children: <Widget>[
                       Padding(padding:EdgeInsets.only(top: 20),),
                       Text(
-                        'Forget Password',
+                        'Forgot Password',
                         style: TextStyle(fontFamily: "Lato",fontStyle:FontStyle.normal,fontWeight: FontWeight.normal,fontSize: 20),
                       ),
                       SizedBox(
@@ -857,7 +830,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                         },
                       ),
                       SizedBox(
-                        height: margin-350.0,
+                        height:35.0,
                       ),
                       Row(
                         children: <Widget>[
@@ -945,7 +918,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                             });
                           }
                         },
-                        child: Text((_loading?'loading...':'Forget Password'),
+                        child: Text((_loading?'loading...':'Reset Password'),
                           style: TextStyle(
                             fontSize: 16.0,
                             color: Colors.white,
@@ -1048,6 +1021,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     }
 
     final popup = BeautifulPopup(
+
       context: context,
       template: TemplateAuthentication,
 

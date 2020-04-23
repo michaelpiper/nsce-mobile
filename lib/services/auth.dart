@@ -69,7 +69,7 @@ class AuthService with ChangeNotifier{
     if(result == false){
       return Future.value('No internet connection');
     }
-    if(result.containsKey('error') && result['error']){
+    if(result.containsKey('error')){
       return Future.value(result['message']);
     }
     return Future.value(null);
@@ -104,7 +104,7 @@ class AuthService with ChangeNotifier{
   }
   Future loginUser({String username,String password}) async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    if(isInDebugMode && username =='test@test.com' && password=='damola123'){
+    if(isInDebugMode && username =='test@test.com' && password=='password'){
       var result ={'id': '4', 'email': 'pipermichael@aol.com', 'phone': '08147065493', 'createdAt': '2020-02-13T10:37:17.000Z', 'updatedAt': '2020-02-13T10:37:17.000Z', 'authorization': 'Bearer MTU4MjUzNjA0MTUwNnd3S09SQXJ5NG9RT0ZoS3FvSg=='};
       prefs.setString(STORAGE_USER_KEY,convert.jsonEncode(result));
       notifyListeners();
