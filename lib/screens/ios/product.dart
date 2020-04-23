@@ -49,6 +49,7 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
     _txtController.text=unit.toString();
   }
   void increament(){
+    if(unit>=9999)return;
     setState(() {
       unit++;
       _txtController.text=unit.toString();
@@ -261,7 +262,7 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
 //                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   Padding(padding: EdgeInsets.only(right:7.0),),
-                  Expanded(child:Text(_product['descripton'].toString()+' from Yard in\n'+_product['Category']['Quarry']['state']+', '+_product['Category']['Quarry']['country'],style:TextStyle(color:noteColor,fontSize: 16,textBaseline: TextBaseline.alphabetic)))
+                  Expanded(child:Text(_product['descripton']==null?'':_product['descripton'].toString()+' from Yard in\n'+_product['Category']['Quarry']['state']+', '+_product['Category']['Quarry']['country'],style:TextStyle(color:noteColor,fontSize: 16,textBaseline: TextBaseline.alphabetic)))
                 ],
               )
             ]
@@ -293,67 +294,66 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
                         ),
                         side: BorderSide(color: secondaryColor,)
                     ),
-                    child: SizedBox(
-                      child: Stack(
-                        children: <Widget>[
-                          Padding(padding: EdgeInsets.only(right: 20.0),),
-                          ButtonBar(
-                            buttonPadding: EdgeInsets.only(top:2.0),
-                            alignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              IconButton(
-                                padding: EdgeInsets.all(0.0),
-                                iconSize: 16,
-                                icon: Icon(Icons.remove),
-                                tooltip: 'Decrease volume by 1',
-                                onPressed: () {
-                                  decreament();
-                                },
-                              ),
-                              InkWell(
-                                onTap: (){
-                                  return showDialog(context: context,builder: (BuildContext context){
-                                    return Dialog(
+                    child: ButtonBar(
+                      buttonPadding: EdgeInsets.only(top:2.0),
+                      alignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        IconButton(
+                          padding: EdgeInsets.all(0.0),
+                          iconSize: 16,
+                          icon: Icon(Icons.remove),
+                          tooltip: 'Decrease volume by 1',
+                          onPressed: () {
+                            decreament();
+                          },
+                        ),
+                        InkWell(
+                           onTap: (){
+                             _txtController.text='$unit';
+                             return showDialog(context: context,builder: (BuildContext context){
+                               return Dialog(
+                                 child: Padding(
+                                   padding:EdgeInsets.symmetric(horizontal: 10),
+                                   child:TextField(
+                                     controller: _txtController,
+                                     autofocus: true,
+                                     keyboardType: TextInputType.number,
+                                     decoration: InputDecoration(
+                                         border: InputBorder.none,
+                                         contentPadding: EdgeInsets.all(10)
+                                     ),
+                                     onSubmitted: (e)=>setState(() {
+                                       int qty=int.tryParse(e);
+                                       if(qty>9999){
+                                         unit=9999;
+                                       }
+                                       else{
+                                         unit=qty;
+                                       }
+                                       Navigator.of(context).pop();
+                                     }),
+                                     style: TextStyle(
+                                       textBaseline: TextBaseline.alphabetic,
+                                     ),
+                                   )
+                                 ),
+                               );
+                             });
+                           },
+                           child: Text('$unit',textAlign: TextAlign.center,),
+                         ),
+                        IconButton(
+                          padding: EdgeInsets.all(0.0),
+                          iconSize: 16,
 
-                                      child: TextField(
-                                        controller: _txtController,
-                                        autofocus: true,
-                                        keyboardType: TextInputType.number,
-                                        decoration: InputDecoration(
-                                            border: InputBorder.none
-                                        ),
-                                        onChanged: (e)=>setState(() {
-                                          unit=int.tryParse(e);
-                                        }),
-                                        onSubmitted: (e)=>setState(() {
-                                          unit=int.tryParse(e);
-                                          Navigator.of(context).pop();
-                                        }),
-                                        style: TextStyle(
-                                          textBaseline: TextBaseline.alphabetic,
-                                        ),
-                                      ),
-                                    );
-                                  });
-                                },
-                                child: Text('$unit'),
-                              ),
-                              IconButton(
-                                padding: EdgeInsets.all(0.0),
-                                iconSize: 16,
-
-                                icon: Icon(Icons.add),
-                                tooltip: 'Increase volume by 1',
-                                onPressed: () {
-                                  increament();
-                                },
-                              ),
-                            ],)
-                        ],
-                      ),
-
-                      width: 150,
-                      height: 40,),
+                          icon: Icon(Icons.add),
+                          tooltip: 'Increase volume by 1',
+                          onPressed: () {
+                            increament();
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                   Text('X 1 Unit',
                     style: TextStyle(color: noteColor),
@@ -361,7 +361,6 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
                   ),
                 ],
               ),
-
               MaterialButton(
                 splashColor: primaryColor,
                 color: primaryColor,
