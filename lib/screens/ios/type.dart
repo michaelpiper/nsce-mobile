@@ -186,8 +186,10 @@ class _TypePageState extends State<TypePage> with TickerProviderStateMixin {
       child:  ListView(
         shrinkWrap: true,
         children: <Widget>[
-          Container(height: 5.0,color: bgColor,),
+          Container(height: 10.0,color: bgColor,),
           Container(padding:EdgeInsets.symmetric(horizontal: 12),child: Text('Product',style: TextStyle(color: noteColor,fontWeight: FontWeight.w600,fontSize: 20),),color: liteColor,),
+          Container(height: 10.0,color: bgColor,),
+          Divider(height: 10,color: noteColor,thickness: 4,),
           Container(height: 5.0,color: bgColor,),
           Container(child: productsBuilder(),)
         ]

@@ -292,7 +292,7 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
                             top: Radius.elliptical(12.0,12.0),
                             bottom: Radius.elliptical(12.0,12.0)
                         ),
-                        side: BorderSide(color: secondaryColor,)
+                        side: BorderSide(color: noteColor,)
                     ),
                     child: ButtonBar(
                       buttonPadding: EdgeInsets.only(top:2.0),
@@ -300,8 +300,8 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
                       children: <Widget>[
                         IconButton(
                           padding: EdgeInsets.all(0.0),
-                          iconSize: 16,
-                          icon: Icon(Icons.remove),
+                          iconSize: 15,
+                          icon: Icon(Icons.remove_circle_outline),
                           tooltip: 'Decrease volume by 1',
                           onPressed: () {
                             decreament();
@@ -344,9 +344,9 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
                          ),
                         IconButton(
                           padding: EdgeInsets.all(0.0),
-                          iconSize: 16,
+                          iconSize: 15,
 
-                          icon: Icon(Icons.add),
+                          icon: Icon(Icons.add_circle_outline),
                           tooltip: 'Increase volume by 1',
                           onPressed: () {
                             increament();
@@ -366,6 +366,7 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
                 color: primaryColor,
                 textColor: primaryTextColor,
                 hoverColor: primarySwatch,
+                padding: EdgeInsets.all(15),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.vertical(
                         top: Radius.elliptical(15.0,15.0),
@@ -440,10 +441,12 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
       ),
       child: Container(
         decoration: BoxDecoration(
+          color: Colors.grey[100],
           borderRadius: BorderRadius.circular(20.0),
         ),
-        height: 300.0,
-        width: 300.0,
+        padding: EdgeInsets.all(20),
+        height: 320.0,
+        width: 320.0,
         child: Stack(
           children: <Widget>[
             Container(

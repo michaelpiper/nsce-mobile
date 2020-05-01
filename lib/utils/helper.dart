@@ -1,7 +1,9 @@
 import '../services/endpoints.dart';
+import 'package:flutter/foundation.dart';
 bool get isInDebugMode{
-  bool inDebugMode=false;
-  assert(inDebugMode=true);
+  const bool inDebugMode=true;
+  if(kReleaseMode)
+    return kReleaseMode;
   return inDebugMode;
 }
 

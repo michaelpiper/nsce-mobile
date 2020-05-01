@@ -19,8 +19,7 @@ import 'home/notification.dart';
 import 'home/products.dart';
 import 'home/wallet.dart';
 import 'home/drawer.dart';
-
-
+import 'package:NSCE/utils/helper.dart';
 
 
 final notifications = FlutterLocalNotificationsPlugin();
@@ -117,41 +116,44 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _title = _children[currentIndex].title;
     _controller.addListener(_handleSelected);
     _initMe();
-    notifications.initialize(
-        InitializationSettings(settingsAndroid, settingsIOS),
-        onSelectNotification: onSelectNotification);
+    if(!isInDebugMode){
+//      call notification and initialize firebase only when in release mode
+      notifications.initialize(
+          InitializationSettings(settingsAndroid, settingsIOS),
+          onSelectNotification: onSelectNotification);
 
-    final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-    _firebaseMessaging.configure(
-      onLaunch: (Map<String, dynamic> message) async {
-        print('onLaunch');
-      },
-      onBackgroundMessage: myBackgroundMessageHandler,
-      onMessage: (Map<String, dynamic> message)async{
-        print('Firebase: ${message['notification']}');
-        showSilentNotification(notifications,
-            title:  message['notification']['title'], body:  message['notification']['body'],payload: '$message');
-        showDialog(
-            context: context,
-            builder: (context){
-              return SmartAlert(title: message['notification']['title'], description: message['notification']['body']);
-            });
-      },
-      onResume: (Map<String, dynamic> message) async {
-        print('onResume');
-      },
-    );
-    _firebaseMessaging.getToken().then((token){
-      print('Firebase Token is $token');
-      if(token!=null) {
-        patchAccount({"pushNotificationToken": token});
-        _firebaseMessaging.subscribeToTopic('all');
-      }
-    });
-    _firebaseMessaging.requestNotificationPermissions(const IosNotificationSettings(sound: true, badge: true, alert: true));
-    _firebaseMessaging.onIosSettingsRegistered.listen((IosNotificationSettings setting) {
-      print('onIosSettingsRegistered: ' + setting.toString());
-    });
+      final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+      _firebaseMessaging.configure(
+        onLaunch: (Map<String, dynamic> message) async {
+          print('onLaunch');
+        },
+        onBackgroundMessage: myBackgroundMessageHandler,
+        onMessage: (Map<String, dynamic> message)async{
+          print('Firebase: ${message['notification']}');
+          showSilentNotification(notifications,
+              title:  message['notification']['title'], body:  message['notification']['body'],payload: '$message');
+          showDialog(
+              context: context,
+              builder: (context){
+                return SmartAlert(title: message['notification']['title'], description: message['notification']['body']);
+              });
+        },
+        onResume: (Map<String, dynamic> message) async {
+          print('onResume');
+        },
+      );
+      _firebaseMessaging.getToken().then((token){
+        print('Firebase Token is $token');
+        if(token!=null) {
+          patchAccount({"pushNotificationToken": token});
+          _firebaseMessaging.subscribeToTopic('all');
+        }
+      });
+      _firebaseMessaging.requestNotificationPermissions(const IosNotificationSettings(sound: true, badge: true, alert: true));
+      _firebaseMessaging.onIosSettingsRegistered.listen((IosNotificationSettings setting) {
+        print('onIosSettingsRegistered: ' + setting.toString());
+      });
+    }
   }
   @override
   void dispose(){

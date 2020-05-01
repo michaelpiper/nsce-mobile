@@ -36,19 +36,21 @@ class _Search extends State<Search>{
     // TODO: implement build
     return  Container(
       decoration: BoxDecoration(
+        color: Colors.grey[100],
         borderRadius: BorderRadius.circular(20.0),
+        image: DecorationImage(image: AssetImage('images/map.png'),fit: BoxFit.fill)
       ),
-      height: 300.0,
-      width: 300.0,
+      padding: EdgeInsets.all(20),
+      height: 320.0,
+      width: 320.0,
       child: Stack(
         children: <Widget>[
           Container(
             width: double.infinity,
             height: 300,
             decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(12.0),
-                image: DecorationImage(image: AssetImage('images/map.png'),fit: BoxFit.fill)
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(12.0)
             ),
             child: Padding(
                 padding: EdgeInsets.only(bottom:10, top: 65,left: 10, right: 10),

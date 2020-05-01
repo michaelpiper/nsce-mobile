@@ -236,7 +236,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-
+                      _quicklink.isNotEmpty?
                       TableBuilder(
                         _quicklink.map<Widget>((e)=>SmallCard(
                             name: e['name'],
@@ -250,7 +250,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
                           )
                         ).toList(),
                         column: 4,
-                      ),
+                      ):
+                      Container(),
                     ],
                   ),
                 ),

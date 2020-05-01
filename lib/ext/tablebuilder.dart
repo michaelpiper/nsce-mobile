@@ -21,13 +21,14 @@ class TableBuilder extends StatelessWidget{
     while(built[built.length-1].length<column){
       built[built.length-1].add(TableCell(child:Container()));
     }
+    print(built);
     return built.map<TableRow>((body)=> TableRow(
         children: body
     )).toList();
   }
   @override
   Widget build(BuildContext context) {
-    return  Table(
+    return Table(
         children:_rowBuilder()
     );
   }
