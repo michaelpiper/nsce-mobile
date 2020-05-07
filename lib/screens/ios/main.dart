@@ -1,3 +1,5 @@
+import 'package:NSCE/screens/ios/invoice.dart';
+import 'package:NSCE/screens/ios/schedule_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -151,7 +153,9 @@ buildAndroid(context){
       '/schedule':   (BuildContext context) =>SchedulePage(),
       '/driver-profile':(BuildContext context) =>DriverProfilePage(),
       '/driver-home':(BuildContext context) =>DriverHomePage(),
-      '/chat':(BuildContext context) =>ChatPage()
+      '/chat':(BuildContext context) =>ChatPage(),
+      '/invoices': (BuildContext context) => InvoicesPage(),
+      '/schedule-list':(BuildContext context) =>ScheduleListPage()
     },
   );
 }

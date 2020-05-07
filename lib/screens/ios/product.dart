@@ -32,6 +32,7 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
   final LocalStorage storage = new LocalStorage(STORAGE_KEY);
   TextEditingController _txtController = TextEditingController();
   final oCcy = new NumberFormat("#,##0.00", "en_US");
+  Map _userDetails;
   Map post={'productId':'','quantity':'','schedule':'','pickup':'','contactPerson':'','contactPhone':''};
   final DialogMan dialogMan =DialogMan(child: Scaffold(
       backgroundColor: Colors.transparent,
@@ -44,6 +45,7 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
   void initState() {
     // TODO: implement initState
     super.initState();
+    _userDetails=storage.getItem(STORAGE_USER_DETAILS_KEY);
     _loadingIndicator=true;
     unit=1;
     _txtController.text=unit.toString();
@@ -65,11 +67,12 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
 
   Future _loadProduct() async {
     fetchProductWithParents(id).then((product){
+      print(product);
       if(product==false || product==null){
         return Future.value(false);
       }
       if( product['data'] is Map){
-        // print(product['data']);
+         print(product['data']);
         setState(() {
           _product = product['data'];
           _productLoaded();
@@ -124,7 +127,7 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
                     ),
                     Expanded(
                       child: Text(
-                        _product['Category']['Quarry']['address']+' '+_product['Category']['Quarry']['state']+', '+_product['Category']['Quarry']['country'],
+                        _product['Category']['Plant']['Quarry']['address']+' '+_product['Category']['Plant']['Quarry']['state']+', '+_product['Category']['Plant']['Quarry']['country'],
                         style: TextStyle(
                           color: Colors.grey[500],
                         ),
@@ -216,7 +219,7 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
               ),
               Row(
                   children: <Widget>[
-                    Expanded(child: Text('${CURRENCY['sign']} '+percentage(_product['price'],_product['discount']).toString()+'/'+_product['unit'],style: TextStyle(fontWeight: FontWeight.w600,fontSize: 20,color: textColor),),)
+                    Expanded(child: Text('${CURRENCY['sign']} '+percentage(_product['price'],_product['discount']).toString()+'/'+isNull(_product['unit'],replace: 'unit'),style: TextStyle(fontWeight: FontWeight.w600,fontSize: 20,color: textColor),),)
                   ]
               ),
               _product['discount']==0?
@@ -251,8 +254,8 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
                 ),
                 InkWell(
                     onTap: (){
-                      storage.setItem(STORAGE_QUARRY_KEY, _product['Category']['Quarry']).then((v){
-                        Navigator.pushNamed(context, '/quarry/'+_product['Category']['Quarry']['id'].toString());
+                      storage.setItem(STORAGE_QUARRY_KEY, _product['Category']['Plant']['Quarry']).then((v){
+                        Navigator.pushNamed(context, '/quarry/'+_product['Category']['Plant']['Quarry']['id'].toString());
                       });
                     },
                     child: Text('see more',style:TextStyle(color:primaryColor)))
@@ -376,7 +379,19 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
                 ),
                 child: Text('Schedule'),
                 onPressed: (){
-                  showFancyCustomDialog(context);
+                  fn(res){
+                    if(res['data'] == null){
+                      showFancyCustomDialog(context);
+                    }else{
+                      dialogMan.show();
+                      setState(() {
+                        selectedMethod= res['data']=='pickup'?'Pick up at Yard':'Site Delivery"';
+                      });
+                      continueToAdd();
+                    }
+                  }
+                  fetchCart(id: 'type').then(fn);
+
                 },
               )
             ],
@@ -422,7 +437,7 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
         post['productId']=id.toString();
         post['quantity']=unit.toString();
         post['schedule']='';
-        post['pickup']= selectedMethod=="Site Delivery"?'0':'1';
+        post['type']= selectedMethod=="Site Delivery"?'delivery':'pickup';
         post['contactPerson']=contact['firstName']+' '+contact['lastName'];
         post['contactPhone']=act['phone'];
         storage.setItem(STORAGE_SCHEDULE_KEY, {'post':post,'product':_product}).then<void>((value){
@@ -559,15 +574,16 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
         borderRadius: BorderRadius.circular(12.0),
       ),
       child: Search(
-        initValue:post['address'] ==null?'':post['address'] ,
+        initValue:post['shippingAddress'] ==null?'':post['address'] ,
       onSelect: (e){
-        post['contactPhone']="";
-        post['contactPerson']="";
-        post['address'] = e['address'];
-        List arrAddress =post['address'].split(',');
-        post['country'] = arrAddress[arrAddress.length-1];
-        post['state'] = arrAddress[arrAddress.length-2];
-        post['geolocation'] = e['geolocation'];
+        post['contactPhone']=_userDetails['firstName']+' '+_userDetails['lastName'];
+        post['contactPerson']=_userDetails['phone'];
+        post['shippingAddress'] = e['address'];
+        List arrAddress = e['address'].split(',');
+        post['shippingState'] = isNull(arrAddress[arrAddress.length-1],replace: '');
+        post['shippingLGA'] = isNull(arrAddress[arrAddress.length-2],replace: '');
+        post['shippingLatLng'] = e['geolocation'];
+        updateShippingAddress(post);
         Navigator.of(context).pop();
       },)
     );

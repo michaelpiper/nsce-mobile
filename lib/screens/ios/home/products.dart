@@ -40,7 +40,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
       {'avatar':'assets/icons/calculator.png','link':'/orders','name':'Material Calculator','color':Color.fromRGBO(242, 189, 40, 0.12)},
       {'avatar':'assets/icons/payment.png','link':'/home/2','name':'Payments','color':Color.fromRGBO(242, 189, 40, 0.12)},
       {'avatar':'assets/icons/wallet.png','link':'/home/3','name':'Wallet','color':Color.fromRGBO(242, 189, 40, 0.12)},
-      {'avatar':'assets/icons/invoice.png','link':'/product/1','name':'Invoice','color':Color.fromRGBO(242, 189, 40, 0.12)},
+      {'avatar':'assets/icons/invoice.png','link':'/invoices','name':'Invoice','color':Color.fromRGBO(242, 189, 40, 0.12)},
       {'avatar':'assets/icons/chat.png','link':'/chat','name':'Chat','color':Color.fromRGBO(242, 189, 40, 0.12)},
     ];
   }
@@ -177,7 +177,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                     Padding(
                       padding: EdgeInsets.only(right: 10.0),
                     ),
-                    _loadingAdvertIndicator?Center(child:CircularProgressIndicator()):CarouselWithIndicator(_adverts,activeIndicator: actionColor,),
+                    _loadingAdvertIndicator || _adverts.length==0?Center(child:CircularProgressIndicator()):CarouselWithIndicator(_adverts,activeIndicator: actionColor,),
                   ]
                 ),
               ),

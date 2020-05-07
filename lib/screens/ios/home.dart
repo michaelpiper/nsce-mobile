@@ -325,8 +325,8 @@ class CartLength extends StatefulWidget{
 
 class _CartLength extends State<CartLength> {
   int _cartCount=0;
-  Timer _updateme;
-  void updateCart(){
+  Timer _timer;
+  void updateCart(_t){
     count(cartCount){
       if(cartCount is bool || cartCount == null){
         return;
@@ -344,14 +344,14 @@ class _CartLength extends State<CartLength> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    updateCart();
-    _updateme=new Timer(const Duration(seconds: 5),updateCart);
+    updateCart(_timer);
+    _timer=new Timer.periodic(const Duration(seconds: 5),updateCart);
   }
   @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-    _updateme.cancel();
+    _timer.cancel();
   }
   @override
   Widget build(BuildContext context) {

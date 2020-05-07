@@ -22,17 +22,19 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
   Map<DateTime, List> _events;
   AnimationController _animationController;
   Map _schedule={};
-  Map _eventSchedule={};
   List _selectedEvents=[];
   bool _loadingScheduleIndicator;
   String _message;
   int unit;
+  int totalUnit;
+  bool _continue;
   TextEditingController _txtController = TextEditingController();
   final oCcy = new NumberFormat("#,##0.00", "en_US");
   _SchedulePageState();
   @override
   void initState(){
     super.initState();
+    _continue=false;
     _loadingScheduleIndicator=true;
     final _selectedDay = DateTime.now();
 
@@ -46,7 +48,9 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
     );
     _animationController.forward();
     unit=int.tryParse(_schedule['post']['quantity']);
+    totalUnit=0;
     _loadSchedule(_selectedDay);
+    _clearProductInCart();
   }
   @override
   void dispose(){
@@ -65,6 +69,9 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
       if(unit>1)unit--;
       else unit=1;
     });
+  }
+  void _clearProductInCart(){
+    fetchCart(id:'clear-product-${_schedule['product']['id']}');
   }
   void _onDaySelected(DateTime day, List events){
     debugPrint('Callback: _onDaySelected');
@@ -127,7 +134,12 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
               ),
               onSubmitted: (e)=>setState(() {
                 int qty=int.tryParse(e);
-                if(qty>9999){
+                if(totalUnit>qty){
+                  Navigator.of(context).pop();
+                  showDialog(context: context,child: SmartAlert(title: 'Alert',description: 'You can\'t choose quantity below it\'s current set unit',));
+                  return;
+                }
+                else if(qty>9999){
                   _schedule['post']['quantity']='9999';
                 }
                 else{
@@ -151,26 +163,28 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
           children: _selectedEvents.map<Widget>((event)=> Container(
             child: ListTile(
               selected: false,
-              title: Text(event['time'].toString()),
-              subtitle: Text('30 cubic left'),
+              title: Text(isNull(event['timeSlot'],replace: 'Time Slot')),
+              subtitle: Text('${event['quantityLeft']} ${isNull(_schedule['product']['unit'],replace: 'unit')} left'),
               leading: Checkbox(
                 value: _events[_calendarController.selectedDay]!=null && _events[_calendarController.selectedDay].any((e){
-                  return e['id']==event['time'];
+                  return e['id']==event['id'];
                 }),
                 onChanged: (_){
                   if (_){
                     Map<String,dynamic> item={};
-                    item['id']=event['time'];
-                    item['title']=event['time'];
+                    item['id']=event['id'];
+                    item['title']=event['timeSlot'];
+                    item['quantityLeft']=event['quantityLeft'];
                     item['time']=_calendarController.selectedDay;
                    _addSchd(item);
                   }else{
                     Map<String,dynamic> item={};
-                    item['id']=event['time'];
-                    item['title']=event['time'];
+                    item['id']=event['id'];
+                    item['title']=event['timeSlot'];
+                    item['quantityLeft']=event['quantityLeft'];
                     item['time']=_calendarController.selectedDay;
                    _removeSchd(item);
-                 }
+                  }
                   return _;
                 },
               ),
@@ -199,26 +213,15 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
     scheduleOrder(_schedule['post']).then((schedules){
       if(schedules==false || schedules==null)
         return;
-      if(schedules['data'] is Map) {
-        Map data = schedules['data'];
-        _eventSchedule=data;
-//        print(data);
+      if(schedules['data'] is List) {
+        List data = schedules['data'];
         setState(() {
-          _selectedEvents = data['schedule'].map<Map>((e)
-          {
-            DateTime start =DateTime.parse(e['start']).toLocal();
-            DateTime end = DateTime.parse(e['end']).toLocal();
-           return {
-             'schedule': start.toString(),
-             'time': (start.hour>9?start.hour.toString():'0'+start.hour.toString())+':'+(start.minute>9?start.minute.toString():'0'+start.minute.toString())+' - '+( end.hour>9?end.hour.toString():'0'+end.hour.toString())+':'+(end.minute>9?end.minute.toString():'0'+end.minute.toString()),
-             'title': 'You should be in yard 30 minutes before production ends'
-           };
-          }).toList();
+          _selectedEvents = data;
           _scheduleLoaded();
         });
       }else{
         setState(() {
-          _selectedEvents = [{'time':'Alert!','title':schedules['message']}];
+          _selectedEvents = [];
           _scheduleLoaded();
         });
       }
@@ -232,15 +235,71 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
   void _removeSchd(item){
     setState(() {
       _events[item['time']].removeWhere((e){
-        return  e['id']==item['id'];
+        bool test= e['id']==item['id'];
+        if(test){
+          totalUnit-=e['qty'];
+          fn(res){
+//            print(res);
+            if(isNull(res) || res is bool){
+              _addSchd(item);
+            }
+          }
+          if(!isNull(e['cartId'])){
+//            print(e['cartId']);
+            destroyCart('${e['cartId']}')
+                .then(fn);
+          }
+        }
+        return test;
       });
     });
   }
   void _addSchd(item){
+    int  qty=int.tryParse(_schedule['post']['quantity']);
+    if(totalUnit+unit > qty){
+      num _left= qty-totalUnit;
+      String _msg;
+      if(_left>0){
+        _msg="You have only $_left to schedule. you are trying to schedule more than 'Quantity Needed'";
+      }else{
+        _msg="You have already scheduled all 'Quantity Needed'";
+      }
+      showDialog(context: context,child: SmartAlert(title: 'Alert',description: _msg,));
+      return;
+    }
+    else if(unit>item['quantityLeft']){
+      showDialog(context: context,child: SmartAlert(title: 'Alert',description: 'You can only schedule ${item['quantityLeft']} for this time',));
+      return;
+    }
     setState(() {
       if(_events[item['time']]==null)_events[item['time']]=[];
+      totalUnit+=unit;
       _events[item['time']].add({'id':item['id'],'time':item['time'],'title':item['title'],'qty':unit});
     });
+    fn(res){
+
+      if(isNull(res) || res is bool){
+        _removeSchd(item);
+      }else if (res['data'] is Map){
+//        print(res);
+        if(isNull(res['data']['id']))return;
+       int _eventIdx = _events[item['time']].indexWhere((e)=>e['id']==item['id']);
+       if(_eventIdx>-1){
+         setState(() {
+           _events[item['time']][_eventIdx]['cartId']=res['data']['id'];
+         });
+       }
+      }else{
+        print(res);
+      }
+    }
+    addToCart({
+      'plantTimeId':'${item['id']}',
+      'quantity':'$unit',
+      'productId':'${_schedule['product']['id']}',
+      'schedule':'${item['time']}',
+      'type':'${_schedule['post']['type']}'
+    }).then(fn);
   }
   @override
   Widget build(BuildContext context) {
@@ -297,14 +356,21 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
                    ]
                  )
               ),
+              Text('$totalUnit')
             ]
           )
         ],
       ),
    );
-   Widget _done= InkWell(
+   Widget _done = InkWell(
      onTap: (){
-
+       if('$totalUnit'==_schedule['post']['quantity']){
+         setState(() {
+           _continue=true;
+         });
+       }else{
+         showDialog(context: context,child: SmartAlert(title: 'Alert',description: 'Schedule can\'t be made done until Quantity needed is equal to quantity scheduled.'));
+       }
      },
      child: Text('done',style:TextStyle(color: primaryColor)),
    );
@@ -314,7 +380,17 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
        child: MaterialButton(
                color: primaryColor,
                onPressed: (){
-
+                 if(_continue){
+                   fn(res){
+                     if(res is Map && res['error']==false)
+                      Navigator.of(context).popAndPushNamed('/cart');
+                     else
+                       showDialog(context: context,child: SmartAlert(title: 'Alert',description: "Can't add to cart.",));
+                   }
+                   fetchCart(id:'done-product-${_schedule['product']['id']}').then(fn);
+                 }else{
+                   showDialog(context: context,child: SmartAlert(title: 'Alert',description: "Scheduled not marked as done.",));
+                 }
                },
                shape: RoundedRectangleBorder(
                    borderRadius: BorderRadius.vertical(
@@ -356,7 +432,7 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
                  children: <Widget>[
                    SizedBox(width: 20,),
                    Expanded(
-                     child: Text('${int.tryParse(_schedule['post']['quantity'])}  ${_schedule['product']['unit']}',style: TextStyle(color: noteColor))
+                     child: Text('${int.tryParse(_schedule['post']['quantity'])}  ${isNull(_schedule['product']['unit'],replace: 'unit')}',style: TextStyle(color: noteColor))
                    ),
                    InkWell(
                      onTap: _totalUnitInput,
@@ -378,7 +454,7 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
                  children: <Widget>[
                    SizedBox(width: 20,),
                    Expanded(
-                       child: Text(_schedule['post']['pickup']=='1'?'Pickup at yard':_schedule['post']['address'],style: TextStyle(color: noteColor),)
+                       child: Text(_schedule['post']['type']=='pickup'?'Pickup at yard':_schedule['post']['shippingAddress'],style: TextStyle(color: noteColor),)
                    )
                  ],
                ),
@@ -480,7 +556,7 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
                 elevation: 5,
                 child: Padding(
                   padding: EdgeInsets.all(5),
-                  child: Text('${_schedule['product']['name']}, ${item['qty']} ${_schedule['product']['unit']} $time (${item['title']})'),
+                  child: Text('${_schedule['product']['name']}, ${item['qty']} ${isNull(_schedule['product']['unit'],replace: 'unit')} $time (${item['title']})'),
                 )
                )
              ),
@@ -494,7 +570,7 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
        );
      }
      return Column(
-     children: items.map(f).toList(),
+      children: items.map(f).toList(),
      );
    }
    Widget _buildSchdList = Padding(

@@ -44,8 +44,8 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
     fn(res){
       _loading = false;
       dialogMan.hide();
-      // print(res);
-      // print('i am here');
+       print(res);
+       print('i am here');
       if(res is bool || res['error']==true){
         showDialog<void>(
           context: context,
@@ -307,7 +307,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                               dialogMan.show();
                             }
                             patchAccount(_userDetails).then(fn).catchError((e){
-                              // print(e);
+                               print(e);
                             });
                           }else{
                             // print('am here');

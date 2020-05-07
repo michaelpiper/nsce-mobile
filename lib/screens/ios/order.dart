@@ -1,3 +1,4 @@
+import 'package:NSCE/utils/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -44,16 +45,20 @@ class _OrderPageState extends State<OrderPage>{
   Widget build(BuildContext context) {
     Widget description(){
       return InkWell(
-        onTap: (){
-          Navigator.pushNamed(context,'/order/'+index.toString());
-        },
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 5.0, horizontal:5.0 ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
-              Text("OrderID: "+index.toString(),style:TextStyle(color:primaryTextColor,fontSize: 16,textBaseline: TextBaseline.alphabetic)),
+              Text("Order ID # "+index.toString(),style:TextStyle(color:primaryTextColor,fontSize: 16,textBaseline: TextBaseline.alphabetic)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text('Placed On ',style:TextStyle(color: primaryTextColor,fontSize: 15.0),textAlign: TextAlign.left,),
+                  Text(("${_date.day}-${_date.month}-${_date.year} ${_date.hour>12?_date.hour-12:_date.hour}:${_date.minute} "+(_date.hour>12?'p':'a')+"m"),style:TextStyle(color: primaryTextColor,fontSize: 15.0),textAlign: TextAlign.left,),
+                ],
+              ),
               Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -61,15 +66,13 @@ class _OrderPageState extends State<OrderPage>{
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Text('trnRef',style:TextStyle(color:primaryTextColor,fontSize: 15,textBaseline: TextBaseline.alphabetic)),
-                      Text('Quantity',style:TextStyle(color:primaryTextColor,fontSize: 15,textBaseline: TextBaseline.alphabetic))
+                      Text('trnRef',style:TextStyle(color:primaryTextColor,fontSize: 15,textBaseline: TextBaseline.alphabetic))
                     ],
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Expanded(child:Text(_order['trnRef'],overflow: TextOverflow.ellipsis,maxLines: 5,style:TextStyle(color:primaryTextColor,fontSize: 15,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),),
-                      Text(_order['quantity'].toString()+' ',style:TextStyle(color:primaryTextColor,fontSize: 18,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700))
+                      Expanded(child:Text(_order['trnRef'],overflow: TextOverflow.ellipsis,maxLines: 5,style:TextStyle(color:primaryTextColor,fontSize: 15,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),)
                     ],
                   )
                 ],
@@ -84,7 +87,7 @@ class _OrderPageState extends State<OrderPage>{
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text('Shipping method',style:TextStyle(color:primaryTextColor,fontSize: 14,textBaseline: TextBaseline.alphabetic)),
-                      Text(_order['pickup']==1?"Pick up at Yard":"Site Delivery",style:TextStyle(color:primaryTextColor,fontSize: 18,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),
+                      Text(_order['type']=='pickup'?"Pick up at Yard":"Site Delivery",style:TextStyle(color:primaryTextColor,fontSize: 18,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),
                     ],
                   ),
                   Column(
@@ -110,6 +113,7 @@ class _OrderPageState extends State<OrderPage>{
     }
     Widget head(){
       return Card(
+        elevation: 5,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15.0)
         ),
@@ -120,13 +124,6 @@ class _OrderPageState extends State<OrderPage>{
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text('Created at',style:TextStyle(color: primaryTextColor,fontSize: 15.0),textAlign: TextAlign.left,),
-                  Text(("${_date.day}-${_date.month}-${_date.year} ${_date.hour>12?_date.hour-12:_date.hour}:${_date.minute} "+(_date.hour>12?'p':'a')+"m"),style:TextStyle(color: primaryTextColor,fontSize: 15.0),textAlign: TextAlign.left,),
-                ],
-              ),
               Expanded(
                 child: description(),
               )
@@ -247,14 +244,7 @@ class _OrderPageState extends State<OrderPage>{
           );
         default:
           return Expanded(
-            child:Card(
-              color: Colors.white,
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15.0)
-              ),
-              child: Dispatch(index),
-            ),
+            child: OrderDetails(index),
           );
       }
 
@@ -262,48 +252,59 @@ class _OrderPageState extends State<OrderPage>{
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text("Order # "+index.toString(),style: TextStyle(color: primaryTextColor),),
+        title: Text("Order # $index ",style: TextStyle(color: primaryTextColor),),
         iconTheme: IconThemeData(color: primaryTextColor),
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children:<Widget> [
           head(),
           SizedBox(height: 10,),
-          Text("Dispatch list",style: TextStyle(color:noteColor, fontSize: 19,fontWeight: FontWeight.w600),textAlign: TextAlign.center,),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Text("Schedule list",
+                style: TextStyle(color:noteColor, fontSize: 19,fontWeight: FontWeight.w600),
+                textAlign: TextAlign.left
+            ),
+          ),
           SizedBox(height: 10,),
           status(),
+          SizedBox(height: 10,),
         ]
       )
     );
   }
 }
 
-class Dispatch extends StatefulWidget{
+class OrderDetails extends StatefulWidget{
   final int orderId;
-  Dispatch(this.orderId);
+  OrderDetails(this.orderId);
   @override
-  _Dispatch createState() => _Dispatch();
+  _OrderDetails createState() => _OrderDetails();
 }
-class _Dispatch extends State<Dispatch>{
+class _OrderDetails extends State<OrderDetails>{
   bool loading;
-  List <Map<String, dynamic>> _dispatches=[];
+  List <Map<String, dynamic>> _orderDetails=[];
+  final LocalStorage storage = new LocalStorage(STORAGE_KEY);
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     loading=true;
+    _loadOrderDetails();
   }
-  void _loadDispatch(){
+  void _loadOrderDetails(){
     void f(res){
       _loading(false);
+      print(res);
       if(res is Map && res['data'] is List){
         setState(() {
-          _dispatches = res['data'].map<Map<String,dynamic>>((e)=>new Map<String, dynamic>.from(e)).toList();
+          _orderDetails = res['data'].map<Map<String,dynamic>>((e)=>new Map<String, dynamic>.from(e)).toList();
         });
       }
     }
     _loading(true);
-    fetchOrderDispatch(id:'orderId=${widget.orderId}').then(f);
+    fetchOrderDetails('${widget.orderId}').then(f);
   }
   void _loading(bool state){
     setState(() {
@@ -314,27 +315,46 @@ class _Dispatch extends State<Dispatch>{
   Widget build(BuildContext context) {
     // TODO: implement build
     if(loading){
-      _loadDispatch();
       return Center(child: CircularProgressIndicator(),);
     }
-    f(Map dispatch){
-      DateTime _datee = DateTime.parse(dispatch['dateScheduled']).toLocal();
+    f(Map schedule){
+     
       return Card(
+        elevation: 5,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0)
+        ),
         child: ListTile(
-          title: Text('Qty: '+dispatch['quantity'].toString()),
+          onTap: (){
+            storage.setItem(STORAGE_SCHEDULE_LIST_KEY, schedule).then((_){
+              Navigator.of(context).pushNamed('/schedule-list');
+            });
+          },
+          contentPadding: EdgeInsets.symmetric(vertical: 20,horizontal: 10),
+          title: Text(' ${isNull(schedule['Product']['name'],replace: 'Product')}',style: TextStyle(fontWeight: FontWeight.w600,fontSize: 16),),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text('scheduled',style:TextStyle(color: textColor,fontSize: 12.0)),
-              Text(("${_datee.isUtc.toString()} ${_datee.day}-${_datee.month}-${_datee.year} ( ${_datee.hour>12?_datee.hour-12:_datee.hour}:${_datee.minute} "+(_datee.hour>12?'p':'a')+"m )"),overflow: TextOverflow.ellipsis,maxLines: 5,style:TextStyle(color: textColor,fontSize: 15.0),textAlign: TextAlign.left,),
+              Text('Qty: ${schedule['quantity']} ${isNull(schedule['Product']['unit'],replace: 'unit')}'),
+              SizedBox(height: 6,),
+              Text('schedule Date',style:TextStyle(color: textColor)),
+              Text(("${schedule['dateScheduled']} ( ${schedule['PlantTime']['timeSlot']} )"),overflow: TextOverflow.ellipsis,maxLines: 5,style:TextStyle(color: textColor,fontSize: 15.0,fontWeight: FontWeight.w600),textAlign: TextAlign.left,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  Expanded(child: Container(),),
+                  Icon(Icons.check_circle,size: 19,color: primaryColor),
+                  Text(isNull( schedule['status'],replace: 'Status'),style:TextStyle(color:primaryColor,fontSize: 19,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w600)),
+                ],
+              ),
             ],
           ),
         ),
       );
     }
-    return _dispatches.length==0?Center(child: Text('Empty'),): ListView.builder(itemCount: _dispatches.length,
+    return _orderDetails.length==0?Center(child: Text('Empty'),): ListView.builder(itemCount: _orderDetails.length,
         itemBuilder: (BuildContext ctxt, int index) {
-          return f(_dispatches[index]);
+          return f(_orderDetails[index]);
     });
   }
 }

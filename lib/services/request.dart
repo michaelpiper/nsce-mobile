@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert' as convert;
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'endpoints.dart';
@@ -306,6 +307,91 @@ updateAccount(Map body)async{
     return false;
   }
 }
+updateBillingAddress(Map body)async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  Map<String, String> headers={};
+  if(prefs.containsKey(STORAGE_USER_KEY)) {
+    var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
+    if(wait.containsKey('authorization')) {
+      headers['Authorization']=wait['authorization'];
+    }
+  }
+  try{
+    var response = await http.post(API_BILLING_ADDRESS , headers: headers,body:body);
+    if (response.statusCode == 200) {
+      return convert.jsonDecode(response.body);
+    } else {
+      return false;
+    }
+  }
+  catch(e){
+    return false;
+  }
+}
+getBillingAddress()async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  Map<String, String> headers={};
+  if(prefs.containsKey(STORAGE_USER_KEY)) {
+    var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
+    if(wait.containsKey('authorization')) {
+      headers['Authorization']=wait['authorization'];
+    }
+  }
+  try{
+    var response = await http.get(API_BILLING_ADDRESS , headers: headers);
+    if (response.statusCode == 200) {
+      return convert.jsonDecode(response.body);
+    } else {
+      return false;
+    }
+  }
+  catch(e){
+    return false;
+  }
+}
+
+updateShippingAddress(Map body)async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  Map<String, String> headers={};
+  if(prefs.containsKey(STORAGE_USER_KEY)) {
+    var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
+    if(wait.containsKey('authorization')) {
+      headers['Authorization']=wait['authorization'];
+    }
+  }
+  try{
+    var response = await http.post(API_SHIPPING_ADDRESS , headers: headers,body:body);
+    if (response.statusCode == 200) {
+      return convert.jsonDecode(response.body);
+    } else {
+      return false;
+    }
+  }
+  catch(e){
+    return false;
+  }
+}
+getShippingAddress()async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  Map<String, String> headers={};
+  if(prefs.containsKey(STORAGE_USER_KEY)) {
+    var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
+    if(wait.containsKey('authorization')) {
+      headers['Authorization']=wait['authorization'];
+    }
+  }
+  try{
+    var response = await http.get(API_SHIPPING_ADDRESS , headers: headers);
+    if (response.statusCode == 200) {
+      return convert.jsonDecode(response.body);
+    } else {
+      return false;
+    }
+  }
+  catch(e){
+    return false;
+  }
+}
 updateAccountProfilePicture(File filename)async{
   SharedPreferences prefs = await SharedPreferences.getInstance();
   Map<String, String> headers={};
@@ -503,6 +589,29 @@ fetchOrders({id=false})async{
   }
 }
 
+Future fetchOrderDetails(id)async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  Map<String, String> headers={};
+  if(prefs.containsKey(STORAGE_USER_KEY)) {
+    var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
+    if(wait.containsKey('authorization')) {
+      headers['Authorization']=wait['authorization'];
+    }
+  }
+  try{
+    var response;
+    response = await http.get(API_ORDER_URL + '/' + id.toString()+'/detail', headers: headers);
+    if (response.statusCode == 200) {
+      return convert.jsonDecode(response.body);
+    } else {
+      return false;
+    }
+  }
+  catch(e){
+    return false;
+  }
+}
+
 fetchOrderDispatch({id=false})async{
   SharedPreferences prefs = await SharedPreferences.getInstance();
   Map<String, String> headers={};
@@ -617,7 +726,7 @@ scheduleOrder(body)async{
   }
 }
 // cart
-addToCart(body)async{
+Future addToCart(body)async{
   SharedPreferences prefs = await SharedPreferences.getInstance();
   // print(body);
   Map<String, String> headers={};
@@ -642,7 +751,7 @@ addToCart(body)async{
     return false;
   }
 }
-fetchCart({id=false})async{
+Future fetchCart({id=false})async{
   SharedPreferences prefs = await SharedPreferences.getInstance();
   Map<String, String> headers={};
   if(prefs.containsKey(STORAGE_USER_KEY)) {

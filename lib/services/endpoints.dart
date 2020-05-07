@@ -5,17 +5,21 @@ String get BASE_URL {
 //  if(isInDebugMode){
 //    return "http://192.168.43.40:9000";
 //  }else{
-    return "https://www.nsce.com.ng";
+  return "https://www.nsce.com.ng";
 //  }
 }
 String get API_URL {
-//  if (isInDebugMode) {
-//    return "http://192.168.43.40:3001/v1";
-//  }
-//  else {
-    return "https://api.nsce.com.ng/v1";
-//  }
+  const debug="http://192.168.43.40:3001/v1";
+  const release="https://api.nsce.com.ng/v1";
+  if (isInDebugMode) {
+    return debug;
+  }
+  else {
+    return release;
+  }
 }
+final String API_BILLING_ADDRESS = API_URL+'/billingaddress';
+final String API_SHIPPING_ADDRESS = API_URL+'/shippingaddress';
 final String API_AUTH_URL=API_URL+"/auth";
 final String API_TRANSACTION_URL=API_URL+"/transactions";
 final String API_TRANSACTION_REF_URL=API_URL+"/reference";
@@ -33,5 +37,5 @@ final String API_PRODUCT_URL=API_URL+"/products";
 final String API_ADVERT_URL=API_URL+"/adverts";
 final String API_NOTIFICATION_URL=API_URL+"/notifications";
 final String API_SERVICE_URL=API_URL+"/service";
-final API_SEND_MAIL_URL =API_URL+'/sendmail';
+final API_SEND_MAIL_URL=API_URL+'/sendmail';
 final String API_AUTO_COMPLETE_ADDRESS_URL = API_SERVICE_URL+"/auto_complete_address";

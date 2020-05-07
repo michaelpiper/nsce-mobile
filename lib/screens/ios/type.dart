@@ -7,6 +7,7 @@ import '../../ext/smallcard.dart';
 import '../../ext/tablebuilder.dart';
 import '../../ext/loading.dart';
 import '../../services/request.dart';
+import 'package:intl/intl.dart';
 // Notification screen
 class TypePage extends StatefulWidget {
   final int index;
@@ -20,6 +21,7 @@ class _TypePageState extends State<TypePage> with TickerProviderStateMixin {
   List <Map<String, dynamic>> _types = [];
   bool _loadingIndicator;
   bool _loadingProductIndicator;
+  final oCcy = new NumberFormat("#,##0.00", "en_US");
   _TypePageState({this.index:1});
 
   @override
@@ -79,7 +81,7 @@ class _TypePageState extends State<TypePage> with TickerProviderStateMixin {
             'avatar': e['image']!=null?baseURL(e['path']+e['image']):null,
             'link': '/product/' + e['id'].toString(),
             'name': e['name'],
-            'price': CURRENCY['sign']+' '+e['price'].toString()
+            'price': CURRENCY['sign']+' '+ oCcy.format(e['price'])
           }).toList();
           _productLoaded();
         });
@@ -141,7 +143,8 @@ class _TypePageState extends State<TypePage> with TickerProviderStateMixin {
                           borderRadius:BorderRadius.vertical(
                             top:    Radius.circular(10.0),
                           ),
-                          image: DecorationImage(
+                          image: type['avatar']==null?
+                              null:DecorationImage(
                               image:NetworkImage(type['avatar']),
                               fit: BoxFit.cover
                           )

@@ -1,3 +1,5 @@
+import 'package:NSCE/ext/search.dart';
+import 'package:NSCE/utils/helper.dart';
 import 'package:flutter/material.dart';
 import '../../utils/colors.dart';
 import 'package:NSCE/utils/constants.dart';
@@ -7,10 +9,16 @@ import 'package:NSCE/services/request.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:intl/intl.dart';
 // Notification screen
-class ConfirmOrderPage extends StatelessWidget {
-  final LocalStorage localStorage = new LocalStorage(STORAGE_KEY);
+class ConfirmOrderPage extends StatefulWidget {
+  @override
+  _ConfirmOrderPage createState() => _ConfirmOrderPage();
+}
+class _ConfirmOrderPage extends State<ConfirmOrderPage>{
+final LocalStorage localStorage = new LocalStorage(STORAGE_KEY);
   List _cart;
   Map _userDetails={};
+  String _type;
+  String _shippingAddress;
   final oCcy = new NumberFormat("#,##0.00", "en_US");
   final DialogMan dialogMan = DialogMan(child: Scaffold(
       backgroundColor: Colors.transparent,
@@ -18,9 +26,13 @@ class ConfirmOrderPage extends StatelessWidget {
           child:CircularProgressIndicator()
       )
   ));
-  ConfirmOrderPage(){
+  @override
+  initState(){
+    super.initState();
     _cart=localStorage.getItem(STORAGE_CART_KEY);
     _userDetails=localStorage.getItem(STORAGE_USER_DETAILS_KEY);
+    _type=_cart[0]['type'];
+    _shippingAddress=localStorage.getItem(STORAGE_SHIPPING_ADDRESS_KEY);
   }
   @override
   Widget build(BuildContext context) {
@@ -129,45 +141,67 @@ class ConfirmOrderPage extends StatelessWidget {
         ),
       ),
     );
-    Widget shippingSection =  Container(
-      padding: EdgeInsets.only(
-          top: 0.12,
-          right: 0.0,
-          left: 0.0),
-      child:Card(
-        color: Colors.white,
-        elevation: 1.0,
-        child:Padding(
-          padding: EdgeInsets.symmetric(vertical: 15.0,horizontal: 10.0),
-          child: Column(
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    Expanded(child: Text('Shipping Info',style: TextStyle(fontWeight: FontWeight.w300,fontSize: 20,color: textColor),),),
-                  ]
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Padding(padding: EdgeInsets.only(right:7.0),),
-                    Icon(Icons.local_shipping,color:noteColor),
-                    Padding(padding: EdgeInsets.only(right:5.0),),
-                    Expanded(child:Text('Site Delivery',style:TextStyle(color:textColor,fontSize: 16,textBaseline: TextBaseline.alphabetic)))
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Padding(padding: EdgeInsets.only(right:7.0),),
-                    SizedBox(width: 20,),
-                    Padding(padding: EdgeInsets.only(right:5.0),),
-                    Expanded(child:Text('from Yard',style:TextStyle(color:noteColor,fontSize: 16,textBaseline: TextBaseline.alphabetic)))
-                  ],
-                )
-              ]
+    Widget shippingSection = Container(
+        padding: EdgeInsets.only(
+            top: 0.12,
+            right: 0.0,
+            left: 0.0),
+        child:Card(
+          color: Colors.white,
+          elevation: 1.0,
+          child:Padding(
+            padding: EdgeInsets.symmetric(vertical: 15.0,horizontal: 10.0),
+            child: Column(
+                children: <Widget>[
+                  Row(
+                      children: <Widget>[
+                        Expanded(child: Text('Shipping Info',style: TextStyle(fontWeight: FontWeight.w300,fontSize: 20,color: textColor),),),
+                        _type=='pickup'?
+                        SizedBox():
+                        InkWell(onTap:(){
+                            onSelect(e){
+                              Map<String,String> post={};
+                              post['contactPhone']=_userDetails['firstName']+' '+_userDetails['lastName'];
+                              post['contactPerson']=_userDetails['phone'];
+                              post['shippingAddress'] = e['address'];
+                              List arrAddress = e['address'].split(',');
+                              post['shippingState'] = isNull(arrAddress[arrAddress.length-1],replace: '') ;
+                              post['shippingLGA'] = isNull(arrAddress[arrAddress.length-2],replace: '');
+                              post['shippingLatLng'] = e['geolocation'];
+                              updateShippingAddress(post).then((e)=>print(e));
+                              Navigator.of(context).pop();
+                              setState((){
+                                _shippingAddress=e['address'];
+                              });
+                            }
+                            return showDialog(context: context,child:Dialog(child: Search( initValue: isNull(_shippingAddress,replace: ''),onSelect: onSelect),));
+                          },
+                          child: Text('Edit',style:TextStyle(color:primaryColor))
+                        )
+                      ]
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Padding(padding: EdgeInsets.only(right:7.0),),
+                      Icon(Icons.local_shipping,color:noteColor),
+                      Padding(padding: EdgeInsets.only(right:5.0),),
+                      Expanded(child:Text(_type=='pickup'?'Pickup at Yard':'Site Delivery',style:TextStyle(color:textColor,fontSize: 16,textBaseline: TextBaseline.alphabetic)))
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Padding(padding: EdgeInsets.only(right:7.0),),
+                      SizedBox(width: 20,),
+                      Padding(padding: EdgeInsets.only(right:5.0),),
+                      Expanded(child:Text(_type=='pickup'?'':isNull(_shippingAddress,replace: ''),style:TextStyle(color:noteColor,fontSize: 16,textBaseline: TextBaseline.alphabetic)))
+                    ],
+                  )
+                ]
+            ),
           ),
         ),
-      ),
     );
     List orderTitle = <Widget>[
       Row(
@@ -181,18 +215,17 @@ class ConfirmOrderPage extends StatelessWidget {
         height: 5,
       )
     ];
-    int total=0;
-    int  shippingFee=0;
+    num total=0;
+    num shippingFee=0;
     updateOrder(e){
-      int price=e['quantity']*(e['Product']['price']-e['Product']['discount']);
-      total+=price;
+      total+=e['unitPrice']*e['quantity'];
       shippingFee+=e['shippingFee'];
       orderTitle.add(
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Text(e['Product']['name'],style: TextStyle(color: noteColor),),
-              Text(CURRENCY['sign']+' '+oCcy.format(price)),
+              Text(CURRENCY['sign']+' '+oCcy.format(isNull(e['totalPrice'],replace: 0))),
             ],
           ),
       );
@@ -237,26 +270,6 @@ class ConfirmOrderPage extends StatelessWidget {
           ],
         )
     );
-//    .addAll(
-//    _cart.map<Widget>((e)=>
-//    Row(
-//    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//    children: <Widget>[
-//    Text(e['Product']['name'],style: TextStyle(color: noteColor),),
-//    Text(CURRENCY['sign']+e['price']),
-//    ]
-//    )
-//    ).toList(),
-//    <Widget>[
-//    Row(
-//    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//    children: <Widget>[
-//    Text('Total'),
-//    Text(CURRENCY['sign']+' 18,000'),
-//    ]
-//    )
-//    ]
-//    )
     Widget ordersSection =  Container(
       padding: EdgeInsets.only(
           top: 0.12,

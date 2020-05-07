@@ -1,5 +1,6 @@
 import 'package:NSCE/ext/loading.dart';
 import 'package:NSCE/ext/smartalert.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:NSCE/utils/colors.dart';
@@ -8,6 +9,7 @@ import 'package:NSCE/utils/constants.dart';
 import 'package:NSCE/services/request.dart';
 import 'package:NSCE/ext/dialogman.dart';
 import 'package:localstorage/localstorage.dart';
+import 'package:intl/intl.dart';
 class CartPage extends StatefulWidget {
   @override
   CartPageState createState() =>CartPageState();
@@ -22,6 +24,7 @@ class CartPageState extends State<CartPage>{
           child:CircularProgressIndicator()
       )
   ));
+  final oCcy = new NumberFormat("#,##0.00", "en_US");
   @override
   void initState() {
     // TODO: implement initState
@@ -31,6 +34,10 @@ class CartPageState extends State<CartPage>{
     fetchCart().then((cart){
       if(cart==false || cart==null){
         return;
+      }
+      if(cart['shippingAddress'] is String){
+        print(cart['shippingAddress']);
+        localStorage.setItem(STORAGE_SHIPPING_ADDRESS_KEY, cart['shippingAddress']);
       }
       if( cart['data'] is List) {
         List _data = cart['data'];
@@ -52,8 +59,8 @@ class CartPageState extends State<CartPage>{
     if (_loadingCartIndicator) {
       _loadCart();
     }
-    int _total=0;
-    _cartList.forEach((e) {_total +=(e['Product']['price'] - e['Product']['discount']) * e['quantity'];});
+    num _total=0;
+    _cartList.forEach((e) {_total +=e['totalPrice'];});
     List _buildBody=_cartList.map<Widget>((e)=>Container(
       margin: EdgeInsets.symmetric(vertical: 10.0),
       decoration: BoxDecoration(
@@ -94,16 +101,10 @@ class CartPageState extends State<CartPage>{
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Text(e['Product']['name'],style: TextStyle(fontSize: 15,fontWeight: FontWeight.w500)),
-                            Text('Qty: '+(e['quantity']*e['Product']['quantity']).toString()+' '+e['Product']['unit'],style: TextStyle(fontSize: 15,color: noteColor)),
-                            Text('${CURRENCY['sign']} '+((e['Product']['price']-e['Product']['discount'])*e['quantity']).toString(),style: TextStyle(fontSize: 17,fontWeight: FontWeight.w700),),
+                            Text('Qty: ${e['quantity']} ${isNull(e['Product']['unit'],replace: 'unit')}',style: TextStyle(fontSize: 15,color: noteColor)),
+                            Text('${CURRENCY['sign']} ${oCcy.format(e['totalPrice'])}',style: TextStyle(fontSize: 17,fontWeight: FontWeight.w700),),
                             SizedBox(height: 10.0,),
-                            Row(
-                                children: <Widget>[
-                                  Icon(Icons.schedule,color:primaryColor),
-                                  SizedBox(width: 10.0,),
-                                  Expanded(child:Text( DateTime.parse(e['scheduleStart']).toLocal().toString(),style: TextStyle(color:primaryColor,),)),
-                                ]
-                            ),
+                            Text(e['dateScheduled']+' ${isNull(e['PlantTime']['timeSlot'],replace: '')}',style: TextStyle(color:primaryColor,),),
                           ],
                         ),
                       )
@@ -149,8 +150,7 @@ class CartPageState extends State<CartPage>{
                         },
                         child: Row(
                           children: <Widget>[
-                            Icon(Icons.favorite_border,color:primaryColor),
-                           Text("Add to save items",style: TextStyle(color:primaryColor,),),
+                            Icon(Icons.favorite_border,color:primaryColor,size: 40,),
                           ],
                         ),
                       ),
@@ -171,15 +171,12 @@ class CartPageState extends State<CartPage>{
                               }else{
                                 String message=res['message']!=null?res['message']:'Item removed from cart';
                                 return SmartAlert(title:"Alert",description:message,onOk: (){
-                                  for(var i =0; i < _cartList.length;i++){
-                                    if(_cartList[i]['id']==cartId){
-                                      setState(() {
-                                        _cartList.removeAt(i);
+                                    setState(() {
+                                      _cartList.removeWhere((_e) {
+                                        return _e['id'] == e['id'];
                                       });
-                                    }
-                                    break;
+                                    });
                                   }
-                                },
                                 );
                               }
                             },
@@ -201,8 +198,7 @@ class CartPageState extends State<CartPage>{
                       },
                       child: Row(
                         children: <Widget>[
-                          Icon(Icons.delete,color:secondaryTextColor),
-                          Text("Remove",style: TextStyle(color: secondaryTextColor),)
+                          Icon(CupertinoIcons.delete ,color:secondaryTextColor,size: 40,)
                         ],
                       ),
                     ),),)
@@ -214,10 +210,14 @@ class CartPageState extends State<CartPage>{
       ),
     )).toList();
     if(_total>0){
-      _buildBody.add(Card(child:ListTile(
-        title:Text('Total'),
-        trailing: Text(CURRENCY['sign']+' '+_total.toString()),
-      )));
+      _buildBody.add(Card(
+        elevation: 5,
+        child:ListTile(
+          contentPadding: EdgeInsets.all(15),
+          title:Text('Total',style: TextStyle(fontSize: 20)),
+          trailing: Text(CURRENCY['sign']+' '+oCcy.format(_total),style: TextStyle(fontSize: 20)),
+        )
+      ));
       _buildBody.add(SizedBox(height: 10.0,));
     }
     Widget checkoutButton = Container(

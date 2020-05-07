@@ -62,6 +62,16 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           child: Text("Miss",style:TextStyle(color: textColor),),
           value: "Miss",
         ));
+    _titleList.add(
+        DropdownMenuItem(
+          child: Text("Ms",style:TextStyle(color: textColor),),
+          value: "Ms",
+        ));
+    _titleList.add(
+        DropdownMenuItem(
+          child: Text("Others",style:TextStyle(color: textColor),),
+          value: "Others",
+        ));
   }
   final _formKey = GlobalKey<FormState>();
   String _username;
@@ -397,31 +407,32 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                           style: TextStyle(fontFamily: "Lato",fontStyle:FontStyle.normal,fontWeight: FontWeight.normal,fontSize: 20),
 
                         ),
-                        SizedBox(
-                          height: 15.0,
+                        SizedBox(height: 15,),
+                        DropdownButtonFormField(
+                          decoration: InputDecoration(
+                              prefixIcon:  Icon(Icons.map,color: secondaryTextColor),
+                              contentPadding: EdgeInsets.symmetric(vertical: 5)
+                          ),
+                          iconSize: 30.0,
+                          value: _signUpData['title'],
+                          hint: Text(_signUpData['title']==null?'Title':_signUpData['title']),
+                          isExpanded: true,
+                          style: TextStyle(color: Colors.white70),
+                          onChanged: (v){
+                            return setState(() {
+                              _signUpData['title'] = v;
+                            });
+                          },
+                          validator: (value) {
+                            if (value.isEmpty) {
+                              return 'Please choose your title';
+                            }
+                            return null;
+                          },
+                          items:_titleList,
                         ),
                         Row(
                           children: <Widget>[
-                            Expanded(
-                              child: DropdownButtonFormField(
-                                decoration: InputDecoration(
-                                    prefixIcon:  Icon(Icons.map,color: secondaryTextColor),
-                                    contentPadding: EdgeInsets.symmetric(vertical: 5)
-                                ),
-                                iconSize: 30.0,
-                                value: _signUpData['title'],
-                                hint: Text(_signUpData['title']==null?'Ti':_signUpData['title']),
-                                isExpanded: true,
-                                style: TextStyle(color: Colors.white70),
-                                onChanged: (v){
-                                  return setState(() {
-                                    _signUpData['title'] = v;
-                                  });
-                                },
-                                items:_titleList,
-                              ),
-                            ),
-                            SizedBox(width: 4,),
                             Expanded(
                               child: TextFormField(
                                 initialValue: _signUpData['firstname'] ,

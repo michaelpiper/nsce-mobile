@@ -131,8 +131,9 @@ class Balance extends StatefulWidget{
 
 class _Balance extends State<Balance> {
   int balance=0;
+  Timer _timer;
   final oCcy = new NumberFormat("#,##0.00", "en_US");
-  void updateBalance(){
+  void updateBalance(_t){
     fetchAccount(id:'balance')
         .then((value){
         if(value == false){
@@ -150,19 +151,21 @@ class _Balance extends State<Balance> {
           });
         }
     });
-    new Timer(const Duration(seconds: 10),updateBalance);
+
   }
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    updateBalance();
     balance=widget.initialValue==null?0:widget.initialValue;
+    updateBalance(_timer);
+    _timer=Timer.periodic(const Duration(seconds: 10),updateBalance);
   }
   @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
+    _timer.cancel();
   }
   @override
   Widget build(BuildContext context) {

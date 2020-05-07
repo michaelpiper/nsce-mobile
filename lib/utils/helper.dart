@@ -35,3 +35,10 @@ String baseURL(String path,{replace:false}){
 double percentage(num amount,num per,{divider:100}){
   return amount - ((amount/divider)*per);
 }
+
+  isNull(val,{replace}){
+    if(val==null){
+      return replace==null?true: replace;
+    }
+    return replace==null?false: val;
+  }

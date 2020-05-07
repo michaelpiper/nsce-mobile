@@ -1,3 +1,4 @@
+import 'package:NSCE/utils/helper.dart';
 import 'package:flutter/material.dart';
 
 class SmallCard extends StatelessWidget{
@@ -37,8 +38,8 @@ class SmallCard extends StatelessWidget{
                   ),
               ):Container(width: width,height: height,)),
             ),
-            Text(name),
-            Text(subtitle==null?'':subtitle)
+            Text(isNull(name,replace: ''),textAlign: TextAlign.center,),
+            Text(isNull(subtitle,replace: ''),textAlign: TextAlign.center,)
           ],
         ) ,
       ),
