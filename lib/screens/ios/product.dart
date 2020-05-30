@@ -576,8 +576,8 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
       child: Search(
         initValue:post['shippingAddress'] ==null?'':post['address'] ,
       onSelect: (e){
-        post['contactPhone']=_userDetails['firstName']+' '+_userDetails['lastName'];
-        post['contactPerson']=_userDetails['phone'];
+        post['contactPhone']=_userDetails['phone'];
+        post['contactPerson']= _userDetails['firstName']+' '+_userDetails['lastName'];
         post['shippingAddress'] = e['address'];
         List arrAddress = e['address'].split(',');
         post['shippingState'] = isNull(arrAddress[arrAddress.length-1],replace: '');

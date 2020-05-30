@@ -44,6 +44,7 @@ class  SearchPageState extends State<SearchPage>{
         onTap: (){
           Navigator.of(context).pushNamed('/product/'+e['id'].toString());
         },
+        subtitle: Divider(),
       );
     }
     return Scaffold(

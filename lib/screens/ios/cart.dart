@@ -31,7 +31,7 @@ class CartPageState extends State<CartPage>{
     super.initState();
   }
   void _loadCart(){
-    fetchCart().then((cart){
+    fetchCart(id: 'grouped').then((cart){
       if(cart==false || cart==null){
         return;
       }
@@ -103,8 +103,7 @@ class CartPageState extends State<CartPage>{
                             Text(e['Product']['name'],style: TextStyle(fontSize: 15,fontWeight: FontWeight.w500)),
                             Text('Qty: ${e['quantity']} ${isNull(e['Product']['unit'],replace: 'unit')}',style: TextStyle(fontSize: 15,color: noteColor)),
                             Text('${CURRENCY['sign']} ${oCcy.format(e['totalPrice'])}',style: TextStyle(fontSize: 17,fontWeight: FontWeight.w700),),
-                            SizedBox(height: 10.0,),
-                            Text(e['dateScheduled']+' ${isNull(e['PlantTime']['timeSlot'],replace: '')}',style: TextStyle(color:primaryColor,),),
+                            SizedBox(height: 10.0,)
                           ],
                         ),
                       )
@@ -157,7 +156,7 @@ class CartPageState extends State<CartPage>{
                     ),
                     Expanded(child:  Container(child: InkWell(
                       onTap: (){
-                        void callback(res,cartId){
+                        void callback(res){
                           showDialog<void>(
                             context: context,
                             barrierDismissible: false, // user must tap button!
@@ -173,7 +172,7 @@ class CartPageState extends State<CartPage>{
                                 return SmartAlert(title:"Alert",description:message,onOk: (){
                                     setState(() {
                                       _cartList.removeWhere((_e) {
-                                        return _e['id'] == e['id'];
+                                        return _e['productId'] == e['productId'];
                                       });
                                     });
                                   }
@@ -188,9 +187,9 @@ class CartPageState extends State<CartPage>{
                             builder: (BuildContext context) {
                               Function f=(){
                                 dialogMan.show();
-                                destroyCart(e['id']).then((res){
+                                destroyCart('product-${e['productId']}').then((res){
                                   dialogMan.hide();
-                                  callback(res,e['id']);
+                                  callback(res);
                                 });
                               };
                               return SmartAlert(title:'Confirm',description:'Are you sure you want to remove item from cart',onOk:f,canCancel: true);

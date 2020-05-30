@@ -8,7 +8,7 @@ import 'package:NSCE/utils/constants.dart';
 // third screen
 
 class AddFundsPage extends StatefulWidget {
-  final int amount;
+  final num amount;
   final Function onDone;
   AddFundsPage({Key key,this.amount,this.onDone}) : super(key: key);
   @override
@@ -21,7 +21,7 @@ class _AddFundsPage extends State<AddFundsPage> {
   String _cvv="408";
   int _expiryYear=20;
   int _expiryMonth=12;
-  int _amount=500;
+  num _amount= 500;
   bool _loading=false;
   String _expiryDate="12/20";
   connectPaystack() {
@@ -54,7 +54,7 @@ class _AddFundsPage extends State<AddFundsPage> {
             expiryYear: _expiryYear,
             expiryMonth: _expiryMonth);
         Charge charge = Charge()
-          ..amount = _amount * 100
+          ..amount = convertToPayStackInt(_amount)
           ..putCustomField('full name', userDetails['firstName']+' '+userDetails['lastName'])
           ..putCustomField('phone number', user['phone'])
           ..email = user['email']
@@ -224,7 +224,7 @@ class _AddFundsPage extends State<AddFundsPage> {
                 ),
                 TextFormField(
                   initialValue: _amount.toString(),
-                  onChanged: (v) => _amount = int.parse(v),
+                  onChanged: (v) => _amount = num.parse(v),
                   readOnly: widget.amount==null?false:true,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
@@ -273,5 +273,13 @@ class _AddFundsPage extends State<AddFundsPage> {
         ),
       ),
     );
+  }
+}
+
+int convertToPayStackInt(num number){
+  if(number.toString().contains('.')){
+    return int.tryParse(number.toStringAsFixed(2).replaceAll('.', ''));
+  }else{
+    return number*100;
   }
 }

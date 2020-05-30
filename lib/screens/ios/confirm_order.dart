@@ -161,8 +161,8 @@ final LocalStorage localStorage = new LocalStorage(STORAGE_KEY);
                         InkWell(onTap:(){
                             onSelect(e){
                               Map<String,String> post={};
-                              post['contactPhone']=_userDetails['firstName']+' '+_userDetails['lastName'];
-                              post['contactPerson']=_userDetails['phone'];
+                              post['contactPhone']=_userDetails['phone'];
+                              post['contactPerson']= _userDetails['firstName']+' '+_userDetails['lastName'];
                               post['shippingAddress'] = e['address'];
                               List arrAddress = e['address'].split(',');
                               post['shippingState'] = isNull(arrAddress[arrAddress.length-1],replace: '') ;
@@ -218,7 +218,7 @@ final LocalStorage localStorage = new LocalStorage(STORAGE_KEY);
     num total=0;
     num shippingFee=0;
     updateOrder(e){
-      total+=e['unitPrice']*e['quantity'];
+      total+=e['unitPrice']*int.tryParse(e['quantity']);
       shippingFee+=e['shippingFee'];
       orderTitle.add(
           Row(

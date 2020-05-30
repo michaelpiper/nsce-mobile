@@ -35,6 +35,7 @@ class UpdateProfileState extends State<UpdateProfile> {
   }
 
   startUpload() {
+    imageCache.clear();
     setStatus('Uploading Image...');
     if (null == tmpFile) {
       setStatus(errMessage);
@@ -43,7 +44,6 @@ class UpdateProfileState extends State<UpdateProfile> {
     updateAccountProfilePicture(tmpFile).then((res){
       if(res is Map){
         setStatus('Upload Sucessful');
-        imageCache.clear();
         f(){
           Navigator.of(context).pop(true);
         }

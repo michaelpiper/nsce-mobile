@@ -11,14 +11,11 @@ class TransactionPage extends StatelessWidget {
   final int trnId;
   final GlobalKey<State<StatefulWidget>> previewContainer = GlobalKey();
   final LocalStorage storage = new LocalStorage(STORAGE_KEY);
-  Map _transaction;
+  
   final oCcy = new NumberFormat("#,##0.00", "en_US");
-  TransactionPage({this.trnId}){
-    _transaction = storage.getItem(STORAGE_TRANSACTION_KEY);
-    // print(_transaction);
-  }
-
+  TransactionPage({this.trnId});
   Widget _build(){
+    final Map _transaction = storage.getItem(STORAGE_TRANSACTION_KEY);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[

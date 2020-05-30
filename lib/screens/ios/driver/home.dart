@@ -1,4 +1,6 @@
 import 'package:NSCE/ext/loading.dart';
+import 'package:NSCE/utils/helper.dart';
+import 'package:NSCE/utils/month.dart';
 import 'package:flutter/material.dart';
 import 'package:NSCE/services/driver_request.dart';
 import 'package:NSCE/ext/spinner.dart';
@@ -26,6 +28,7 @@ class _DriverHomePage extends State<DriverHomePage> {
   }
   _buildDispatch(){
     f(e){
+      print (e);
       DateTime _datee = DateTime.parse(e['dateScheduled']??'');
       return InkWell(
         onTap: (){
@@ -46,10 +49,10 @@ class _DriverHomePage extends State<DriverHomePage> {
                     SizedBox(height: 7,),
                     Text('Customer name',style: TextStyle(color: secondaryTextColor),),
                     SizedBox(height: 7,),
-                    Text(e['Order']['contactPerson'],style: TextStyle(color: noteColor),),
+                    Text(isNull(e['OrderDetail']['Order']['contactPerson'],replace:'Not provided'),style: TextStyle(color: noteColor),),
                     Text('Address',style: TextStyle(color: secondaryTextColor),),
                     SizedBox(height: 7,),
-                    Text(e['Order']['address'],style: TextStyle(color: noteColor),),
+                    Text(isNull(e['OrderDetail']['Order']['shippingAddress'],replace:'Not provided'),style: TextStyle(color: noteColor),),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
@@ -61,9 +64,9 @@ class _DriverHomePage extends State<DriverHomePage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        Text(e['Vehicle']['uniqueIdentifier'],style: TextStyle(color:  noteColor),),
+                        Text(e['Vehicle']==null?'Vehicle not assigned':isNull(e['Vehicle']['uniqueIdentifier'],replace:'Not available'),style: TextStyle(color:  noteColor),),
                         SizedBox(width: 7,),
-                        Text("${_datee.day}-${_datee.month}-${_datee.year} ${_datee.hour>12?_datee.hour-12:_datee.hour}:${_datee.minute} "+(_datee.hour>12?'p':'a')+"m",style: TextStyle(color:  noteColor),),
+                        Text("${_datee.day}-${short_month[_datee.month]}-${_datee.year}",style: TextStyle(color:  noteColor),),
                       ],
                     )
                   ],

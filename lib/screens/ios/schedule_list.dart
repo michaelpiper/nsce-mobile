@@ -20,7 +20,7 @@ class _ScheduleListPageState extends State<ScheduleListPage>{
 
   final oCcy = new NumberFormat("#,##0.00", "en_US");
   final LocalStorage storage = new LocalStorage(STORAGE_KEY);
-  Map<String,dynamic> _schedules= {};
+  Map<String,dynamic> _schedule= {};
   Map<String,dynamic> _order= {};
   DateTime _date;
   _ScheduleListPageState({this.index});
@@ -29,7 +29,7 @@ class _ScheduleListPageState extends State<ScheduleListPage>{
   void initState() {
     // TODO: implement initState
     super.initState();
-    _schedules = storage.getItem(STORAGE_SCHEDULE_LIST_KEY);
+    _schedule = storage.getItem(STORAGE_SCHEDULE_LIST_KEY);
     _order = storage.getItem(STORAGE_ORDER_KEY);
     _date = DateTime.parse(_order['createdAt']).toLocal();
   }
@@ -43,7 +43,7 @@ class _ScheduleListPageState extends State<ScheduleListPage>{
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
-              Text("Schedule # ${_schedules['id']}",style:TextStyle(color:noteColor,fontSize: 16,textBaseline: TextBaseline.alphabetic)),
+              Text("Schedule # ${_schedule['id']}",style:TextStyle(color:noteColor,fontSize: 16,textBaseline: TextBaseline.alphabetic)),
 
               Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -59,8 +59,8 @@ class _ScheduleListPageState extends State<ScheduleListPage>{
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Expanded(child:Text('${isNull(_schedules['Product']['name'],replace: '')}',overflow: TextOverflow.ellipsis,maxLines: 5,style:TextStyle(color:noteColor,fontSize: 15,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),),
-                      Text('${_schedules['quantity']} ${isNull(_schedules['Product']['unit'],replace: 'unit')}'.toString()+' ',style:TextStyle(color:noteColor,fontSize: 18,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700))
+                      Expanded(child:Text('${isNull(_schedule['Product']['name'],replace: '')}',overflow: TextOverflow.ellipsis,maxLines: 5,style:TextStyle(color:noteColor,fontSize: 15,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),),
+                      Text('${_schedule['quantity']} ${isNull(_schedule['Product']['unit'],replace: 'unit')}'.toString()+' ',style:TextStyle(color:noteColor,fontSize: 18,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700))
                     ],
                   )
                 ],
@@ -75,23 +75,23 @@ class _ScheduleListPageState extends State<ScheduleListPage>{
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text('Shipping method',style:TextStyle(color:noteColor,fontSize: 14,textBaseline: TextBaseline.alphabetic)),
-                        Text(_schedules['type']=='pickup'?"Pick up at Yard":"Site Delivery",style:TextStyle(color:noteColor,fontSize: 18,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),
+                        Text(_order['type']=='pickup'?"Pick up at Yard":"Site Delivery",style:TextStyle(color:noteColor,fontSize: 18,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),
                       ],
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text('Status',style:TextStyle(color:noteColor,fontSize: 15,textBaseline: TextBaseline.alphabetic)),
-                        Text(_schedules['status'],style:TextStyle(color:noteColor,fontSize: 18,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),
+                        Text(_schedule['status'],style:TextStyle(color:noteColor,fontSize: 18,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),
                       ],
                     )
                   ]
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Column(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   Text('Schedule Date',style:TextStyle(color: noteColor,fontSize: 15.0),textAlign: TextAlign.left,),
-                  Text(("${_schedules['dateScheduled']} ${_schedules['PlantTime']['timeSlot']}"),style:TextStyle(color: noteColor,fontSize: 15.0),textAlign: TextAlign.left,),
+                  Text(("${_schedule['dateScheduled']} ${_schedule['PlantTime']['timeSlot']}"),style:TextStyle(color: noteColor,fontSize: 15.0),textAlign: TextAlign.left,),
                 ],
               ),
               SizedBox(
@@ -132,7 +132,7 @@ class _ScheduleListPageState extends State<ScheduleListPage>{
     }
     Widget status(){
           return Expanded(
-            child: Dispatch(_schedules['id'],unit: _schedules['Product']['unit'],),
+            child: Dispatch(_schedule['id'],unit: _schedule['Product']['unit'],),
           );
     }
     return Scaffold(
@@ -173,6 +173,7 @@ class Dispatch extends StatefulWidget{
 class _Dispatch extends State<Dispatch>{
   bool loading;
   List <Map<String, dynamic>> _dispatches=[];
+  final LocalStorage storage = new LocalStorage(STORAGE_KEY);
   @override
   void initState() {
     // TODO: implement initState
@@ -211,6 +212,13 @@ class _Dispatch extends State<Dispatch>{
             borderRadius: BorderRadius.circular(15.0)
         ),
         child: ListTile(
+          onTap: (){
+            dispatch['unit']=widget.unit;
+            storage.setItem(STORAGE_DISPATCH_KEY, dispatch).then((_){
+              Navigator.of(context).pushNamed('/dispatch/${dispatch['id']}');
+            });
+
+          },
           contentPadding: EdgeInsets.symmetric(vertical: 20,horizontal: 10),
           title: Text('Qty: ${dispatch['quantity']}  ${isNull(widget.unit,replace: 'unit')}'.toString()),
           subtitle: Column(
@@ -218,7 +226,6 @@ class _Dispatch extends State<Dispatch>{
             children: <Widget>[
               Text('scheduled',style:TextStyle(color: textColor,fontSize: 12.0)),
               Text(("${dispatch['dateScheduled']} ( ${dispatch['timeScheduled']} )"),overflow: TextOverflow.ellipsis,maxLines: 5,style:TextStyle(color: textColor,fontSize: 15.0),textAlign: TextAlign.left,),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[

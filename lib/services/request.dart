@@ -589,7 +589,7 @@ fetchOrders({id=false})async{
   }
 }
 
-Future fetchOrderDetails(id)async{
+Future fetchOrderDetails(id,{productId})async{
   SharedPreferences prefs = await SharedPreferences.getInstance();
   Map<String, String> headers={};
   if(prefs.containsKey(STORAGE_USER_KEY)) {
@@ -600,7 +600,55 @@ Future fetchOrderDetails(id)async{
   }
   try{
     var response;
-    response = await http.get(API_ORDER_URL + '/' + id.toString()+'/detail', headers: headers);
+    if(productId!=null){
+      response = await http.get(API_ORDER_URL + '/' + id.toString()+ '/detail/' + 'product-' + productId , headers: headers);
+    }else{
+      response = await http.get(API_ORDER_URL + '/' + id.toString()+'/detail', headers: headers);
+    }
+    if (response.statusCode == 200) {
+      return convert.jsonDecode(response.body);
+    } else {
+      return false;
+    }
+  }
+  catch(e){
+    return false;
+  }
+}
+
+
+Future fetchOrderGroupedDetails(id)async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  Map<String, String> headers={};
+  if(prefs.containsKey(STORAGE_USER_KEY)) {
+    var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
+    if(wait.containsKey('authorization')) {
+      headers['Authorization']=wait['authorization'];
+    }
+  }
+  try{
+    var response = await http.get(API_ORDER_URL + '/' + id.toString()+'/grouped-detail', headers: headers);
+    if (response.statusCode == 200) {
+      return convert.jsonDecode(response.body);
+    } else {
+      return false;
+    }
+  }
+  catch(e){
+    return false;
+  }
+}
+Future countOrderDetails(id,{q="count"})async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  Map<String, String> headers={};
+  if(prefs.containsKey(STORAGE_USER_KEY)) {
+    var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
+    if(wait.containsKey('authorization')) {
+      headers['Authorization']=wait['authorization'];
+    }
+  }
+  try{
+    var response = await http.get(API_ORDER_URL + '/' + id.toString()+'/detail/$q', headers: headers);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);
     } else {
@@ -670,6 +718,28 @@ fetchOrderWithDispatches({id=false})async{
   }
 }
 
+fetchDispatchDriver(id)async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  Map<String, String> headers={};
+  if(prefs.containsKey(STORAGE_USER_KEY)) {
+    var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
+    if(wait.containsKey('authorization')) {
+      headers['Authorization']=wait['authorization'];
+    }
+  }
+  try{
+    var response = await http.get(API_DISPATCH_URL + '/' + id.toString()+'/driver', headers: headers);
+    // print(response.request.url);
+    if (response.statusCode == 200) {
+      return convert.jsonDecode(response.body);
+    } else {
+      return false;
+    }
+  }
+  catch(e){
+    return false;
+  }
+}
 //fetch adverts
 
 fetchAdverts({id=false})async{

@@ -338,7 +338,7 @@ class _CartLength extends State<CartLength> {
         });
       }
     }
-    fetchCart(id:'count').then(count);
+    fetchCart(id:'grouped-count').then(count);
   }
   @override
   void initState() {

@@ -1,15 +1,11 @@
 import '../services/endpoints.dart';
 import 'package:flutter/foundation.dart';
-bool get isInDebugMode{
-  const bool inDebugMode=true;
-  if(kReleaseMode)
-    return kReleaseMode;
-  return inDebugMode;
-}
+const isInDebugMode = kReleaseMode? false: true;
 
 String baseURL(String path,{replace:false}){
   if(path==null){
     path='';
+    return BASE_URL;
   }
   else if(path.length>=7){
     if ( path.indexOf("https://")>=0){
@@ -36,9 +32,9 @@ double percentage(num amount,num per,{divider:100}){
   return amount - ((amount/divider)*per);
 }
 
-  isNull(val,{replace}){
-    if(val==null){
-      return replace==null?true: replace;
-    }
-    return replace==null?false: val;
+dynamic isNull(val,{replace}){
+  if(val==null){
+    return replace==null?true: replace;
   }
+  return replace==null?false: val;
+}
