@@ -1,4 +1,5 @@
 import 'package:NSCE/services/request.dart';
+import 'package:NSCE/utils/timehelper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -101,7 +102,7 @@ class OrdersPageState extends State<OrdersPage>{
                                     Padding(padding: EdgeInsets.only(right:1.0),),
                                     SizedBox(width: 100,child: Text('Placed on: ',style:TextStyle(color:noteColor,fontSize: 15,textBaseline: TextBaseline.alphabetic)),),
                                     Padding(padding: EdgeInsets.only(right:3.0),),
-                                    Expanded(child:Text(("${_date.day}-${_date.month}-${_date.year} ${_date.hour>12?_date.hour-12:_date.hour}:${_date.minute} "+(_date.hour>12?'p':'a')+"m"),style:TextStyle(color:noteColor,fontSize: 20,textBaseline: TextBaseline.alphabetic)))
+                                    Expanded(child:Text(Bart.myDate(_date),style:TextStyle(color:noteColor,fontSize: 20,textBaseline: TextBaseline.alphabetic)))
                                   ],
                                 ),
                                 Row(

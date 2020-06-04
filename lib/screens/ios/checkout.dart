@@ -1,4 +1,5 @@
 import 'package:NSCE/ext/loading.dart';
+import 'package:NSCE/utils/country.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:NSCE/services/request.dart';
 import 'package:flutter/material.dart';
@@ -26,20 +27,33 @@ class CheckoutPageState extends State<CheckoutPage>{
       )
   ));
   Map<String, String> _billingData;
+  Map<String, String> _customer;
+  DropdownMenuItem f(e){
+    return DropdownMenuItem(
+      child: Text(e['name'],style:TextStyle(color: textColor),),
+      value: e['name'],
+    );
+  }
+  List<DropdownMenuItem> _countryList;
   @override
   void initState(){
     // TODO: implement initState
     super.initState();
     _loading=false;
-
+    _countryList=simpleCountryCode.map(f).toList();
   }
   _loadCustomer()async{
     var act = checkAuth();
     act.then((res){
       if(res is Map && res.containsKey('data')){
         _billingData={};
+        _customer ={};
         setState(() {
-          res['data'].forEach((k,v){_billingData[k]=v.toString();});
+          res['data'].forEach((k,v){
+            _billingData[k] = v.toString();
+            _customer[k] = v.toString();
+          });
+
           _txtController.text=_billingData['address'];
         });
       }
@@ -178,11 +192,13 @@ class CheckoutPageState extends State<CheckoutPage>{
                 children: <Widget>[
                   Expanded(
                     child:TextFormField(
+
                       initialValue:_billingData['phone'] ,
                       onSaved: (value)=> _billingData['phone']  = value,
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.done,
                       decoration: const InputDecoration(
+                          prefixIcon: Icon(Icons.call,color: secondaryTextColor),
                           hintText: '9433313465',
                           hintStyle: TextStyle(
                             color:  secondaryTextColor,
@@ -218,7 +234,7 @@ class CheckoutPageState extends State<CheckoutPage>{
                 initialValue:_billingData['company'] ,
                 onSaved: (value)=> _billingData['company']  = value,
                 decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.person,color: secondaryTextColor),
+                    prefixIcon: Icon(Icons.markunread_mailbox,color: secondaryTextColor),
                     labelText: 'Company name',
                     labelStyle: TextStyle(
                       color:  secondaryTextColor,
@@ -245,33 +261,39 @@ class CheckoutPageState extends State<CheckoutPage>{
               SizedBox(
                 height: 4,
               ),
-              TextFormField(
-                initialValue:_billingData['country'] ,
-                onSaved: (value)=> _billingData['country']  = value,
-                decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.person,color: secondaryTextColor),
-                    labelText: 'country',
+              DropdownButtonFormField(
+                decoration: InputDecoration(
+                    prefixIcon:  Icon(Icons.map,color: secondaryTextColor),
+                    contentPadding: EdgeInsets.symmetric(vertical: 5),
                     labelStyle: TextStyle(
                       color:  secondaryTextColor,
                     ),
                     enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                        borderRadius: BorderRadius.circular(4.0),
                         borderSide:BorderSide(color: Colors.black12,width:2)
                     ),
                     focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                        borderRadius: BorderRadius.circular(4.0),
                         borderSide:BorderSide(color: Colors.grey,width:2)
                     )
                 ),
-                keyboardType: TextInputType.text,
-                textInputAction: TextInputAction.done,
-                onChanged: (v) => _billingData['country'] = v,
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return 'Please enter your country';
+                iconSize: 30.0,
+                value: _billingData['country'],
+                hint: Text(_billingData['country']==null?'Country':_billingData['country']),
+                isExpanded: true,
+                style: TextStyle(color: Colors.white70),
+                onChanged: (v){
+                  for (var i=0;i<simpleCountryCode.length;i++){
+                    Map e = simpleCountryCode[i];
+                    if(e['name']==v){
+                      return setState(() {
+                        _billingData['country'] = v;
+
+                      });
+                    }
                   }
-                  return null;
                 },
+                items:_countryList,
               ),
               SizedBox(
                 height: 4,
@@ -283,7 +305,7 @@ class CheckoutPageState extends State<CheckoutPage>{
                   showFancyCustomDialogForAddress(context);
                 },
                 decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.person,color: secondaryTextColor),
+                    prefixIcon: Icon(Icons.location_on,color: secondaryTextColor),
                     labelText: 'Address',
                     labelStyle: TextStyle(
                       color:  secondaryTextColor,
@@ -316,16 +338,29 @@ class CheckoutPageState extends State<CheckoutPage>{
                   Expanded(
                     child: InkWell(
                         onTap: (){
+                          if (_loading) {
+                            return;
+                          }
+                          if(
+                          _billingData['firstName'] == _customer['firstName'] &&
+                              _billingData['lastName'] == _customer['lastName'] &&
+                              _billingData['phone'] == _customer['phone'] &&
+                              _billingData['company'] == _customer['company'] &&
+                              _billingData['country'] == _customer['country'] &&
+                              _billingData['address'] == _customer['address']
+                          ){
+                            showDialog<void>(
+                              context: context,
+                              barrierDismissible: false, // user must tap button!
+                              builder: (BuildContext context) {
+                                return  SmartAlert(title:"Alert",description:"No changes have been made");
+                              },
+                            );
+                            return;
+                          }
                           final form = _formKey.currentState;
                           form.save();
-
-
                           if (form.validate()) {
-
-                            if (_loading) {
-
-                              return;
-                            }
                             setState(() {
                               _loading = true;
                             });
@@ -335,6 +370,7 @@ class CheckoutPageState extends State<CheckoutPage>{
                             f(res){
                               _loading = false;
                               dialogMan.hide();
+
                               if(res is bool || res['error']==true){
                                 showDialog<void>(
                                   context: context,

@@ -100,7 +100,7 @@ class _ScheduleListPageState extends State<ScheduleListPage>{
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  Text('Total    ....',style:TextStyle(color:noteColor,fontSize: 15,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),
+                  Text('Total      ',style:TextStyle(color:noteColor,fontSize: 15,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),
                   Expanded(child: Text(CURRENCY['sign']+''+ oCcy.format(_order['totalPrice']+_order['shippingFee']),style:TextStyle(color:noteColor,fontSize: 18,fontWeight: FontWeight.w700),textAlign: TextAlign.right,),)
                 ],
               ),
@@ -230,8 +230,7 @@ class _Dispatch extends State<Dispatch>{
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   Expanded(child: Container(),),
-                  Icon(Icons.check_circle,size: 19,color: primaryColor),
-                  Text(isNull( dispatch['status'],replace: 'Status'),style:TextStyle(color:primaryColor,fontSize: 19,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w600)),
+                  Text("View details",style:TextStyle(color:primaryColor,fontSize: 19,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w600)),
                 ],
               ),
             ],

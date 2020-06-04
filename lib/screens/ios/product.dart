@@ -219,7 +219,7 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
               ),
               Row(
                   children: <Widget>[
-                    Expanded(child: Text('${CURRENCY['sign']} '+percentage(_product['price'],_product['discount']).toString()+'/'+isNull(_product['unit'],replace: 'unit'),style: TextStyle(fontWeight: FontWeight.w600,fontSize: 20,color: textColor),),)
+                    Expanded(child: Text('${CURRENCY['sign']} '+ oCcy.format(percentage(_product['price'],_product['discount']))+'/'+isNull(_product['unit'],replace: 'unit'),style: TextStyle(fontWeight: FontWeight.w600,fontSize: 20,color: textColor),),)
                   ]
               ),
               _product['discount']==0?
@@ -434,12 +434,12 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
       // print(value['data']);
       if(value is Map &&  value.containsKey('data')){
         Map <String,dynamic> contact = value['data'];
-        post['productId']=id.toString();
-        post['quantity']=unit.toString();
-        post['schedule']='';
-        post['type']= selectedMethod=="Site Delivery"?'delivery':'pickup';
-        post['contactPerson']=contact['firstName']+' '+contact['lastName'];
-        post['contactPhone']=act['phone'];
+        post['productId'] = id.toString();
+        post['quantity'] = unit.toString();
+        post['schedule'] = '';
+        post['type'] = selectedMethod=="Site Delivery"?'delivery':'pickup';
+        post['contactPerson'] = contact['firstName']+' '+contact['lastName'];
+        post['contactPhone'] = act['phone'];
         storage.setItem(STORAGE_SCHEDULE_KEY, {'post':post,'product':_product}).then<void>((value){
           dialogMan.hide();
           Navigator.pushNamed(context, '/schedule');

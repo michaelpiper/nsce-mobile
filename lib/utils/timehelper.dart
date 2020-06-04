@@ -14,6 +14,9 @@ class Bart{
     formatter = new DateFormat(format);
     formatted = formatter.format(_now);
   }
+  static myDate(DateTime _date){
+    return "${_date.day}-${_date.month}-${_date.year} ${_date.hour>12?_date.hour-12:_date.hour>9?_date.hour:"0${_date.hour}"}:${_date.minute>9?_date.minute:"0${_date.minute}"} "+(_date.hour>12?'p':'a')+"m";
+  }
   addYear(int a){
     _now= _now.add(Duration(days: a*365));
   }

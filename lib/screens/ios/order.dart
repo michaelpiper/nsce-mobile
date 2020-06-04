@@ -1,4 +1,5 @@
 import 'package:NSCE/utils/helper.dart';
+import 'package:NSCE/utils/timehelper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -68,7 +69,7 @@ class _OrderPageState extends State<OrderPage>{
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Text('Placed On ',style:TextStyle(color: primaryTextColor,fontSize: 15.0),textAlign: TextAlign.left,),
-                  Text(("${_date.day}-${_date.month}-${_date.year} ${_date.hour>12?_date.hour-12:_date.hour}:${_date.minute} "+(_date.hour>12?'p':'a')+"m"),style:TextStyle(color: primaryTextColor,fontSize: 15.0),textAlign: TextAlign.left,),
+                  Text(Bart.myDate(_date),style:TextStyle(color: primaryTextColor,fontSize: 15.0),textAlign: TextAlign.left,),
                 ],
               ),
               Column(
@@ -78,7 +79,7 @@ class _OrderPageState extends State<OrderPage>{
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Text('trnRef',style:TextStyle(color:primaryTextColor,fontSize: 15,textBaseline: TextBaseline.alphabetic))
+                      Text('Reference number',style:TextStyle(color:primaryTextColor,fontSize: 15,textBaseline: TextBaseline.alphabetic))
                     ],
                   ),
                   Row(
@@ -114,7 +115,7 @@ class _OrderPageState extends State<OrderPage>{
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  Text('Total    ....',style:TextStyle(color:primaryTextColor,fontSize: 15,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),
+                  Text('Total        ',style:TextStyle(color:primaryTextColor,fontSize: 15,textBaseline: TextBaseline.alphabetic,fontWeight: FontWeight.w700)),
                   Expanded(child: Text(CURRENCY['sign']+''+ oCcy.format(_order['totalPrice']+_order['shippingFee']),style:TextStyle(color:primaryTextColor,fontSize: 18,fontWeight: FontWeight.w700),textAlign: TextAlign.right,),)
                 ],
               ),
@@ -175,7 +176,8 @@ class OrderDetails extends StatefulWidget{
 }
 class _OrderDetails extends State<OrderDetails>{
   bool loading;
-  List <Map<String, dynamic>> _orderDetails=[];
+  Map _orderDetails= {};
+  List <Map<String, dynamic>> _schedules=[];
   final LocalStorage storage = new LocalStorage(STORAGE_KEY);
   @override
   void initState() {
@@ -188,14 +190,16 @@ class _OrderDetails extends State<OrderDetails>{
     void f(res){
       _loading(false);
       print(res);
-      if(res is Map && res['data'] is List){
+      if(res is Map && res['data'] is Map){
         setState(() {
-          _orderDetails = res['data'].map<Map<String,dynamic>>((e)=>new Map<String, dynamic>.from(e)).toList();
+          _orderDetails =  Map<String, dynamic>.from(res['data']);
+          _schedules = List<Map<String, dynamic>>.from(_orderDetails['Schedules']);
         });
+
       }
     }
     _loading(true);
-    fetchOrderDetails('${widget.orderId}').then(f);
+    fetchOrderDetailsSchedule('${widget.orderId}', asOrderId: true).then(f);
   }
   void _loading(bool state){
     setState(() {
@@ -217,16 +221,17 @@ class _OrderDetails extends State<OrderDetails>{
         ),
         child: ListTile(
           onTap: (){
+            schedule['Product']= _orderDetails['Product'];
             storage.setItem(STORAGE_SCHEDULE_LIST_KEY, schedule).then((_){
               Navigator.of(context).pushNamed('/schedule-list');
             });
           },
           contentPadding: EdgeInsets.symmetric(vertical: 20,horizontal: 10),
-          title: Text(' ${isNull(schedule['Product']['name'],replace: 'Product')}',style: TextStyle(fontWeight: FontWeight.w600,fontSize: 16),),
+          title: Text(' ${isNull(_orderDetails['Product']['name'],replace: 'Product')}',style: TextStyle(fontWeight: FontWeight.w600,fontSize: 16),),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text('Qty: ${schedule['quantity']} ${isNull(schedule['Product']['unit'],replace: 'unit')}'),
+              Text('Qty: ${schedule['quantity']} ${isNull(_orderDetails['Product']['unit'],replace: 'unit')}'),
               SizedBox(height: 6,),
               Text('schedule Date',style:TextStyle(color: textColor)),
               Text(("${schedule['dateScheduled']} ( ${schedule['PlantTime']['timeSlot']} )"),overflow: TextOverflow.ellipsis,maxLines: 5,style:TextStyle(color: textColor,fontSize: 15.0,fontWeight: FontWeight.w600),textAlign: TextAlign.left,),
@@ -243,7 +248,7 @@ class _OrderDetails extends State<OrderDetails>{
         ),
       );
     }
-    return _orderDetails.length==0?Center(child: Text('Empty'),):
+    return _schedules.length==0?Center(child: Text('Empty'),):
     Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
@@ -258,9 +263,9 @@ class _OrderDetails extends State<OrderDetails>{
         Expanded(
           child: ListView.builder(
             shrinkWrap: false,
-            itemCount: _orderDetails.length,
+            itemCount: _schedules.length,
             itemBuilder: (BuildContext ctxt, int index) {
-              return f(_orderDetails[index]);
+              return f(_schedules[index]);
             }),
         )
 
@@ -298,14 +303,14 @@ class _OrderProducts extends State<OrderProducts>{
       }
     }
     _loading(true);
-    fetchOrderGroupedDetails('${widget.orderId}').then(f);
+    fetchOrderDetails('${widget.orderId}').then(f);
   }
   void _loading(bool state){
     setState(() {
       loading=state;
     });
   }
-  void _loadDetails(int productId){
+  void _loadDetails(int orderDetailId, int productId){
     void f(res){
       _loading(false);
       print(res);
@@ -316,7 +321,7 @@ class _OrderProducts extends State<OrderProducts>{
       }
     }
     _loading(true);
-    fetchOrderDetails('${widget.orderId}',productId:'$productId').then(f);
+    fetchOrderDetailsSchedule('$orderDetailId',productId:'$productId').then(f);
   }
   @override
   Widget build(BuildContext context) {
@@ -333,7 +338,7 @@ class _OrderProducts extends State<OrderProducts>{
         child: ListTile(
           onTap: (){
               print(schedule['productId']);
-              _loadDetails(schedule['productId']);
+              _loadDetails(schedule['id'],schedule['productId']);
           },
           contentPadding: EdgeInsets.symmetric(vertical: 20,horizontal: 10),
           title: Text(' ${isNull(schedule['Product']['name'],replace: 'Product')}',style: TextStyle(fontWeight: FontWeight.w600,fontSize: 16),),
@@ -414,7 +419,9 @@ class _OrderProducts extends State<OrderProducts>{
           Expanded(
             child: ListView.builder(shrinkWrap: false,itemCount: _orderDetails.length,
             itemBuilder: (BuildContext ctxt, int index) {
-              return f2(_orderDetails[index]);
+              final Map newSchedule = _orderDetails[index];
+              newSchedule['Product'] = _orderDetails[index]['OrderDetail']['Product'];
+              return f2(newSchedule);
             })
           )
         ],

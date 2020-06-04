@@ -372,7 +372,7 @@ class _SchedulePageState extends State<SchedulePage> with TickerProviderStateMix
          showDialog(context: context,child: SmartAlert(title: 'Alert',description: 'Schedule can\'t be made done until Quantity needed is equal to quantity scheduled.'));
        }
      },
-     child: Text('done',style:TextStyle(color: primaryColor)),
+     child: Text('Done',style:TextStyle(color: primaryColor)),
    );
    Widget _saveButton=Container(
        color: Colors.transparent,

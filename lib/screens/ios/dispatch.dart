@@ -41,6 +41,9 @@ class _DispatchPageState extends State<DispatchPage>{
     }
     Future.delayed(Duration(seconds: 1),f);
   }
+  void printWaybill(){
+
+  }
   void sendFeedback(){
     showDialog<void>(context: context,barrierDismissible: false,builder: (BuildContext context){
       f()async {
@@ -58,15 +61,35 @@ class _DispatchPageState extends State<DispatchPage>{
         });
       }
       return Material(
+        color: Colors.white,
         child: AlertDialog(
-          title: Text('Rate this Driver'),
-          elevation: 1,
+          backgroundColor: Colors.white,
+          title: Text("Delivery Successful", style: TextStyle(fontSize: 21),textAlign: TextAlign.center,),
+          elevation: 0.1,
           shape:  RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(5.0),
           ),
           content: SingleChildScrollView(
             child: ListBody(
                 children: <Widget>[
+
+                  SizedBox(height: 100,),
+                  TextField(
+                      decoration: InputDecoration(
+                        labelText:'Leave a feedback',
+                        hintText: 'Type your comment here',
+                        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: primaryColor)),
+                        focusedBorder:  OutlineInputBorder(borderSide: BorderSide(color: primaryColor)),
+                      ),
+                      minLines: 6,
+                      maxLines: 6,
+                      onChanged: (e){
+                        setState(() {
+                          _comment=e;
+                        });
+                      }
+                  ),
+                  SizedBox(height: 50,),
                   RatingBar(
                     initialRating: 3,
                     minRating: 1,
@@ -84,31 +107,19 @@ class _DispatchPageState extends State<DispatchPage>{
                       });
                     },
                   ),
-                  TextField(
-                      decoration: InputDecoration(
-                        labelText:'Feedbacks',
-                        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: primaryColor)),
-                      ),
-                      minLines: 6,
-                      maxLines: 6,
-                      onChanged: (e){
-                        setState(() {
-                          _comment=e;
-                        });
-                      }
-                  )
               ]
             ),
           ),
+
           actions: <Widget>[
             FlatButton(
-              child: Text('CANCEL',style: TextStyle(color: Colors.red),),
+              child: Text('Skip ',style: TextStyle(color: Colors.black12),),
               onPressed: () {
                 if(Navigator.of(context).canPop())Navigator.of(context).pop();
               },
             ),
             FlatButton(
-              child: Text('OK'),
+              child: Text('Done'),
               onPressed: () {
                 f();
               },
@@ -228,13 +239,13 @@ class _DispatchPageState extends State<DispatchPage>{
           return Center(
             child: MaterialButton(
               color: primaryColor,
-              onPressed: sendFeedback,
+              onPressed: printWaybill,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                   side: BorderSide(color: primarySwatch,)
               ),
               padding: EdgeInsets.symmetric(vertical:20.0,horizontal: 45.0),
-              child: Text('Rate Driver',style: TextStyle(color: primaryTextColor),),
+              child: Text('Print Waybill',style: TextStyle(color: primaryTextColor),),
             ),
           );
             
