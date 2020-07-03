@@ -58,6 +58,10 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
     });
   }
   void decreament(){
+    if(_product['minimumQuantity'] > unit-1){
+       showDialog(context: context,child: SmartAlert(title: 'Alert',description:"You have reach the minimum quantity allowed for this product."));
+       return;
+    }
     setState(() {
       if(unit>1)unit--;
       else unit=1;
@@ -75,6 +79,8 @@ class ProductStatePage extends State<ProductPage> with TickerProviderStateMixin{
          print(product['data']);
         setState(() {
           _product = product['data'];
+          unit = _product['minimumQuantity'];
+          _txtController.text=unit.toString();
           _productLoaded();
         });
         return Future.value(true);

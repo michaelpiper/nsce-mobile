@@ -1,4 +1,5 @@
 import 'package:NSCE/screens/ios/invoice.dart';
+import 'package:NSCE/screens/ios/material_calculator.dart';
 import 'package:NSCE/screens/ios/schedule_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -80,6 +81,7 @@ buildAndroid(context){
       },
     ),
     onGenerateRoute: (settings){
+      print(settings.name);
       List data=settings.name.split('/');
       // print(data);
       if(data[1]=='home' && data[2]!=null){
@@ -155,7 +157,8 @@ buildAndroid(context){
       '/driver-home':(BuildContext context) =>DriverHomePage(),
       '/chat':(BuildContext context) =>ChatPage(),
       '/invoices': (BuildContext context) => InvoicesPage(),
-      '/schedule-list':(BuildContext context) =>ScheduleListPage()
+      '/schedule-list':(BuildContext context) =>ScheduleListPage(),
+      '/material_calculator':(BuildContext context) => MaterialCalculatorPage()
     },
   );
 }

@@ -103,10 +103,10 @@ class InvoicesPageState extends State<InvoicesPage>{
       body += """
         <tr class="row-data">
         <td>${e['Product']['Category']['name']} <span>(${e['Product']['name']})</span></td>
-        <td id="unit">${e['quantity']}</td>
-        <td>${e['unitPrice']}</td>
-        <td>${e['shippingFee']}</td>
-        <td>${e['totalPrice']}</td>
+        <td id="unit"> ${e['quantity']} </td>
+        <td>${CURRENCY['sign']} ${e['unitPrice']} </td>
+        <td>${CURRENCY['sign']} ${e['shippingFee']} </td>
+        <td>${CURRENCY['sign']} ${e['totalPrice']} </td>
         </tr>
 """;
 
@@ -268,13 +268,13 @@ body {
       <div class="invoice-details">
       <table class="invoice-table">
       <thead>
-      <tr>
-      <td>PRODUCT</td>
-      <td>UNIT</td>
-      <td>PRICE</td>
-      <td>SHIPPING</td>
-      <td>TOTAL</td>
-      </tr>
+        <tr>
+          <td>PRODUCT</td>
+          <td>UNIT</td>
+          <td>PRICE</td>
+          <td>SHIPPING</td>
+          <td>TOTAL</td>
+        </tr>
       </thead>
 
       <tbody>

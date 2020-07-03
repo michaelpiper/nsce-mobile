@@ -1,3 +1,5 @@
+import 'package:NSCE/ext/smartalert.dart';
+import 'package:NSCE/services/auth.dart';
 import 'package:NSCE/utils/helper.dart';
 import 'package:NSCE/utils/month.dart';
 import 'package:flutter/material.dart';
@@ -10,261 +12,397 @@ import 'package:NSCE/ext/dialogman.dart';
 
 class DriverDispatchPage extends StatefulWidget {
   final int index;
-  DriverDispatchPage({Key key,this.index:0}) : super(key: key);
+
+  DriverDispatchPage({Key key, this.index: 0}) : super(key: key);
+
   @override
   _DriverDispatchPage createState() => new _DriverDispatchPage();
 }
 
 class _DriverDispatchPage extends State<DriverDispatchPage> {
   int index;
-  String _title='Task';
+  String _title = 'Task';
   Map _dispatch;
+  Map _userDetails = {};
   final LocalStorage storage = new LocalStorage(STORAGE_KEY);
-  final DialogMan dialogMan = DialogMan(child: Scaffold(
-      backgroundColor: Colors.transparent,
-      body:Center(
-          child:CircularProgressIndicator()
-      )
-  ));
+  final DialogMan dialogMan = DialogMan(
+      child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Center(child: CircularProgressIndicator())));
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     this.index = widget.index;
     _dispatch = storage.getItem(STORAGE_DRIVER_DISPATCH_KEY);
+    onValue(v) {
+      debugPrint('==================================');
+      setState(() {
+        _userDetails = v;
+      });
+    }
+
+    AuthService.getUserDetails().then(onValue);
   }
 
-  _fillHead(e){
-    DateTime _datee = DateTime.parse(e['dateScheduled']??'');
-    return  Padding(
-      padding: EdgeInsets.symmetric(vertical: 3.0,horizontal: 2.0),
-      child:Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child:Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text('Dispatch#'+e['id'].toString(),style: TextStyle(color: primaryColor),),
-              SizedBox(height: 7,),
-              Text('Customer name',style: TextStyle(color: secondaryTextColor),),
-              SizedBox(height: 7,),
-              Text(isNull(e['OrderDetail']['Order']['contactPerson'],replace: 'Not provided'),style: TextStyle(color: noteColor),),
-              Text('Address',style: TextStyle(color: secondaryTextColor),),
-              SizedBox(height: 7,),
-              Text(isNull(e['OrderDetail']['Order']['shippingAddress'],replace: 'Not provided'),style: TextStyle(color: noteColor),),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text('Vehicle',style: TextStyle(color: secondaryTextColor),),
-                  SizedBox(width: 7,),
-                  Text('Delivery Date',style: TextStyle(color: secondaryTextColor),),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text(e['Vehicle']==null?'Vehicle not assigned':isNull(e['Vehicle']['uniqueIdentifier'],replace:'Not available'),style: TextStyle(color:  noteColor),),
-                  SizedBox(width: 7,),
-                  Text("${_datee.day}-${short_month[_datee.month]}-${_datee.year} ${e['timeScheduled']}",style: TextStyle(color:  noteColor),),
-                ],
-              )
-            ],
+  _fillHead(e) {
+    DateTime _datee = DateTime.parse(e['dateScheduled'] ?? '');
+    return Padding(
+        padding: EdgeInsets.symmetric(vertical: 3.0, horizontal: 2.0),
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  'Dispatch#' + e['id'].toString(),
+                  style: TextStyle(color: primaryColor),
+                ),
+                SizedBox(
+                  height: 7,
+                ),
+                Text(
+                  'Customer name',
+                  style: TextStyle(color: secondaryTextColor),
+                ),
+                SizedBox(
+                  height: 7,
+                ),
+                Text(
+                  isNull(e['OrderDetail']['Order']['contactPerson'],
+                      replace: 'Not provided'),
+                  style: TextStyle(color: noteColor),
+                ),
+                Text(
+                  'Address',
+                  style: TextStyle(color: secondaryTextColor),
+                ),
+                SizedBox(
+                  height: 7,
+                ),
+                Text(
+                  isNull(e['OrderDetail']['Order']['shippingAddress'],
+                      replace: 'Not provided'),
+                  style: TextStyle(color: noteColor),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                      'Vehicle',
+                      style: TextStyle(color: secondaryTextColor),
+                    ),
+                    SizedBox(
+                      width: 7,
+                    ),
+                    Text(
+                      'Delivery Date',
+                      style: TextStyle(color: secondaryTextColor),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                      e['Vehicle'] == null
+                          ? 'Vehicle not assigned'
+                          : isNull(e['Vehicle']['uniqueIdentifier'],
+                              replace: 'Not available'),
+                      style: TextStyle(color: noteColor),
+                    ),
+                    SizedBox(
+                      width: 7,
+                    ),
+                    Text(
+                      "${_datee.day}-${short_month[_datee.month]}-${_datee.year} ${e['timeScheduled']}",
+                      style: TextStyle(color: noteColor),
+                    ),
+                  ],
+                )
+              ],
+            ),
           ),
-        ),
-      )
-    );
+        ));
   }
-  _fillButton(){
-    switch(_dispatch['status']){
+
+  void updateAvailability() {
+    f(id) {
+      showDialog(
+        context: context,
+        child: SmartAlert(
+          title: "Alert",
+          description: 'Vehicle reported as arrived',
+        ),
+      );
+      updateVehicleStatus(id);
+    }
+
+    if (_dispatch['Vehicle'] == null) {
+      showDialog(
+        context: context,
+        child: SmartAlert(
+          title: "Alert",
+          description: 'No vehicle on transit',
+        ),
+      );
+      return;
+    }
+    if (_dispatch['Vehicle']['status'] == "Available") {
+      showDialog(
+        context: context,
+        child: SmartAlert(
+          title: "Alert",
+          description: 'Vehicle already reported as available.',
+        ),
+      );
+      return;
+    }
+    f(_dispatch['Vehicle']['id']);
+  }
+
+  _fillButton() {
+    switch (_dispatch['status']) {
       case 'Completed':
         return Center(
-          child: Container(
-            child: Text('Dispatch completed'),
-          ),
-        );
+            child: Column(
+          children: <Widget>[
+            Container(
+              child: Text('Dispatch completed'),
+            ),
+            MaterialButton(
+              onPressed: updateAvailability,
+              color: primaryTextColor,
+              child: Text(
+                'Report Arrival',
+                style: TextStyle(color: primaryColor),
+              ),
+              padding: EdgeInsets.all(10),
+              shape: BeveledRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
+                side: BorderSide(color: primaryColor),
+              ),
+            ),
+          ],
+        ));
       case 'On-Transit':
+      case 'Failed':
         return Padding(
-          padding: EdgeInsets.symmetric(vertical: 3.0,horizontal: 2.0),
+          padding: EdgeInsets.symmetric(vertical: 3.0, horizontal: 20.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Row(
-                children: <Widget>[
-                  Expanded(child: MaterialButton(
-                    onPressed: (){
-                      dialogMan.show();
-                      fn(res){
-                        dialogMan.hide();
-                        setState((){
-                          _dispatch['status']='Failed';
-                        });
-                        storage.setItem(STORAGE_DRIVER_DISPATCH_KEY, _dispatch).then((v){
-
-                        });
-                      }
-                      updateDispatch(_dispatch['id'],{'status':'Failed'}).then(fn);
-                    },
-                    color: primaryColor,
-                    child: Text('Failed', style: TextStyle(color: primaryTextColor),),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(
-                            top: Radius.elliptical(15.0,15.0),
-                            bottom: Radius.elliptical(15.0,15.0)
-                        )
-                    ),
-                  ),),
-                  Expanded(child: MaterialButton(
-                    onPressed: (){
-                      dialogMan.show();
-                      fn(res){
-                        dialogMan.hide();
-                        setState((){
-                          _dispatch['status']='Cancel';
-                        });
-                        storage.setItem(STORAGE_DRIVER_DISPATCH_KEY, _dispatch).then((v){
-
-                        });
-                      }
-                      updateDispatch(_dispatch['id'],{'status':'Cancel'}).then(fn);
-                    },
-                    color: primaryColor,
-                    child: Text('Cancel', style: TextStyle(color: primaryTextColor),),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(
-                            top: Radius.elliptical(15.0,15.0),
-                            bottom: Radius.elliptical(15.0,15.0)
-                        )
-                    ),
-                  ),),
-                ],
-              ),
               MaterialButton(
-                onPressed: (){
+                onPressed: () {
                   dialogMan.show();
-                  fn(res){
+                  fn(res) {
                     dialogMan.hide();
-
                     setState(() {
-                      _dispatch['status']='Completed';
+                      _dispatch['status'] = 'Completed';
                     });
-                    storage.setItem(STORAGE_DRIVER_DISPATCH_KEY, _dispatch).then((v){
-                    });
+                    storage
+                        .setItem(STORAGE_DRIVER_DISPATCH_KEY, _dispatch)
+                        .then((v) {});
                   }
-                  updateDispatch(_dispatch['id'],{'status':'Completed'}).then(fn);
+
+                  updateDispatch(_dispatch['id'], {'status': 'Completed'})
+                      .then(fn);
                 },
                 color: primaryColor,
-                child: Text('Completed', style: TextStyle(color: primaryTextColor),),
+                child: Text(
+                  'Arrived',
+                  style: TextStyle(color: primaryTextColor),
+                ),
+                padding: EdgeInsets.all(10),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(
-                        top: Radius.elliptical(15.0,15.0),
-                        bottom: Radius.elliptical(15.0,15.0)
-                    )
+                    borderRadius: BorderRadius.circular(5)),
+              ),
+              MaterialButton(
+                onPressed: () {
+                  dialogMan.show();
+                  fn(res) {
+                    dialogMan.hide();
+                    if (_dispatch['status'] != 'Failed') {
+                      setState(() {
+                        _dispatch['status'] = 'Failed';
+                      });
+                      storage
+                          .setItem(STORAGE_DRIVER_DISPATCH_KEY, _dispatch)
+                          .then((v) {});
+                    }
+                    showDialog(context: context, builder: showIssuesDialog);
+                  }
+
+                  updateDispatch(_dispatch['id'], {'status': 'Failed'})
+                      .then(fn);
+                },
+                color: primaryTextColor,
+                child: Text(
+                  _dispatch['status'] != 'Failed'
+                      ? 'Report an Issue'
+                      : 'Update',
+                  style: TextStyle(color: primaryColor),
+                ),
+                padding: EdgeInsets.all(10),
+                shape: BeveledRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                  side: BorderSide(color: primaryColor),
                 ),
               ),
             ],
-          )
+          ),
         );
       case 'Pending':
         return Padding(
-          padding: EdgeInsets.symmetric(vertical: 3.0,horizontal: 2.0),
+          padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 20.0),
           child: MaterialButton(
-            onPressed: (){
+            onPressed: () {
               dialogMan.show();
-              fn(res){
+              fn(res) {
                 // print(res);
                 dialogMan.hide();
 
                 setState(() {
-                  _dispatch['status']='On-Transit';
+                  _dispatch['status'] = 'On-Transit';
                 });
-                storage.setItem(STORAGE_DRIVER_DISPATCH_KEY, _dispatch).then((v){
-
-                });
+                storage
+                    .setItem(STORAGE_DRIVER_DISPATCH_KEY, _dispatch)
+                    .then((v) {});
               }
-              updateDispatch(_dispatch['id'],{'status':'On-Transit'}).then(fn);
+
+              updateDispatch(_dispatch['id'], {'status': 'On-Transit'})
+                  .then(fn);
             },
             color: primaryColor,
-            child: Text('Start', style: TextStyle(color: primaryTextColor),),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(
-                    top: Radius.elliptical(15.0,15.0),
-                    bottom: Radius.elliptical(15.0,15.0)
-                )
+            child: Text(
+              'Start',
+              style: TextStyle(color: primaryTextColor),
             ),
+            padding: EdgeInsets.all(10),
+            shape:
+                BeveledRectangleBorder(borderRadius: BorderRadius.circular(5)),
           ),
         );
       default:
         return Padding(
-          padding: EdgeInsets.symmetric(vertical: 3.0,horizontal: 2.0),
+          padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 20.0),
           child: MaterialButton(
-            onPressed: (){
+            onPressed: () {
               dialogMan.show();
-              fn(res){
+              fn(res) {
                 // print(res);
                 dialogMan.hide();
                 setState(() {
-                  _dispatch['status']='Completed';
+                  _dispatch['status'] = 'Completed';
                 });
-                storage.setItem(STORAGE_DRIVER_DISPATCH_KEY, _dispatch).then((v){
-                  Navigator.of(context).setState((){});
+                storage
+                    .setItem(STORAGE_DRIVER_DISPATCH_KEY, _dispatch)
+                    .then((v) {
+                  Navigator.of(context).setState(() {});
                 });
               }
-              updateDispatch(_dispatch['id'],{'status':'Completed'}).then(fn);
+
+              updateDispatch(_dispatch['id'], {'status': 'Completed'}).then(fn);
             },
             color: primaryColor,
-            child: Text('Completed', style: TextStyle(color: primaryTextColor),),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(
-                    top: Radius.elliptical(15.0,15.0),
-                    bottom: Radius.elliptical(15.0,15.0)
-                )
+            child: Text(
+              'Completed',
+              style: TextStyle(color: primaryTextColor),
             ),
+            padding: EdgeInsets.all(10),
+            shape:
+                BeveledRectangleBorder(borderRadius: BorderRadius.circular(5)),
           ),
         );
     }
   }
-  _buildBody(){
-    return  Column(
+
+  _buildBody() {
+    return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children:<Widget>[
-          _fillHead(_dispatch),
-          Card(
-            child: ListTile(
-              title: Text('Contact Details'),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(_dispatch['OrderDetail']['Order']['contactPhone']??'nil'),
-                  Text(_dispatch['OrderDetail']['Order']['shippingAddress']??'nil')
-                ],
-              ),
+      children: <Widget>[
+        _fillHead(_dispatch),
+        Card(
+          child: ListTile(
+            title: Text('Contact Details'),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                    _dispatch['OrderDetail']['Order']['contactPhone'] ?? 'nil'),
+                Text(_dispatch['OrderDetail']['Order']['shippingAddress'] ??
+                    'nil')
+              ],
             ),
           ),
-          Card(
-            child: ListTile(
-              title: Text('Dispatch Status'),
-              subtitle: Text(_dispatch['status']??'Pending'),
+        ),
+        Card(
+          child: ListTile(
+            title: Text('Dispatch Status'),
+            trailing: Text(_dispatch['status'] ?? 'Pending'),
+          ),
+        ),
+        Card(
+          child: ListTile(
+            title: Text(
+                'Quantity: ${_dispatch['OrderDetail']['quantity']} ${_dispatch['OrderDetail']['Product']['unit'] ?? 'unit'}'),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Text(
+                    'UnitPrice: ${CURRENCY['sign']} ${_dispatch['OrderDetail']['unitPrice']}'),
+                Text(
+                    'ShippingFee: ${CURRENCY['sign']} ${_dispatch['OrderDetail']['shippingFee']}'),
+                Text(
+                    'TotalPrice: ${CURRENCY['sign']} ${_dispatch['OrderDetail']['totalPrice']}'),
+              ],
             ),
           ),
-          _fillButton()
-      ]
+        ),
+        Card(
+          child: ListTile(
+            title: Text('Product'),
+            trailing:
+                Text(_dispatch['OrderDetail']['Product']['name'] ?? 'nil'),
+          ),
+        ),
+        _fillButton()
+      ],
     );
   }
-  _buildActions(){
-    return <Widget>[
-      SizedBox(
-        height: 25.0,
+
+  Widget _avatar() {
+    ImageProvider bgIm;
+    if (_userDetails['image'] == null || _userDetails['image'] == '') {
+      bgIm = AssetImage('images/avatar.png');
+    } else {
+      bgIm = NetworkImage(baseURL('${_userDetails['image']}'));
+    }
+
+    return SizedBox(
+      width: 50.0,
+      height: 50.0,
+      child: CircleAvatar(
+        backgroundImage: bgIm,
       ),
+    );
+  }
+
+  List<Widget> _buildActions() {
+    return <Widget>[
+      Spacer(),
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         child: InkWell(
-          onTap: (){
+          onTap: () {
             Navigator.pushNamed(context, '/driver-profile');
           },
-          child: Icon(Icons.drive_eta),
+          child: _avatar(),
         ),
       ),
       SizedBox(
@@ -272,19 +410,172 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
       ),
     ];
   }
+
+  Dialog showIssuesDialog(BuildContext context) {
+    String issues = '';
+    void send() {
+      f(resp) {
+        if (resp == false || resp is Map && resp['error'] == true) {
+          showDialog(
+            context: context,
+            child: SmartAlert(
+              title: 'Alert',
+              description: 'Report not sent please try again.',
+            ),
+          );
+          return;
+        }
+        if (resp is Map && resp['message'] != null) {
+          showDialog(
+            context: context,
+            child: SmartAlert(
+              title: 'Alert',
+              description: resp['message'],
+              onOk: Navigator.of(context).pop,
+            ),
+          );
+          return;
+        }
+        showDialog(
+          context: context,
+          child: SmartAlert(
+            title: 'Alert',
+            description: 'Report sent.',
+            onOk: Navigator.of(context).pop,
+          ),
+        );
+      }
+
+      reportIssue(_dispatch['id'], issues).then(f);
+    }
+
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        padding: EdgeInsets.all(20),
+        height: 320.0,
+        width: 320.0,
+        child: Stack(
+          children: <Widget>[
+            Container(
+              width: double.infinity,
+              height: 300,
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Padding(
+                padding: EdgeInsets.only(top: 50),
+                child: TextField(
+                  decoration: InputDecoration(
+                      focusedBorder: OutlineInputBorder(),
+                      border: OutlineInputBorder(),
+                      hintText: 'Report an Issue'),
+                  minLines: 4,
+                  onChanged: (v) => issues = v,
+                  maxLines: 5,
+                ),
+              ),
+            ),
+            Container(
+              width: double.infinity,
+              height: 50,
+              alignment: Alignment.bottomCenter,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                ),
+              ),
+              child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  "",
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: InkWell(
+                onTap: send,
+                child: Container(
+                  width: double.infinity,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: primaryColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      "Send",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Align(
+              // These values are based on trial & error method
+              alignment: Alignment(1.05, -1.05),
+              child: InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.close,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     dialogMan.buildContext(context);
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        title: Text(_title,style: TextStyle(color: primaryTextColor,)),
-        iconTheme: IconThemeData(color:primaryTextColor),
-        actions: _buildActions(),
+    return WillPopScope(
+      onWillPop: () {
+        Navigator.of(context).pop(_dispatch);
+        return Future.value(false);
+      },
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(60.0), // here the desired height
+          child: AppBar(
+            elevation: 0,
+            title: Row(
+              children: _buildActions(),
+            ),
+            iconTheme: IconThemeData(color: primaryTextColor),
+          ),
+        ),
+        body: _buildBody(),
       ),
-      body: _buildBody(),
     );
   }
-
 }

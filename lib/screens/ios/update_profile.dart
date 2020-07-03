@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'dart:io';
 import 'dart:convert' as convert;
-import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:NSCE/services/request.dart';
 class UpdateProfile extends StatefulWidget {
@@ -35,7 +34,6 @@ class UpdateProfileState extends State<UpdateProfile> {
   }
 
   startUpload() {
-    imageCache.clear();
     setStatus('Uploading Image...');
     if (null == tmpFile) {
       setStatus(errMessage);
@@ -49,7 +47,7 @@ class UpdateProfileState extends State<UpdateProfile> {
         }
         Future.delayed(Duration(seconds: 1),f);
       }
-//      print(res);
+      print(res);
     });
   }
   cancelUpload(){

@@ -28,7 +28,7 @@ class TableBuilder extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return Table(
-        children:_rowBuilder()
+        children:this.data.length>0?_rowBuilder():[]
     );
   }
 }

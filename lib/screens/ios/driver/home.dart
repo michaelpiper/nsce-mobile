@@ -1,102 +1,254 @@
+import 'dart:io';
 import 'package:NSCE/ext/loading.dart';
+import 'package:NSCE/services/auth.dart';
 import 'package:NSCE/utils/helper.dart';
 import 'package:NSCE/utils/month.dart';
 import 'package:flutter/material.dart';
 import 'package:NSCE/services/driver_request.dart';
-import 'package:NSCE/ext/spinner.dart';
 import 'package:NSCE/utils/colors.dart';
 import 'package:NSCE/utils/constants.dart';
 import 'package:localstorage/localstorage.dart';
+
 // third screen
+import 'package:flutter_background_geolocation/flutter_background_geolocation.dart'
+    as bg;
+import 'package:device_id/device_id.dart';
 
 class DriverHomePage extends StatefulWidget {
   DriverHomePage({Key key}) : super(key: key);
+
   @override
   _DriverHomePage createState() => new _DriverHomePage();
 }
 
 class _DriverHomePage extends State<DriverHomePage> {
-  List<Map<String,dynamic>> _dispatchList=[];
-  String _title='Task';
+  List<Map<String, dynamic>> _dispatchList = [];
+  String _title = 'Task';
+  Map _userDetails = {};
   var refreshKey = GlobalKey<RefreshIndicatorState>();
-  bool _loadingDispatchIndicator=true;
+  bool _loadingDispatchIndicator = true;
   final LocalStorage storage = new LocalStorage(STORAGE_KEY);
+
+  init() async {
+    String deviceId = await DeviceId.getID;
+    String device =
+        Platform.isAndroid ? 'Android' : Platform.isIOS ? 'IOS' : 'others';
+    bg.BackgroundGeolocation.onLocation((bg.Location location) {
+      print('[deviceId] - $deviceId');
+      print('[location] - $location');
+      if (location.coords.latitude!=null && location.coords.longitude!=null) {
+        updateUserLocation({
+          'device': device,
+          'deviceId': deviceId,
+          'longitude': location.coords.longitude.toString(),
+          'latitude': location.coords.latitude.toString()
+        });
+      }
+    });
+    //
+    // 2.  Configure the plugin
+    //
+    bg.BackgroundGeolocation.ready(bg.Config(
+            desiredAccuracy: bg.Config.DESIRED_ACCURACY_HIGH,
+            distanceFilter: 10.0,
+            stopOnTerminate: false,
+            startOnBoot: true,
+            debug: true,
+            logLevel: bg.Config.LOG_LEVEL_VERBOSE))
+        .then((bg.State state) {
+      if (!state.enabled) {
+        //
+        //
+        // 3.  Start the plugin.
+        //
+        bg.BackgroundGeolocation.start();
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    init();
     _loadDispatch();
+    onValue(v) {
+      debugPrint('==================================');
+      setState(() {
+        _userDetails = v;
+      });
+    }
+
+    AuthService.getUserDetails().then(onValue);
   }
-  _buildDispatch(){
-    f(e){
-      print (e);
-      DateTime _datee = DateTime.parse(e['dateScheduled']??'');
+
+  _updateDispatch(dispatch) {
+    print(dispatch);
+    if (dispatch != null) {
+      int idx = _dispatchList
+          .indexWhere((element) => element['id'] == dispatch['id']);
+      if (idx == -1) return;
+      setState(() {
+        _dispatchList[idx] = dispatch;
+      });
+    }
+  }
+
+  _buildDispatch() {
+    f(e) {
+      print(e);
+      DateTime _datee = DateTime.parse(e['dateScheduled'] ?? '');
       return InkWell(
-        onTap: (){
-          storage.setItem(STORAGE_DRIVER_DISPATCH_KEY, e).then((val){
-            Navigator.pushNamed(context, '/driver-dispatch/'+e['id'].toString());
-          });
+        onTap: () {
+          storage.setItem(STORAGE_DRIVER_DISPATCH_KEY, e).then((val) {
+            return Navigator.pushNamed(
+                context, '/driver-dispatch/' + e['id'].toString());
+          }).then(_updateDispatch);
         },
         child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 3.0,horizontal: 2.0),
-            child:Card(
+            padding: EdgeInsets.symmetric(vertical: 3.0, horizontal: 2.0),
+            child: Card(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child:Column(
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text('Dispatch#'+e['id'].toString(),style: TextStyle(color: primaryColor),),
-                    SizedBox(height: 7,),
-                    Text('Customer name',style: TextStyle(color: secondaryTextColor),),
-                    SizedBox(height: 7,),
-                    Text(isNull(e['OrderDetail']['Order']['contactPerson'],replace:'Not provided'),style: TextStyle(color: noteColor),),
-                    Text('Address',style: TextStyle(color: secondaryTextColor),),
-                    SizedBox(height: 7,),
-                    Text(isNull(e['OrderDetail']['Order']['shippingAddress'],replace:'Not provided'),style: TextStyle(color: noteColor),),
+                    Text(
+                      'Dispatch#' + e['id'].toString(),
+                      style: TextStyle(color: primaryColor),
+                    ),
+                    SizedBox(
+                      height: 7,
+                    ),
+                    Text(
+                      'Customer name',
+                      style: TextStyle(color: secondaryTextColor),
+                    ),
+                    SizedBox(
+                      height: 7,
+                    ),
+                    Text(
+                      isNull(e['OrderDetail']['Order']['contactPerson'],
+                          replace: 'Not provided'),
+                      style: TextStyle(color: noteColor),
+                    ),
+                    Text(
+                      'Address',
+                      style: TextStyle(color: secondaryTextColor),
+                    ),
+                    SizedBox(
+                      height: 7,
+                    ),
+                    Text(
+                      isNull(e['OrderDetail']['Order']['shippingAddress'],
+                          replace: 'Not provided'),
+                      style: TextStyle(color: noteColor),
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        Text('Vehicle',style: TextStyle(color: secondaryTextColor),),
-                        SizedBox(width: 7,),
-                        Text('Delivery Date',style: TextStyle(color: secondaryTextColor),),
+                        Text(
+                          'Vehicle',
+                          style: TextStyle(color: secondaryTextColor),
+                        ),
+                        SizedBox(
+                          width: 7,
+                        ),
+                        Text(
+                          'Delivery Date',
+                          style: TextStyle(color: secondaryTextColor),
+                        ),
                       ],
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        Text(e['Vehicle']==null?'Vehicle not assigned':isNull(e['Vehicle']['uniqueIdentifier'],replace:'Not available'),style: TextStyle(color:  noteColor),),
-                        SizedBox(width: 7,),
-                        Text("${_datee.day}-${short_month[_datee.month]}-${_datee.year}",style: TextStyle(color:  noteColor),),
+                        Text(
+                          e['Vehicle'] == null
+                              ? 'Vehicle not assigned'
+                              : isNull(e['Vehicle']['uniqueIdentifier'],
+                                  replace: 'Not available'),
+                          style: TextStyle(color: noteColor),
+                        ),
+                        SizedBox(
+                          width: 7,
+                        ),
+                        Text(
+                          "${_datee.day}-${short_month[_datee.month]}-${_datee.year}",
+                          style: TextStyle(color: noteColor),
+                        ),
                       ],
-                    )
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        Text(
+                          isNull(e['status'], replace: ''),
+                          style: TextStyle(color: primaryColor),
+                          textAlign: TextAlign.right,
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
-            )
-        ),
+            )),
       );
     }
+
     return _dispatchList.map<Widget>(f).toList();
   }
-  _buildBody(){
+
+  get _empty => Container(
+        child: Center(
+          child: Text('Disptach list is empty'),
+        ),
+      );
+
+  _buildBody() {
     return Container(
-      child:_dispatchList.length==0?Center(child: Text('Disptach list is empty'),): ListView(
-        children: _buildDispatch(),
+      child: ListView(
+        children: _dispatchList.length == 0 ? [_empty] : _buildDispatch(),
       ),
     );
   }
-  _buildActions(){
+
+  Widget _avatar() {
+    ImageProvider bgIm;
+    if (_userDetails['image'] == null || _userDetails['image'] == '') {
+      bgIm = AssetImage('images/avatar.png');
+    } else {
+      bgIm = NetworkImage(baseURL('${_userDetails['image']}'));
+    }
+
+    return SizedBox(
+      width: 50.0,
+      height: 50.0,
+      child: CircleAvatar(
+        backgroundImage: bgIm,
+      ),
+    );
+  }
+
+  List<Widget> _buildActions() {
     return <Widget>[
       SizedBox(
         height: 25.0,
       ),
+      Text(
+        _title,
+        style: TextStyle(
+          color: primaryTextColor,
+        ),
+      ),
+      Spacer(),
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         child: InkWell(
-          onTap: (){
+          onTap: () {
             Navigator.pushNamed(context, '/driver-profile');
           },
-          child: Icon(Icons.drive_eta),
+          child: _avatar(),
         ),
       ),
       SizedBox(
@@ -104,41 +256,77 @@ class _DriverHomePage extends State<DriverHomePage> {
       ),
     ];
   }
-  Future<Null> _loadDispatch()async{
+
+  Future<Null> _loadDispatch() async {
     refreshKey.currentState?.show(atTop: false);
-    _dispatchList=[];
-    fn(res){
+    _dispatchList = [];
+    fn(res) {
       _dispatchLoaded();
-      if(res is Map && res['data'] is List){
+      if (res is Map && res['data'] is List) {
         setState(() {
-          _dispatchList = res['data'].map<Map<String, dynamic>>((e)=>Map<String, dynamic>.from(e)).toList();
+          _dispatchList = res['data']
+              .map<Map<String, dynamic>>((e) => Map<String, dynamic>.from(e))
+              .toList();
         });
       }
     }
+
     _dispatchLoaded(state: false);
-    fetchDispatch().then(fn).catchError((e){
+    fetchDispatch().then(fn).catchError((e) {
       // print(e);
     });
     return null;
   }
-  void _dispatchLoaded({bool state:true}){
+
+  void _dispatchLoaded({bool state: true}) {
     setState(() {
-      _loadingDispatchIndicator=!state;
+      _loadingDispatchIndicator = !state;
     });
   }
+
+  Future<bool> _exitApp(BuildContext context) {
+    return showDialog(
+          context: context,
+          child: new AlertDialog(
+            title: new Text('Do you want to exit this application?'),
+            content: new Text('We hate to see you leave...'),
+            actions: <Widget>[
+              new FlatButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: new Text('No'),
+              ),
+              new FlatButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: new Text('Yes'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        title: Text(_title,style: TextStyle(color: primaryTextColor,)),
-        iconTheme: IconThemeData(color:primaryTextColor),
-        actions: _buildActions(),
-      ),
-      body: RefreshIndicator(
-        key: refreshKey,
-        child:  _loadingDispatchIndicator?Center(child:Loading()):_buildBody(),
-        onRefresh: _loadDispatch,
+    return WillPopScope(
+      onWillPop: () => _exitApp(context),
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(60.0), // here the desired height
+          child: AppBar(
+            elevation: 0,
+            title: Row(
+              children: _buildActions(),
+            ),
+            iconTheme: IconThemeData(color: primaryTextColor),
+          ),
+        ),
+        body: RefreshIndicator(
+          key: refreshKey,
+          child: _loadingDispatchIndicator
+              ? Center(child: Loading())
+              : _buildBody(),
+          onRefresh: _loadDispatch,
+        ),
       ),
     );
   }
