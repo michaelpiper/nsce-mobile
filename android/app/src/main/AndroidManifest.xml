@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!-- io.flutter.app.FlutterApplication is an android.app.Application that
          calls FlutterMain.startInitialization(this); in its onCreate method.
          In most cases you can leave this as-is, but you if you want to provide
@@ -36,13 +38,7 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-        <!--        <meta-data android:name="co.paystack.android.PublicKey" android:value="pk_test_9b59cebc741006f6d836576a5be330cfa34c6a3e"/>-->
 
-        <service
-            android:name="com.transistorsoft.locationmanager.service.TrackingService"
-            android:foregroundServiceType="location" />
-        <service
-            android:name="com.transistorsoft.locationmanager.service.LocationRequestService"
-            android:foregroundServiceType="location" />
+        <!--        <meta-data android:name="co.paystack.android.PublicKey" android:value="pk_test_9b59cebc741006f6d836576a5be330cfa34c6a3e"/>-->
     </application>
 </manifest>

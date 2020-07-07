@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:NSCE/ext/loading.dart';
 import 'package:NSCE/services/auth.dart';
@@ -10,8 +11,7 @@ import 'package:NSCE/utils/constants.dart';
 import 'package:localstorage/localstorage.dart';
 
 // third screen
-import 'package:flutter_background_geolocation/flutter_background_geolocation.dart'
-    as bg;
+import 'package:geolocator/geolocator.dart';
 import 'package:device_id/device_id.dart';
 
 class DriverHomePage extends StatefulWidget {
@@ -30,40 +30,29 @@ class _DriverHomePage extends State<DriverHomePage> {
   final LocalStorage storage = new LocalStorage(STORAGE_KEY);
 
   init() async {
+    final geoLocator = Geolocator();
+    final locationOptions = LocationOptions(accuracy: LocationAccuracy.high,distanceFilter: 10);
     String deviceId = await DeviceId.getID;
     String device =
         Platform.isAndroid ? 'Android' : Platform.isIOS ? 'IOS' : 'others';
-    bg.BackgroundGeolocation.onLocation((bg.Location location) {
+//    StreamSubscription<Position> positionStream =
+    Position position = await geoLocator.getCurrentPosition();
+    print('[location] - ${position.longitude.toString()}, ${position.latitude.toString()}');
+    geoLocator.getPositionStream(locationOptions).listen((Position position) {
       print('[deviceId] - $deviceId');
-      print('[location] - $location');
-      if (location.coords.latitude!=null && location.coords.longitude!=null) {
+      print('[location] - $position');
+
         updateUserLocation({
           'device': device,
           'deviceId': deviceId,
-          'longitude': location.coords.longitude.toString(),
-          'latitude': location.coords.latitude.toString()
+          'longitude': position.longitude.toString(),
+          'latitude': position.latitude.toString()
         });
-      }
     });
     //
     // 2.  Configure the plugin
     //
-    bg.BackgroundGeolocation.ready(bg.Config(
-            desiredAccuracy: bg.Config.DESIRED_ACCURACY_HIGH,
-            distanceFilter: 10.0,
-            stopOnTerminate: false,
-            startOnBoot: true,
-            debug: true,
-            logLevel: bg.Config.LOG_LEVEL_VERBOSE))
-        .then((bg.State state) {
-      if (!state.enabled) {
-        //
-        //
-        // 3.  Start the plugin.
-        //
-        bg.BackgroundGeolocation.start();
-      }
-    });
+
   }
 
   @override
