@@ -98,7 +98,7 @@ class _ScheduleListPageState extends State<ScheduleListPage> {
               print('==================== am here ===================');
               changeOrderDriverId(_order['id'].toString(), e);
               setState(() {
-                _order['pickupDriverId']=e;
+                _order['pickupDriverId'] = e;
                 storage.setItem(STORAGE_ORDER_KEY, _order);
               });
             }
@@ -209,6 +209,56 @@ class _ScheduleListPageState extends State<ScheduleListPage> {
                                 fontSize: 18,
                                 textBaseline: TextBaseline.alphabetic,
                                 fontWeight: FontWeight.w700)),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          'Distance',
+                          style: TextStyle(
+                            color: noteColor,
+                            fontSize: 14,
+                            textBaseline: TextBaseline.alphabetic,
+                          ),
+                        ),
+                        _order['type'] == 'pickup'
+                            ? Container()
+                            : FutureBuilder(
+                                future: distanceProductMatrix(
+                                    productId:
+                                        '${_schedule['productId']}' ?? '',
+                                    destinations: ' Lagos, Nigeria'),
+                                builder: (BuildContext context,
+                                    AsyncSnapshot<Map> snapshot) {
+                                  String text = '';
+                                  if (snapshot.hasData) {
+                                    print(snapshot.data);
+                                  }
+                                  if (snapshot.hasData &&
+                                      snapshot.data is Map &&
+                                      snapshot.data['error'] == false) {
+                                    final List res = snapshot.data['data'];
+                                    if (res[0].length > 0 &&
+                                        res[0] != null &&
+                                        res[0] is Map &&
+                                        res[0] != null &&
+                                        res[0]['distance'] != null) {
+                                      text = res[0]['distance']['text'] ?? '';
+                                    }
+                                  }
+
+                                  return Text(
+                                    snapshot.hasData ? text : "Loading.....",
+                                    style: TextStyle(
+                                      color: noteColor,
+                                      fontSize: 18,
+                                      textBaseline: TextBaseline.alphabetic,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  );
+                                },
+                              ),
                       ],
                     ),
                     Column(
@@ -703,23 +753,25 @@ class _ReScheduleScreenState extends State<ReScheduleScreen>
         borderRadius: BorderRadius.circular(16.0),
       ),
     );
-    Widget _done = InkWell(
-      onTap: () {
-        if (totalUnit == schedule['quantity']) {
-          setState(() {
-            _continue = true;
-          });
-        } else {
-          showDialog(
-              context: context,
-              child: SmartAlert(
-                  title: 'Alert',
-                  description:
-                      'Schedule can\'t be made done until Quantity needed is equal to quantity scheduled.'));
-        }
-      },
-      child: Text('Done', style: TextStyle(color: primaryColor)),
-    );
+    Widget _done = _continue == true
+        ? Container()
+        : InkWell(
+            onTap: () {
+              if (totalUnit == schedule['quantity']) {
+                setState(() {
+                  _continue = true;
+                });
+              } else {
+                showDialog(
+                    context: context,
+                    child: SmartAlert(
+                        title: 'Alert',
+                        description:
+                            'Schedule can\'t be made done until Quantity needed is equal to quantity scheduled.'));
+              }
+            },
+            child: Text('Done', style: TextStyle(color: primaryColor)),
+          );
     Widget _saveButton = Container(
         color: Colors.transparent,
         padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 20),
@@ -916,6 +968,7 @@ class _ReScheduleScreenState extends State<ReScheduleScreen>
                           : Center(
                               child: Text(
                                 'Warning\n $_message',
+                                style: TextStyle(color: rejectColor),
                                 textAlign: TextAlign.center,
                               ),
                             )),

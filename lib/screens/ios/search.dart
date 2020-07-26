@@ -71,7 +71,7 @@ class  SearchPageState extends State<SearchPage>{
           ),
           autofocus: true,
           decoration: const InputDecoration(
-            hintText: 'Your search end here...',
+            hintText: 'Search...',
             hintStyle: TextStyle(
                 color:  primaryTextColor,
                 decoration: TextDecoration.none
@@ -85,7 +85,7 @@ class  SearchPageState extends State<SearchPage>{
         ],
       ),
       body: Center(
-        child: _searchResult.length==0?Text('Search result empty'):ListView(
+        child: _searchResult.length==0?Text('No search results'):ListView(
           children: _searchResult.map(buildList).toList(),
         )
       )

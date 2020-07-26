@@ -37,17 +37,25 @@ class _DriverHomePage extends State<DriverHomePage> {
         Platform.isAndroid ? 'Android' : Platform.isIOS ? 'IOS' : 'others';
 //    StreamSubscription<Position> positionStream =
     Position position = await geoLocator.getCurrentPosition();
-    print('[location] - ${position.longitude.toString()}, ${position.latitude.toString()}');
+    updateUserLocation({
+      'device': device,
+      'deviceId': deviceId,
+      'longitude': position.longitude.toString(),
+      'latitude': position.latitude.toString()
+    });
+//    print('[location] - ${position.longitude.toString()}, ${position.latitude.toString()}');
     geoLocator.getPositionStream(locationOptions).listen((Position position) {
-      print('[deviceId] - $deviceId');
-      print('[location] - $position');
-
+//      print('[deviceId] - $deviceId');
+//      print('[location] - $position');
+      if(position!=null){
         updateUserLocation({
           'device': device,
           'deviceId': deviceId,
           'longitude': position.longitude.toString(),
           'latitude': position.latitude.toString()
         });
+      }
+
     });
     //
     // 2.  Configure the plugin

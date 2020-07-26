@@ -10,14 +10,19 @@ import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_beautiful_popup/main.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 // import service here
 import '../../services/auth.dart';
+
 // import color
 import 'package:NSCE/utils/colors.dart';
 import 'package:NSCE/ext/smartalert.dart';
 import 'package:NSCE/utils/country.dart';
 import 'package:NSCE/screens/ios/chat.dart';
 import 'package:NSCE/ext/dialogman.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 /// This Widget is the main application widget.
 class AuthPage extends StatelessWidget {
   // static const String _title = 'Welcome';
@@ -37,158 +42,186 @@ class MyStatefulWidget extends StatefulWidget {
 }
 
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-  _MyStatefulWidgetState(){
-    f(e){
+  _MyStatefulWidgetState() {
+    f(e) {
       return DropdownMenuItem(
-        child: Text(e['name'],style:TextStyle(color: textColor),),
+        child: Text(
+          e['name'],
+          style: TextStyle(color: textColor),
+        ),
         value: e['name'],
       );
     }
-    _countryList=simpleCountryCode.map(f).toList();
-    _text_controller.text=_username;
+
+    _countryList = simpleCountryCode.map(f).toList();
+    _text_controller.text = _username;
     tryRemember();
-    _titleList.add(
-        DropdownMenuItem(
-      child: Text("Mr",style:TextStyle(color: textColor),),
+    _titleList.add(DropdownMenuItem(
+      child: Text(
+        "Mr",
+        style: TextStyle(color: textColor),
+      ),
       value: "Mr",
     ));
-    _titleList.add(
-        DropdownMenuItem(
-          child: Text("Mrs",style:TextStyle(color: textColor),),
-          value: "Mrs",
-        ));
-    _titleList.add(
-        DropdownMenuItem(
-          child: Text("Miss",style:TextStyle(color: textColor),),
-          value: "Miss",
-        ));
-    _titleList.add(
-        DropdownMenuItem(
-          child: Text("Ms",style:TextStyle(color: textColor),),
-          value: "Ms",
-        ));
-    _titleList.add(
-        DropdownMenuItem(
-          child: Text("Others",style:TextStyle(color: textColor),),
-          value: "Others",
-        ));
+    _titleList.add(DropdownMenuItem(
+      child: Text(
+        "Mrs",
+        style: TextStyle(color: textColor),
+      ),
+      value: "Mrs",
+    ));
+    _titleList.add(DropdownMenuItem(
+      child: Text(
+        "Miss",
+        style: TextStyle(color: textColor),
+      ),
+      value: "Miss",
+    ));
+    _titleList.add(DropdownMenuItem(
+      child: Text(
+        "Ms",
+        style: TextStyle(color: textColor),
+      ),
+      value: "Ms",
+    ));
+    _titleList.add(DropdownMenuItem(
+      child: Text(
+        "Others",
+        style: TextStyle(color: textColor),
+      ),
+      value: "Others",
+    ));
   }
+
   final _formKey = GlobalKey<FormState>();
   String _username;
   String _forgetDetails;
   String _password;
   final String _rememberme_key = "@login-remeberme";
-  int _screen=1;
-  bool _loading=false;
-  bool _eye_signup=true;
-  bool _eye_signin=true;
-  bool _rememberme=false;
-  Map<String, String> _sendMailData={};
-  List <Widget> _countryList=[];
-  List <DropdownMenuItem> _titleList=[];
+  int _screen = 1;
+  bool _loading = false;
+  bool _eye_signup = true;
+  bool _eye_signin = true;
+  bool _rememberme = false;
+  Map<String, String> _sendMailData = {};
+  List<Widget> _countryList = [];
+  List<DropdownMenuItem> _titleList = [];
   TextEditingController _text_controller = TextEditingController();
-  Map<String, String> _signUpData={'firstname':'','lastname':'','fullname':'','country':null,'company':'','email':'','phone':'','password':'','confirm_password':'','remeberme':'0'};
+  Map<String, String> _signUpData = {
+    'firstname': '',
+    'lastname': '',
+    'fullname': '',
+    'country': null,
+    'company': '',
+    'email': '',
+    'phone': '',
+    'password': '',
+    'confirm_password': '',
+    'remeberme': '0'
+  };
 
-  final DialogMan dialogMan = DialogMan(child: Scaffold(
-      backgroundColor: Colors.transparent,
-      body:Center(
-          child:CircularProgressIndicator()
-      )
-  ));
+  final DialogMan dialogMan = DialogMan(
+      child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Center(child: CircularProgressIndicator())));
+
   @override
-  void initState(){
+  void initState() {
     super.initState();
-
   }
-  tryRemember()async{
+
+  tryRemember() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final data = prefs.get(_rememberme_key);
-    if(data!=null){
+    if (data != null) {
 //      print('$data');
       setState(() {
-        _username=data;
-        _text_controller.text=data;
-        _signUpData['remeberme']='1';
-        _rememberme=true;
-        _sendMailData['email']=data;
+        _username = data;
+        _text_controller.text = data;
+        _signUpData['remeberme'] = '1';
+        _rememberme = true;
+        _sendMailData['email'] = data;
       });
     }
   }
-  updateRememberMe(value)async{
+
+  updateRememberMe(value) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString(_rememberme_key, value).then((val){
+    prefs.setString(_rememberme_key, value).then((val) {
 //      print('$val');
     });
   }
-  Widget login(){
-    double margin=0.0;
-    var size=MediaQuery.of(context).size;
-    if(size.height>630){
-      margin=500;
+
+  Widget login() {
+    double margin = 0.0;
+    var size = MediaQuery.of(context).size;
+    if (size.height > 630) {
+      margin = 500;
+    } else if (size.height > 610) {
+      margin = 500;
+    } else if (size.height > 510) {
+      margin = 450;
+    } else if (size.height > 410) {
+      margin = 400;
+    } else if (size.height > 340) {
+      margin = 320;
+    } else {
+      margin = 300;
     }
-    else if(size.height>610){
-      margin=500;
-    }
-    else if(size.height>510){
-      margin=450;
-    }
-    else if(size.height>410){
-      margin=400;
-    }
-    else if(size.height>340){
-      margin=320;
-    }else{
-      margin=300;
-    }
-    return  Container(
-      // Center is a layout widget. It takes a single child and positions it
-      // in the middle of the parent.
+    return Container(
+        // Center is a layout widget. It takes a single child and positions it
+        // in the middle of the parent.
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Color.fromRGBO(224, 224, 224 , 1),
+              color: Color.fromRGBO(224, 224, 224, 1),
               blurRadius: 25.0, // soften the shadow
               spreadRadius: 2.0, // extend the shadow
               offset: Offset(
                 12.0, // Move to right 10 horizontally
-                1.0,   //Move to bottom 10 Vertically
+                1.0, //Move to bottom 10 Vertically
               ),
             )
           ],
         ),
-        child:Card(
+        child: Card(
             elevation: 4.0,
-            margin: EdgeInsets.only(top:0.0,left: 20.0,right: 20.0),
+            margin: EdgeInsets.only(top: 0.0, left: 20.0, right: 20.0),
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.horizontal(
-                  left: Radius.elliptical(20.0,20.0),
-                  right: Radius.elliptical(20.0,20.0)
-                ),
+                    left: Radius.elliptical(20.0, 20.0),
+                    right: Radius.elliptical(20.0, 20.0)),
                 side: BorderSide(color: Colors.black12)),
-            child:Form(
+            child: Form(
               key: _formKey,
-              child:Padding(
+              child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child:
-                  Column(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      Padding(padding:EdgeInsets.only(top: 20),),
+                      Padding(
+                        padding: EdgeInsets.only(top: 20),
+                      ),
                       Text(
                         'Login',
-                        style: TextStyle(fontFamily: "Lato",fontStyle:FontStyle.normal,fontWeight: FontWeight.normal,fontSize: 20),
+                        style: TextStyle(
+                            fontFamily: "Lato",
+                            fontStyle: FontStyle.normal,
+                            fontWeight: FontWeight.normal,
+                            fontSize: 20),
                       ),
                       SizedBox(
                         height: 15.0,
                       ),
                       TextFormField(
                         controller: _text_controller,
-                        onSaved: (value)=> _username = value,
+                        onSaved: (value) => _username = value,
                         decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.person,color: secondaryTextColor),
+                          prefixIcon:
+                              Icon(Icons.person, color: secondaryTextColor),
                           labelText: 'Email',
                           labelStyle: TextStyle(
-                            color:  secondaryTextColor,
+                            color: secondaryTextColor,
                           ),
                         ),
                         keyboardType: TextInputType.emailAddress,
@@ -201,16 +234,15 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                           return null;
                         },
                       ),
-                      Stack(
-                          alignment: Alignment(1.0,0.0), // right & center
+                      Stack(alignment: Alignment(1.0, 0.0), // right & center
                           children: <Widget>[
                             TextFormField(
-
                               obscureText: _eye_signin,
                               initialValue: _password,
-                              onSaved: (value)=> _password = value,
+                              onSaved: (value) => _password = value,
                               decoration: const InputDecoration(
-                                prefixIcon: Icon(Icons.lock,color: secondaryTextColor),
+                                prefixIcon:
+                                    Icon(Icons.lock, color: secondaryTextColor),
                                 labelText: 'Password',
                                 labelStyle: TextStyle(
                                   color: secondaryTextColor,
@@ -227,36 +259,43 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                               },
                             ),
                             Positioned(
-                                child:IconButton(
-                                  icon: Icon(_eye_signin?Icons.visibility_off:Icons.visibility,color: secondaryTextColor),
-                                  onPressed: (){
-                                    setState(() {
-                                      _eye_signin=!_eye_signin;
-                                    });
-                                  },
-                                )
-                            )
-                          ]
-                      ),
+                                child: IconButton(
+                              icon: Icon(
+                                  _eye_signin
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
+                                  color: secondaryTextColor),
+                              onPressed: () {
+                                setState(() {
+                                  _eye_signin = !_eye_signin;
+                                });
+                              },
+                            ))
+                          ]),
                       Row(
                         children: <Widget>[
                           Checkbox(
-                            value:_rememberme,
-                            onChanged: (v){
-                            setState((){_rememberme=!_rememberme;});
-                          },),
+                            value: _rememberme,
+                            onChanged: (v) {
+                              setState(() {
+                                _rememberme = !_rememberme;
+                              });
+                            },
+                          ),
                           Expanded(
                             child: InkWell(
-
-                              onTap: (){
-                                if(_loading) {
+                              onTap: () {
+                                if (_loading) {
                                   return;
                                 }
-                                setState((){_rememberme=!_rememberme;});
+                                setState(() {
+                                  _rememberme = !_rememberme;
+                                });
                               },
-                              child: Text("Remember me",
+                              child: Text(
+                                "Remember me",
                                 style: TextStyle(
-                                  color:  actionColor,
+                                  color: actionColor,
                                 ),
                               ),
                             ),
@@ -264,56 +303,57 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                         ],
                       ),
                       SizedBox(
-                        height: margin-430.0,
+                        height: margin - 430.0,
                       ),
                       MaterialButton(
-
                         color: primaryColor,
                         shape: RoundedRectangleBorder(
-
                             borderRadius: BorderRadius.vertical(
-                                top: Radius.elliptical(10.0,10.0),
-                                bottom: Radius.elliptical(10.0,10.0)
-                            ),
-                            side: BorderSide(color: primarySwatch)
-                        ),
+                                top: Radius.elliptical(10.0, 10.0),
+                                bottom: Radius.elliptical(10.0, 10.0)),
+                            side: BorderSide(color: primarySwatch)),
                         onPressed: () {
                           // Validate will return true if the form is valid, or false if
                           // the form is invalid
                           final form = _formKey.currentState;
                           form.save();
 
-
                           if (_formKey.currentState.validate()) {
-                            if(_loading){
+                            if (_loading) {
                               return;
                             }
                             setState(() {
-                              _loading=true;
+                              _loading = true;
                             });
-                            if(_rememberme){
+                            if (_rememberme) {
                               updateRememberMe(_username);
                             }
-                            var wait=Provider.of<AuthService>(context).loginUser(username: _username, password: _password);
-                            wait.then((status){
+                            var wait = Provider.of<AuthService>(context)
+                                .loginUser(
+                                    username: _username, password: _password);
+                            wait.then((status) {
                               setState(() {
-                                _loading=false;
+                                _loading = false;
                               });
 
-                              if(status == null){
-                                return  Scaffold.of(context).showSnackBar(SnackBar(content:Text('Invalid username number')));
-                              }
-                              else if(status == false){
-                                return  Scaffold.of(context).showSnackBar(SnackBar(content:Text("Internet error")));
-                              }
-                              else if(status != true){
-                                return Scaffold.of(context).showSnackBar(SnackBar(content:Text(status)));
+                              if (status == null) {
+                                return Scaffold.of(context).showSnackBar(
+                                    SnackBar(
+                                        content:
+                                            Text('Invalid username number')));
+                              } else if (status == false) {
+                                return Scaffold.of(context).showSnackBar(
+                                    SnackBar(content: Text("Internet error")));
+                              } else if (status != true) {
+                                return Scaffold.of(context).showSnackBar(
+                                    SnackBar(content: Text(status)));
                               }
                               return null;
                             });
                           }
                         },
-                        child: Text((_loading?'loading...':'Login'),
+                        child: Text(
+                          (_loading ? 'loading...' : 'Login'),
                           style: TextStyle(
                             fontSize: 16.0,
                             color: Colors.white,
@@ -327,507 +367,527 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                         children: <Widget>[
                           Expanded(
                             child: InkWell(
-                              onTap: (){
-                                if(_loading) {
+                              onTap: () {
+                                if (_loading) {
                                   return;
                                 }
                                 setState(() {
                                   // Process data.
-                                  _screen=3;
+                                  _screen = 3;
                                 });
                               },
-                              child: Text("Forgot Password?",
+                              child: Text(
+                                "Forgot Password?",
                                 style: TextStyle(
-                                  color:  actionColor,
+                                  color: actionColor,
                                 ),
                               ),
                             ),
                           ),
                           InkWell(
-                            onTap: (){
-                              if(_loading) {
+                            onTap: () {
+                              if (_loading) {
                                 return;
                               }
                               setState(() {
                                 // Process data.
-                                _screen=2;
+                                _screen = 2;
                               });
                             },
-                            child: Text("Create an Account",
+                            child: Text(
+                              "Create an Account",
                               style: TextStyle(
-                                color:  actionColor,
+                                color: actionColor,
                               ),
                             ),
                           )
                         ],
                       ),
                     ],
-                  )
-              ),
-            )
-        )
-    );
+                  )),
+            )));
   }
-  Widget signUp(){
-    dynamic _country=_signUpData['country'];
+
+  Widget signUp() {
+    dynamic _country = _signUpData['country'];
     return Container(
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
-            color: Color.fromRGBO(224, 224, 224 , 1),
+            color: Color.fromRGBO(224, 224, 224, 1),
             blurRadius: 25.0, // soften the shadow
             spreadRadius: 2.0, // extend the shadow
             offset: Offset(
               12.0, // Move to right 10 horizontally
-              1.0,   //Move to bottom 10 Vertically
+              1.0, //Move to bottom 10 Vertically
             ),
           )
         ],
       ),
-      child:Card(
-          elevation: 4.0,
-          margin: EdgeInsets.only(top:0.0,left: 20.0,right: 20.0),
-
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.horizontal(
-                left: Radius.elliptical(20.0,20.0),
-                right: Radius.elliptical(20.0,20.0)
-              ),
-              side: BorderSide(color: Colors.black12)),
-          child: Form(
-              key: _formKey,
-              child:Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        Padding(padding:EdgeInsets.only(top: 20),),
-                        Text(
-                          'Create Account',
-                          style: TextStyle(fontFamily: "Lato",fontStyle:FontStyle.normal,fontWeight: FontWeight.normal,fontSize: 20),
-
-                        ),
-                        SizedBox(height: 15,),
-                        DropdownButtonFormField(
-                          decoration: InputDecoration(
-                              prefixIcon:  Icon(Icons.map,color: secondaryTextColor),
-                              contentPadding: EdgeInsets.symmetric(vertical: 5)
+      child: Card(
+        elevation: 4.0,
+        margin: EdgeInsets.only(top: 0.0, left: 20.0, right: 20.0),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.horizontal(
+                left: Radius.elliptical(20.0, 20.0),
+                right: Radius.elliptical(20.0, 20.0)),
+            side: BorderSide(color: Colors.black12)),
+        child: Form(
+          key: _formKey,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.only(top: 20),
+                ),
+                Text(
+                  'Create Account',
+                  style: TextStyle(
+                      fontFamily: "Lato",
+                      fontStyle: FontStyle.normal,
+                      fontWeight: FontWeight.normal,
+                      fontSize: 20),
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                DropdownButtonFormField(
+                  decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.map, color: secondaryTextColor),
+                      contentPadding: EdgeInsets.symmetric(vertical: 5)),
+                  iconSize: 30.0,
+                  value: _signUpData['title'],
+                  hint: Text(_signUpData['title'] == null
+                      ? 'Title'
+                      : _signUpData['title']),
+                  isExpanded: true,
+                  style: TextStyle(color: Colors.white70),
+                  onChanged: (v) {
+                    return setState(() {
+                      _signUpData['title'] = v;
+                    });
+                  },
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return 'Please choose your title';
+                    }
+                    return null;
+                  },
+                  items: _titleList,
+                ),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: TextFormField(
+                        initialValue: _signUpData['firstname'],
+                        onSaved: (value) => _signUpData['firstname'] = value,
+                        decoration: const InputDecoration(
+                          prefixIcon:
+                              Icon(Icons.person, color: secondaryTextColor),
+                          labelText: 'Firstname',
+                          labelStyle: TextStyle(
+                            color: secondaryTextColor,
                           ),
-                          iconSize: 30.0,
-                          value: _signUpData['title'],
-                          hint: Text(_signUpData['title']==null?'Title':_signUpData['title']),
-                          isExpanded: true,
-                          style: TextStyle(color: Colors.white70),
-                          onChanged: (v){
-                            return setState(() {
-                              _signUpData['title'] = v;
-                            });
-                          },
-                          validator: (value) {
-                            if (value.isEmpty) {
-                              return 'Please choose your title';
-                            }
-                            return null;
-                          },
-                          items:_titleList,
                         ),
-                        Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: TextFormField(
-                                initialValue: _signUpData['firstname'] ,
-                                onSaved: (value)=> _signUpData['firstname'] = value,
-                                decoration: const InputDecoration(
-                                  prefixIcon: Icon(Icons.person,color: secondaryTextColor),
-                                  labelText: 'Firstname',
-                                  labelStyle: TextStyle(
-                                    color: secondaryTextColor,
-                                  ),
-                                ),
-                                keyboardType: TextInputType.text,
-                                // textInputAction: TextInputAction.continueAction,
-                                onChanged: (v) => _signUpData['firstname'] = v,
-                                validator: (value) {
-                                  if (value.isEmpty) {
-                                    return 'Please enter your first name';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                            SizedBox(width: 4,),
-                            Expanded(
-                              child: TextFormField(
-
-                                initialValue: _signUpData['lastname'] ,
-                                onSaved: (value)=> _signUpData['lastname'] = value,
-                                decoration: const InputDecoration(
-                                  prefixIcon: Icon(Icons.person,color: secondaryTextColor),
-                                  labelText: 'Lastname',
-                                  labelStyle: TextStyle(
-                                    color: secondaryTextColor,
-                                  ),
-                                ),
-                                keyboardType: TextInputType.text,
-                                // textInputAction: TextInputAction.continueAction,
-                                onChanged: (v) => _signUpData['lastname'] = v,
-                                validator: (value) {
-                                  if (value.isEmpty) {
-                                    return 'Please enter your lastname';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            )
-
-                          ],
-                        ),
-                        TextFormField(
-                          initialValue: _signUpData['email'] ,
-                          onSaved: (value)=> _signUpData['email'] = value,
-                          decoration: const InputDecoration(
-                            prefixIcon: Icon(Icons.email,color: secondaryTextColor),
-                            labelText: 'Email',
-                            labelStyle: TextStyle(
-                              color:  secondaryTextColor,
-                            ),
+                        keyboardType: TextInputType.text,
+                        // textInputAction: TextInputAction.continueAction,
+                        onChanged: (v) => _signUpData['firstname'] = v,
+                        validator: (value) {
+                          if (value.isEmpty) {
+                            return 'Please enter your first name';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      width: 4,
+                    ),
+                    Expanded(
+                      child: TextFormField(
+                        initialValue: _signUpData['lastname'],
+                        onSaved: (value) => _signUpData['lastname'] = value,
+                        decoration: const InputDecoration(
+                          prefixIcon:
+                              Icon(Icons.person, color: secondaryTextColor),
+                          labelText: 'Lastname',
+                          labelStyle: TextStyle(
+                            color: secondaryTextColor,
                           ),
-                          keyboardType: TextInputType.emailAddress,
-                          // textInputAction: TextInputAction.continueAction,
-                          onChanged: (v) => _signUpData['email'] = v,
-                          validator: (value) {
-                            if (value.isEmpty) {
-                              return 'Please enter your email';
-                            }
-                            return null;
-                          },
                         ),
-                        DropdownButtonFormField(
-                          decoration: InputDecoration(
-                            prefixIcon:  Icon(Icons.map,color: secondaryTextColor),
-                            contentPadding: EdgeInsets.symmetric(vertical: 5)
+                        keyboardType: TextInputType.text,
+                        // textInputAction: TextInputAction.continueAction,
+                        onChanged: (v) => _signUpData['lastname'] = v,
+                        validator: (value) {
+                          if (value.isEmpty) {
+                            return 'Please enter your lastname';
+                          }
+                          return null;
+                        },
+                      ),
+                    )
+                  ],
+                ),
+                TextFormField(
+                  initialValue: _signUpData['email'],
+                  onSaved: (value) => _signUpData['email'] = value,
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.email, color: secondaryTextColor),
+                    labelText: 'Email',
+                    labelStyle: TextStyle(
+                      color: secondaryTextColor,
+                    ),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  // textInputAction: TextInputAction.continueAction,
+                  onChanged: (v) => _signUpData['email'] = v,
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    return null;
+                  },
+                ),
+                DropdownButtonFormField(
+                  decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.map, color: secondaryTextColor),
+                      contentPadding: EdgeInsets.symmetric(vertical: 5)),
+                  iconSize: 30.0,
+                  value: _country,
+                  hint: Text(_signUpData['country'] == null
+                      ? 'Country'
+                      : _signUpData['country']),
+                  isExpanded: true,
+                  style: TextStyle(color: Colors.white70),
+                  onChanged: (v) {
+                    for (var i = 0; i < simpleCountryCode.length; i++) {
+                      Map e = simpleCountryCode[i];
+                      if (e['name'] == v) {
+                        return setState(() {
+                          _signUpData['country'] = v;
+                          _signUpData['phone'] = e['code'];
+                        });
+                      }
+                    }
+                  },
+                  items: _countryList,
+                ),
+                TextFormField(
+                  key: UniqueKey(),
+                  initialValue: _signUpData['phone'],
+                  onSaved: (value) => _signUpData['phone'] = value,
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.call, color: secondaryTextColor),
+                    labelText: 'Phone number',
+                    labelStyle: TextStyle(
+                      color: secondaryTextColor,
+                    ),
+                  ),
+                  keyboardType: TextInputType.phone,
+                  // textInputAction: TextInputAction.continueAction,
+                  onChanged: (v) => _signUpData['phone'] = v,
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return 'Please enter your phone number';
+                    }
+                    return null;
+                  },
+                ),
+                Stack(alignment: Alignment(1.0, 0.0), // right & center
+                    children: <Widget>[
+                      TextFormField(
+                        obscureText: _eye_signup,
+                        initialValue: _signUpData['password'],
+                        onSaved: (value) => _signUpData['password'] = value,
+                        decoration: const InputDecoration(
+                          prefixIcon:
+                              Icon(Icons.lock, color: secondaryTextColor),
+                          labelText: 'Password',
+                          labelStyle: TextStyle(
+                            color: secondaryTextColor,
                           ),
-                          iconSize: 30.0,
-                          value: _country,
-                          hint: Text(_signUpData['country']==null?'Country':_signUpData['country']),
-                          isExpanded: true,
-                          style: TextStyle(color: Colors.white70),
-                          onChanged: (v){
-                            for (var i=0;i<simpleCountryCode.length;i++){
-                              Map e = simpleCountryCode[i];
-                              if(e['name']==v){
-                                return setState(() {
-                                  _signUpData['country'] = v;
-                                  _signUpData['phone'] = e['code'];
-                                });
-                              }
-                            }
-                          },
-                          items:_countryList,
                         ),
-                        TextFormField(
-                          key: UniqueKey(),
-                          initialValue: _signUpData['phone'],
-                          onSaved: (value)=> _signUpData['phone'] = value,
-                          decoration: const InputDecoration(
-                            prefixIcon: Icon(Icons.call,color: secondaryTextColor),
-                            labelText: 'Phone number',
-                            labelStyle: TextStyle(
-                              color:  secondaryTextColor,
-                            ),
+                        keyboardType: TextInputType.text,
+                        // textInputAction: TextInputAction.continueAction,
+                        onChanged: (v) => _signUpData['password'] = v,
+                        validator: (value) {
+                          if (value.isEmpty) {
+                            return 'Please enter your password';
+                          }
+                          return null;
+                        },
+                      ),
+                      Positioned(
+                          child: IconButton(
+                        icon: Icon(
+                            _eye_signup
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: secondaryTextColor),
+                        onPressed: () {
+                          setState(() {
+                            _eye_signup = !_eye_signup;
+                          });
+                        },
+                      ))
+                    ]),
+                Stack(alignment: Alignment(1.0, 0.0), // right & center
+                    children: <Widget>[
+                      TextFormField(
+                        obscureText: _eye_signup,
+                        initialValue: _signUpData['confirm_password'],
+                        onSaved: (value) =>
+                            _signUpData['confirm_password'] = value,
+                        decoration: const InputDecoration(
+                          prefixIcon:
+                              Icon(Icons.lock, color: secondaryTextColor),
+                          labelText: 'Confirm Password',
+                          labelStyle: TextStyle(
+                            color: secondaryTextColor,
                           ),
-                          keyboardType: TextInputType.phone,
-                          // textInputAction: TextInputAction.continueAction,
-                          onChanged: (v) => _signUpData['phone'] = v,
-                          validator: (value) {
-                            if (value.isEmpty) {
-                              return 'Please enter your phone number';
-                            }
-                            return null;
-                          },
                         ),
-                        Stack(
-                            alignment: Alignment(1.0,0.0), // right & center
-                            children: <Widget>[
-                              TextFormField(
+                        keyboardType: TextInputType.text,
+                        // textInputAction: TextInputAction.continueAction,
+                        onChanged: (v) => _signUpData['confirm_password'] = v,
+                        validator: (value) {
+                          if (value.isEmpty) {
+                            return 'Please enter your password';
+                          } else if (value != _signUpData['password']) {
+                            return 'Password not the same with confirm password';
+                          }
+                          return null;
+                        },
+                      ),
+                      Positioned(
+                          child: IconButton(
+                        icon: Icon(
+                            _eye_signup
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: secondaryTextColor),
+                        onPressed: () {
+                          setState(() {
+                            _eye_signup = !_eye_signup;
+                          });
+                        },
+                      ))
+                    ]),
+                SizedBox(
+                  height: 15.0,
+                ),
+                Row(
+                  children: <Widget>[
+                    Checkbox(
+                      value: _signUpData['remeberme'] == '1' ? true : false,
+                      onChanged: (v) => setState(() {
+                        _signUpData['remeberme'] = v ? '1' : '0';
+                      }),
+                    ),
+                    Expanded(
+                        child: Text(
+                      "i have read & agreed to the terms and condition",
+                      style: TextStyle(
+                        color: secondaryTextColor,
+                      ),
+                    )),
+                    InkWell(
+                      onTap: () async {
+                        if (_loading) {
+                          return;
+                        }
+                        const String url = ("https://nsce.com.ng/terms");
+                        if (await canLaunch(url)) {
+                          await launch(
+                            url,
+                            forceSafariVC: false,
+                          );
+                        }
+                      },
+                      child: Text(
+                        "Terms of Service",
+                        style: TextStyle(
+                          color: actionColor,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+                SizedBox(
+                  height: 10.0,
+                ),
+                MaterialButton(
+                  color: primaryColor,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                          top: Radius.elliptical(10.0, 10.0),
+                          bottom: Radius.elliptical(10.0, 10.0)),
+                      side: BorderSide(color: primarySwatch)),
+                  onPressed: () {
+                    // Validate will return true if the form is valid, or false if
+                    // the form is invalid.
+                    final form = _formKey.currentState;
+                    form.save();
 
-                                obscureText: _eye_signup,
-                                initialValue:  _signUpData['password'],
-                                onSaved: (value)=> _signUpData['password'] = value,
-                                decoration: const InputDecoration(
-                                  prefixIcon: Icon(Icons.lock,color: secondaryTextColor),
-                                  labelText: 'Password',
-                                  labelStyle: TextStyle(
-                                    color:  secondaryTextColor,
-                                  ),
+                    if (_formKey.currentState.validate()) {
+                      if (_loading) {
+                        return;
+                      }
+                      setState(() {
+                        _loading = true;
+                      });
+                      _signUpData['fullname'] = _signUpData['firstname'] +
+                          ' ' +
+                          _signUpData['lastname'];
+                      var wait = Provider.of<AuthService>(context)
+                          .createUser(_signUpData);
+                      wait.then((status) {
+                        setState(() {
+                          _loading = false;
+                        });
+
+                        if (status == null) {
+                          return Scaffold.of(context).showSnackBar(SnackBar(
+                              content: Text('Invalid username number')));
+                        } else if (status == false) {
+                          return Scaffold.of(context).showSnackBar(
+                              SnackBar(content: Text("Internet error")));
+                        } else if (status != true) {
+                          return Scaffold.of(context)
+                              .showSnackBar(SnackBar(content: Text(status)));
+                        }
+                        setState(() {
+                          // Process data.
+                          _screen = 1;
+                        });
+                        return showDialog<void>(
+                          context: context,
+                          barrierDismissible: false,
+                          // user must tap button!
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('Welcome ' + _signUpData['fullname']),
+                              content: SingleChildScrollView(
+                                child: ListBody(
+                                  children: <Widget>[
+                                    Text('Your account have been created.'),
+                                  ],
                                 ),
-                                keyboardType: TextInputType.text,
-                                // textInputAction: TextInputAction.continueAction,
-                                onChanged: (v) => _signUpData['password'] = v,
-                                validator: (value) {
-                                  if (value.isEmpty ) {
-                                    return 'Please enter your password';
-                                  }
-                                  return null;
-                                },
                               ),
-                              Positioned(
-                                  child:IconButton(
-                                    icon: Icon(_eye_signup?Icons.visibility_off:Icons.visibility,color: secondaryTextColor),
-                                    onPressed: (){
-                                      setState(() {
-                                        _eye_signup=!_eye_signup;
-                                      });
-                                    },
-                                  )
-                              )
-                            ]
-                        ),
-                        Stack(
-                            alignment: Alignment(1.0,0.0), // right & center
-                            children: <Widget>[
-                              TextFormField(
-
-                                obscureText: _eye_signup,
-                                initialValue:_signUpData['confirm_password'],
-                                onSaved: (value)=> _signUpData['confirm_password'] = value,
-                                decoration: const InputDecoration(
-                                  prefixIcon: Icon(Icons.lock,color:secondaryTextColor),
-                                  labelText: 'Confirm Password',
-                                  labelStyle: TextStyle(
-                                    color:  secondaryTextColor,
-                                  ),
-                                ),
-                                keyboardType: TextInputType.text,
-                                // textInputAction: TextInputAction.continueAction,
-                                onChanged: (v) => _signUpData['confirm_password'] = v,
-                                validator: (value) {
-                                  if (value.isEmpty) {
-                                    return 'Please enter your password';
-                                  }
-                                  else if (value != _signUpData['password']) {
-                                    return 'Password not the same with confirm password';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              Positioned(
-                                  child:IconButton(
-                                    icon: Icon(_eye_signup?Icons.visibility_off:Icons.visibility,color: secondaryTextColor),
-                                    onPressed: (){
-                                      setState(() {
-                                        _eye_signup=!_eye_signup;
-                                      });
-                                    },
-                                  )
-                              )
-                            ]
-                        ),
-                        SizedBox(
-                          height: 15.0,
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Checkbox(
-                              value:_signUpData['remeberme']=='1'?true:false,
-                              onChanged: (v)=>setState((){
-                                _signUpData['remeberme']=v?'1':'0';
-                              }),
-                            ),
-                            Expanded(
-                              child: Text("i have read & agreed to the terms and condition",style: TextStyle(
-                                  color:  secondaryTextColor,
-                                ),
-                              )
-                            ),
-                            InkWell(
-                              onTap: (){
-                                if(_loading) {
-                                  return;
-                                }
-                                //                                  setState(() {
-                                //                                    // Process data.
-                                //                                    _screen=3;
-                                //                                  });
-                              },
-                              child: Text("Terms of Service",
-                                style: TextStyle(
-                                  color:  actionColor,
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                        SizedBox(
-                          height: 10.0,
-                        ),
-                        MaterialButton(
-                          color: primaryColor,
-                          shape: RoundedRectangleBorder(
-
-                              borderRadius: BorderRadius.vertical(
-                                  top: Radius.elliptical(10.0,10.0),
-                                  bottom: Radius.elliptical(10.0,10.0)
-                              ),
-                              side: BorderSide(color: primarySwatch)
-                          ),
-                          onPressed: () {
-                            // Validate will return true if the form is valid, or false if
-                            // the form is invalid.
-                            final form = _formKey.currentState;
-                            form.save();
-
-                            if (_formKey.currentState.validate()) {
-                              if(_loading) {
-                                return;
-                              }
-                              setState(() {
-                                _loading=true;
-                              });
-                              _signUpData['fullname']=_signUpData['firstname']+' '+_signUpData['lastname'];
-                              var wait=Provider.of<AuthService>(context).createUser(_signUpData);
-                              wait.then((status){
-                                setState(() {
-                                  _loading=false;
-                                });
-
-                                if(status == null){
-                                  return  Scaffold.of(context).showSnackBar(SnackBar(content:Text('Invalid username number')));
-                                }
-                                else if(status == false){
-                                  return  Scaffold.of(context).showSnackBar(SnackBar(content:Text("Internet error")));
-                                }
-                                else if(status != true){
-                                  return Scaffold.of(context).showSnackBar(SnackBar(content:Text(status)));
-                                }
-                                setState(() {
-                                  // Process data.
-                                  _screen=1;
-                                });
-                                return showDialog<void>(
-                                  context: context,
-                                  barrierDismissible: false, // user must tap button!
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: Text('Welcome '+_signUpData['fullname']),
-                                      content: SingleChildScrollView(
-                                        child: ListBody(
-                                          children: <Widget>[
-                                            Text('Your account have been created.'),
-                                          ],
-                                        ),
-                                      ),
-                                      actions: <Widget>[
-                                        FlatButton(
-                                          child: Text('OK'),
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                        ),
-                                      ],
-                                    );
+                              actions: <Widget>[
+                                FlatButton(
+                                  child: Text('OK'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
                                   },
-                                );
-                              }
-                              );
-                            }
-                          },
-                          child: Text(
-                            (_loading?'loading...':'Create'),
-                            style: TextStyle(
-                              fontSize: 16.0,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 25.0,
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Expanded(child: Text("Already have an Account?")),
-                            InkWell(
-
-                              onTap: (){
-                                if(_loading) {
-                                  return;
-                                }
-                                setState(() {
-                                  // Process data.
-                                  _screen=1;
-                                });
-                              },
-                              child: Text("Sign In",
-                                style: TextStyle(
-                                  color:  actionColor,
                                 ),
-                              ),
-                            )
-                          ],
+                              ],
+                            );
+                          },
+                        );
+                      });
+                    }
+                  },
+                  child: Text(
+                    (_loading ? 'loading...' : 'Create'),
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 25.0,
+                ),
+                Row(
+                  children: <Widget>[
+                    Expanded(child: Text("Already have an Account?")),
+                    InkWell(
+                      onTap: () {
+                        if (_loading) {
+                          return;
+                        }
+                        setState(() {
+                          // Process data.
+                          _screen = 1;
+                        });
+                      },
+                      child: Text(
+                        "Sign In",
+                        style: TextStyle(
+                          color: actionColor,
                         ),
-                        SizedBox(
-                          height: 15.0,
-
-                        ),
-                      ]
-                  )
-              )
-          )
+                      ),
+                    )
+                  ],
+                ),
+                SizedBox(
+                  height: 15.0,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
-  Widget forgetPassword(){
+
+  Widget forgetPassword() {
     return Container(
-      // Center is a layout widget. It takes a single child and positions it
-      // in the middle of the parent.
+        // Center is a layout widget. It takes a single child and positions it
+        // in the middle of the parent.
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Color.fromRGBO(224, 224, 224 , 1),
+              color: Color.fromRGBO(224, 224, 224, 1),
               blurRadius: 25.0, // soften the shadow
               spreadRadius: 2.0, // extend the shadow
               offset: Offset(
                 12.0, // Move to right 10 horizontally
-                1.0,   //Move to bottom 10 Vertically
+                1.0, //Move to bottom 10 Vertically
               ),
             )
           ],
         ),
-
-        child:Card(
+        child: Card(
             elevation: 4.0,
-            margin: EdgeInsets.only(top:0.0,left: 20.0,right: 20.0),
+            margin: EdgeInsets.only(top: 0.0, left: 20.0, right: 20.0),
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.horizontal(
-                  left: Radius.elliptical(20.0,20.0),
-                  right: Radius.elliptical(20.0,20.0)
-                ),
+                    left: Radius.elliptical(20.0, 20.0),
+                    right: Radius.elliptical(20.0, 20.0)),
                 side: BorderSide(color: Colors.black12)),
-            child:Form(
+            child: Form(
               key: _formKey,
-              child:Padding(
+              child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child:
-                  Column(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      Padding(padding:EdgeInsets.only(top: 20),),
+                      Padding(
+                        padding: EdgeInsets.only(top: 20),
+                      ),
                       Text(
                         'Forgot Password',
-                        style: TextStyle(fontFamily: "Lato",fontStyle:FontStyle.normal,fontWeight: FontWeight.normal,fontSize: 20),
+                        style: TextStyle(
+                            fontFamily: "Lato",
+                            fontStyle: FontStyle.normal,
+                            fontWeight: FontWeight.normal,
+                            fontSize: 20),
                       ),
                       SizedBox(
                         height: 15.0,
                       ),
                       TextFormField(
-
-                        initialValue:_forgetDetails ,
-                        onSaved: (value)=> _forgetDetails = value,
+                        initialValue: _forgetDetails,
+                        onSaved: (value) => _forgetDetails = value,
                         decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.person,color: secondaryTextColor),
+                          prefixIcon:
+                              Icon(Icons.person, color: secondaryTextColor),
                           labelText: 'Email or Phone',
                           labelStyle: TextStyle(
-                            color:  secondaryTextColor,
+                            color: secondaryTextColor,
                           ),
                         ),
                         keyboardType: TextInputType.text,
@@ -841,24 +901,25 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                         },
                       ),
                       SizedBox(
-                        height:35.0,
+                        height: 35.0,
                       ),
                       Row(
                         children: <Widget>[
                           Expanded(child: Text("")),
                           InkWell(
-                            onTap: (){
-                              if(_loading) {
+                            onTap: () {
+                              if (_loading) {
                                 return;
                               }
                               setState(() {
                                 // Process data.
-                                _screen=1;
+                                _screen = 1;
                               });
                             },
-                            child: Text("Login",
+                            child: Text(
+                              "Login",
                               style: TextStyle(
-                                color:  actionColor,
+                                color: actionColor,
                               ),
                             ),
                           )
@@ -868,68 +929,65 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                         height: 25,
                       ),
                       MaterialButton(
-
                         color: primaryColor,
                         shape: RoundedRectangleBorder(
-
                             borderRadius: BorderRadius.vertical(
-                                top: Radius.elliptical(10.0,10.0),
-                                bottom: Radius.elliptical(10.0,10.0)
-                            ),
-                            side: BorderSide(color: primarySwatch)
-                        ),
+                                top: Radius.elliptical(10.0, 10.0),
+                                bottom: Radius.elliptical(10.0, 10.0)),
+                            side: BorderSide(color: primarySwatch)),
                         onPressed: () {
                           // Validate will return true if the form is valid, or false if
                           // the form is invalid
                           final form = _formKey.currentState;
                           form.save();
 
-
                           if (_formKey.currentState.validate()) {
-                            if(_loading){
+                            if (_loading) {
                               return;
                             }
                             setState(() {
-                              _loading=true;
+                              _loading = true;
                             });
-                            var wait=Provider.of<AuthService>(context).forgetPassword(phone: _forgetDetails);
-                            wait.then((status){
+                            var wait = Provider.of<AuthService>(context)
+                                .forgetPassword(phone: _forgetDetails);
+                            wait.then((status) {
                               setState(() {
-                                _loading=false;
+                                _loading = false;
                               });
 
-                              if(status == null){
+                              if (status == null) {
                                 return showDialog(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder: (BuildContext context ){
-                                    return SmartAlert(title:'Alert',description: "Invalid user details");
-                                  }
-                                );
-                              }
-                              else if(status == false){
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (BuildContext context) {
+                                      return SmartAlert(
+                                          title: 'Alert',
+                                          description: "Invalid user details");
+                                    });
+                              } else if (status == false) {
                                 return showDialog(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder: (BuildContext context ){
-                                    return SmartAlert(title:'Alert',description: "Internet error");
-                                  }
-                                );
-                              }
-                              else if(status != true){
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (BuildContext context) {
+                                      return SmartAlert(
+                                          title: 'Alert',
+                                          description: "Internet error");
+                                    });
+                              } else if (status != true) {
                                 showDialog(
                                     context: context,
                                     barrierDismissible: false,
-                                    builder: (BuildContext context ){
-                                    return SmartAlert(title:'Alert',description: status);
-                                  }
-                                );
+                                    builder: (BuildContext context) {
+                                      return SmartAlert(
+                                          title: 'Alert', description: status);
+                                    });
                               }
                               return null;
                             });
                           }
                         },
-                        child: Text((_loading?'loading...':'Reset Password'),
+                        child: Text(
+                          (_loading ? 'loading...' : 'Reset Password'),
                           style: TextStyle(
                             fontSize: 16.0,
                             color: Colors.white,
@@ -943,35 +1001,33 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                         children: <Widget>[
                           Expanded(child: Text("New on NSCE?")),
                           InkWell(
-                            onTap: (){
-                              if(_loading) {
+                            onTap: () {
+                              if (_loading) {
                                 return;
                               }
                               setState(() {
                                 // Process data.
-                                _screen=2;
+                                _screen = 2;
                               });
                             },
-                            child: Text("Create an Account",
+                            child: Text(
+                              "Create an Account",
                               style: TextStyle(
-                                color:  actionColor,
+                                color: actionColor,
                               ),
                             ),
                           )
                         ],
                       ),
                     ],
-                  )
-              ),
-            )
-        )
-    );
-
+                  )),
+            )));
   }
+
   @override
   Widget build(BuildContext context) {
     dialogMan.buildContext(context);
-    Widget buildBody(_body,{double maxHeight}) {
+    Widget buildBody(_body, {double maxHeight}) {
       return ListView(
         shrinkWrap: true,
         children: <Widget>[
@@ -980,7 +1036,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               minWidth: MediaQuery.of(context).size.width,
               maxWidth: MediaQuery.of(context).size.width,
               minHeight: 400,
-              maxHeight: maxHeight==null? MediaQuery.of(context).size.height:maxHeight,
+              maxHeight: maxHeight == null
+                  ? MediaQuery.of(context).size.height+50
+                  : maxHeight,
             ),
             child: Stack(
               fit: StackFit.loose,
@@ -991,9 +1049,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   child: _body,
                 ),
                 Positioned(
-                  top:0,
+                  top: 0,
                   child: Container(
-                    alignment: Alignment(0,0),
+                    alignment: Alignment(0, 0),
                     width: MediaQuery.of(context).size.width,
                     child: Center(
                       child: Image(
@@ -1011,11 +1069,12 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         ],
       );
     }
+
     switchScreen() {
       switch (_screen) {
         case 3:
           {
-            return buildBody(forgetPassword(),maxHeight:600);
+            return buildBody(forgetPassword(), maxHeight: 600);
           }
           break;
         case 2:
@@ -1025,153 +1084,179 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           break;
         default:
           {
-            return buildBody(login(),maxHeight:600);
+            return buildBody(login(), maxHeight: 600);
           }
           break;
       }
     }
 
     final popup = BeautifulPopup(
-
       context: context,
       template: TemplateAuthentication,
-
     );
     popup.recolor(primaryColor);
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(20.0),// here the desired height
-        child: AppBar(
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(20.0), // here the desired height
+          child: AppBar(
             elevation: 0,
             brightness: Brightness.dark,
             iconTheme: IconThemeData(color: primaryTextColor),
-        ),
-      ),
-      floatingActionButton:Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-        child:  Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            Container(
-              decoration: BoxDecoration(
-                  color: Colors.black26,
-                  borderRadius: BorderRadius.all(Radius.circular(30))
-              ),
-              child: IconButton(
-                icon:Icon(Icons.message),
-                onPressed: (){
-                  popup.show(
-                    title: 'Contact us',
-                    content:ListView(
-                      children: <Widget>[
-                        TextField(
-                          onChanged: (v)=>setState((){
-                            _sendMailData['fullname']=v;
-                          }),
-                          decoration: InputDecoration(
-                              labelText: 'Full name'
-                          ),
-                        ),
-                        TextField(
-                          controller: _text_controller,
-                          onChanged: (v)=>setState((){
-                            _sendMailData['email']=v;
-                          }),
-                          decoration: InputDecoration(
-                              labelText: 'Email'
-                          ),
-                        ),
-                        TextField(
-                          onChanged: (v)=>setState((){
-                            _sendMailData['body']=v;
-                          }),
-                          onSubmitted:(v)=>setState((){
-                            _sendMailData['body']=v;
-                          }) ,
-                          decoration: InputDecoration(
-                              labelText: 'Message'
-                          ),
-                        )
-                      ],
-                    ),
-                    actions: [
-                      popup.button(
-                        label: _loading?"Sending...":'Send',
-                        onPressed: (){
-                          if(_loading) {
-                            return;
-                          }
-                          if(_sendMailData['email'] ==null || _sendMailData['fullname'] == null || _sendMailData['body']==null){
-                            showDialog(context: context,child: SmartAlert(title: 'Alert',description: 'Email, full name and message can\'t be empty'));
-                            return;
-                          }
-                          dialogMan.show();
-                          sendMail({"email":"${_sendMailData['email']}","subject":"A message from ${_sendMailData['fullname']} ","body":'${_sendMailData['fullname']} your message "${_sendMailData['body']}" \n has been received and our support will respond back to you via mail.'}).then((res){
-                            dialogMan.hide();
-                            String msg;
-                            if(res is Map && res['error']==false){
-                              msg=res['message'];
-                            }else if (res is Map){
-                              msg=res['message']??"Message not delivered please retry";
-                            }else{
-                              msg="Message not delivered please retry";
-                            }
-                            setState(() {
-                              _sendMailData['fullname'] = null;
-                            });
-                            if(Navigator.of(context).canPop())Navigator.of(context).pop();
-                            showDialog(context: context,child: SmartAlert(title: 'Alert',description: msg));
-                          }).catchError((e){
-                            print(e);
-                          });
-                        },
-                      ),
-                      popup.button(
-                        label: 'Chat',
-                        onPressed: (){
-                          if(_sendMailData['email'] == null || _sendMailData['fullname'] == null || _sendMailData['body']==null){
-                            showDialog(context: context,child: SmartAlert(title: 'Alert',description: 'Email, full name and message can\'t be empty'));
-                            return;
-                          }
-                          if(Navigator.of(context).canPop()){
-                            Navigator.of(context).pop();
-                          }
-                          Map _name=_sendMailData['fullname'].split(' ').asMap();
-                          Map _data={};
-                          _data['firstName']=_name.containsKey(0)?_name[0]:'';
-                          _data['lastName']=_name.containsKey(1)?_name[1]:'';
-                          _data['email']=_sendMailData['email'];
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => ChatPage(message: _sendMailData['body'],userDetails: _data)));
-                          setState(() {
-                            _sendMailData['fullname'] = null;
-                          });
-                        },
-                      ),
-                    ],
-                    // bool barrierDismissible = false,
-                    // Widget close,
-                  );
-                },
-              ),
-            ),
-            Text('Help')
-          ],
-        )
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      body:Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-//        constraints: BoxConstraints(minHeight:MediaQuery.of(context).size.height,maxHeight: MediaQuery.of(context).size.height ),
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("images/bg.png"),
-            fit: BoxFit.fill,
           ),
-//          color: primaryColor,
         ),
-        child:Center(child: switchScreen(),),
-      )
-    );
+        floatingActionButton: Padding(
+            padding:
+                EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                Container(
+                  decoration: BoxDecoration(
+                      color: Colors.black26,
+                      borderRadius: BorderRadius.all(Radius.circular(30))),
+                  child: IconButton(
+                    icon: Icon(Icons.message),
+                    onPressed: () {
+                      popup.show(
+                        title: 'Contact us',
+                        content: ListView(
+                          children: <Widget>[
+                            TextField(
+                              onChanged: (v) => setState(() {
+                                _sendMailData['fullname'] = v;
+                              }),
+                              decoration:
+                                  InputDecoration(labelText: 'Full name'),
+                            ),
+                            TextField(
+                              controller: _text_controller,
+                              onChanged: (v) => setState(() {
+                                _sendMailData['email'] = v;
+                              }),
+                              decoration: InputDecoration(labelText: 'Email'),
+                            ),
+                            TextField(
+                              onChanged: (v) => setState(() {
+                                _sendMailData['body'] = v;
+                              }),
+                              onSubmitted: (v) => setState(() {
+                                _sendMailData['body'] = v;
+                              }),
+                              decoration: InputDecoration(labelText: 'Message'),
+                            )
+                          ],
+                        ),
+                        actions: [
+                          popup.button(
+                            label: _loading ? "Sending..." : 'Send',
+                            onPressed: () {
+                              if (_loading) {
+                                return;
+                              }
+                              if (_sendMailData['email'] == null ||
+                                  _sendMailData['fullname'] == null ||
+                                  _sendMailData['body'] == null) {
+                                showDialog(
+                                    context: context,
+                                    child: SmartAlert(
+                                        title: 'Alert',
+                                        description:
+                                            'Email, full name and message can\'t be empty'));
+                                return;
+                              }
+                              dialogMan.show();
+                              sendMail({
+                                "email": "${_sendMailData['email']}",
+                                "subject":
+                                    "A message from ${_sendMailData['fullname']} ",
+                                "body":
+                                    '${_sendMailData['fullname']} your message "${_sendMailData['body']}" \n has been received and our support will respond back to you via mail.'
+                              }).then((res) {
+                                dialogMan.hide();
+                                String msg;
+                                if (res is Map && res['error'] == false) {
+                                  msg = res['message'];
+                                } else if (res is Map) {
+                                  msg = res['message'] ??
+                                      "Message not delivered please retry";
+                                } else {
+                                  msg = "Message not delivered please retry";
+                                }
+                                setState(() {
+                                  _sendMailData['fullname'] = null;
+                                });
+                                if (Navigator.of(context).canPop())
+                                  Navigator.of(context).pop();
+                                showDialog(
+                                    context: context,
+                                    child: SmartAlert(
+                                        title: 'Alert', description: msg));
+                              }).catchError((e) {
+                                print(e);
+                              });
+                            },
+                          ),
+                          popup.button(
+                            label: 'Chat',
+                            onPressed: () {
+                              if (_sendMailData['email'] == null ||
+                                  _sendMailData['fullname'] == null ||
+                                  _sendMailData['body'] == null) {
+                                showDialog(
+                                    context: context,
+                                    child: SmartAlert(
+                                        title: 'Alert',
+                                        description:
+                                            'Email, full name and message can\'t be empty'));
+                                return;
+                              }
+                              if (Navigator.of(context).canPop()) {
+                                Navigator.of(context).pop();
+                              }
+                              Map _name =
+                                  _sendMailData['fullname'].split(' ').asMap();
+                              Map _data = {};
+                              _data['firstName'] =
+                                  _name.containsKey(0) ? _name[0] : '';
+                              _data['lastName'] =
+                                  _name.containsKey(1) ? _name[1] : '';
+                              _data['email'] = _sendMailData['email'];
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ChatPage(
+                                          message: _sendMailData['body'],
+                                          userDetails: _data)));
+                              setState(() {
+                                _sendMailData['fullname'] = null;
+                              });
+                            },
+                          ),
+                        ],
+                        // bool barrierDismissible = false,
+                        // Widget close,
+                      );
+                    },
+                  ),
+                ),
+                Text('Help')
+              ],
+            )),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        body: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+//        constraints: BoxConstraints(minHeight:MediaQuery.of(context).size.height,maxHeight: MediaQuery.of(context).size.height ),
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage("images/bg.png"),
+              fit: BoxFit.fill,
+            ),
+//          color: primaryColor,
+          ),
+          child: Center(
+            child: switchScreen(),
+          ),
+        ));
   }
 }

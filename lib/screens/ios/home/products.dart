@@ -37,7 +37,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
     _adverts=[{'id':'','link':'https://google.com','avatar':'images/sample1.png','name':''},{'id':'','link':'https://google.com','avatar':'images/sample2.png','name':''}];
     _quicklink= [
       {'avatar':'assets/icons/order.png','link':'/orders','name':'My Orders','color':Color.fromRGBO(242, 189, 40, 0.12)},
-      {'avatar':'assets/icons/calculator.png','link':'/material_calculator','name':'Material Calculator','color':Color.fromRGBO(242, 189, 40, 0.12)},
+      {'avatar':'assets/icons/calculator.png','link':'/material_calculator','name':'Product Calculator','color':Color.fromRGBO(242, 189, 40, 0.12)},
       {'avatar':'assets/icons/payment.png','link':'/home/2','name':'Payments','color':Color.fromRGBO(242, 189, 40, 0.12)},
       {'avatar':'assets/icons/wallet.png','link':'/home/3','name':'Wallet','color':Color.fromRGBO(242, 189, 40, 0.12)},
       {'avatar':'assets/icons/invoice.png','link':'/invoices','name':'Invoice','color':Color.fromRGBO(242, 189, 40, 0.12)},
@@ -196,7 +196,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                         Row(
                           children: <Widget>[
                             Expanded(
-                              child: Text('Types',style: TextStyle(fontWeight: FontWeight.w600,fontSize: 17,fontFamily: 'Lato'),),
+                              child: Text('Products',style: TextStyle(fontWeight: FontWeight.w600,fontSize: 17,fontFamily: 'Lato'),),
                             ),
 
                           ],

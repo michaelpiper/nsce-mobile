@@ -15,7 +15,7 @@ String baseURL(String path,{replace:false}){
         return path;
       }
     }
-    else if (replace &&  path.indexOf("http://")>=0){
+    else if (path.indexOf("http://")>=0){
       if(replace) {
         path = path.replaceFirst("http://", '').split('/')[1] ?? '';
       }else {

@@ -148,6 +148,8 @@ class _DriverProfilePage extends State<DriverProfilePage>
           space,
           Text(_userDetails['phone'] ?? ''),
           space,
+          Text(_userDetails['email'] ?? ''),
+          space,
           Text('Ratings'),
           space,
           RatingBarIndicator(

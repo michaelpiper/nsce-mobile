@@ -1,11 +1,13 @@
 import 'package:NSCE/ext/smartalert.dart';
 import 'package:NSCE/services/auth.dart';
+import 'package:NSCE/services/request.dart';
 import 'package:NSCE/utils/helper.dart';
 import 'package:NSCE/utils/month.dart';
 import 'package:flutter/material.dart';
 import 'package:NSCE/services/driver_request.dart';
 import 'package:NSCE/utils/colors.dart';
 import 'package:NSCE/utils/constants.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:NSCE/ext/dialogman.dart';
 // third screen
@@ -29,6 +31,9 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
       child: Scaffold(
           backgroundColor: Colors.transparent,
           body: Center(child: CircularProgressIndicator())));
+  final geoLocator = Geolocator();
+  final locationOptions =
+      LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: 10);
 
   @override
   void initState() {
@@ -46,9 +51,64 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
     AuthService.getUserDetails().then(onValue);
   }
 
+  _calculateDistance() async {
+    dialogMan.show();
+    Position position = await geoLocator.getCurrentPosition();
+    if (position == null) {
+      dialogMan.hide();
+      showDialog(
+        context: context,
+        child: SmartAlert(
+          title: "Alert",
+          description: "Couldn't get driver location please turn on location",
+        ),
+      );
+      return;
+    }
+    dynamic res = await distanceMatrix(
+        origins: '${position.longitude}, ${position.latitude}',
+        destinations:
+            '${_dispatch['OrderDetail']['Order']['shippingAddress'] ?? ''}');
+    if (res is bool ||
+        res is Map && res['status'] == false ||
+        res['data'] == null) {
+      dialogMan.hide();
+      showDialog(
+        context: context,
+        child: SmartAlert(
+          title: "Alert",
+          description:
+              "Couldn't calculate distance at of this time please try again.",
+        ),
+      );
+      return;
+    }
+    final List matrix = res['data'];
+    String text = 'Couldn\'t calculate distance.';
+    if (matrix[0].length > 0 &&
+        matrix[0] != null &&
+        matrix[0] is Map &&
+        matrix[0] != null &&
+        matrix[0]['distance'] != null) {
+      text = "Possible distance to destination is ";
+      text += matrix[0]['distance']['text'] ?? '';
+    }
+    dialogMan.hide();
+    showDialog(
+      context: context,
+      child: SmartAlert(
+        title: "Alert",
+        description: text,
+      ),
+    );
+  }
+
   _fillHead(e) {
     DateTime _datee = DateTime.parse(e['dateScheduled'] ?? '');
-    return Padding(
+
+    return InkWell(
+      onTap: _calculateDistance,
+      child: Padding(
         padding: EdgeInsets.symmetric(vertical: 3.0, horizontal: 2.0),
         child: Card(
           child: Padding(
@@ -126,7 +186,9 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
               ],
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   void updateAvailability() {
@@ -189,6 +251,7 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
           ],
         ));
       case 'On-Transit':
+      case 'Feedback':
       case 'Failed':
         return Padding(
           padding: EdgeInsets.symmetric(vertical: 3.0, horizontal: 20.0),
@@ -226,9 +289,9 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
                   dialogMan.show();
                   fn(res) {
                     dialogMan.hide();
-                    if (_dispatch['status'] != 'Failed') {
+                    if (_dispatch['status'] != 'Feedback') {
                       setState(() {
-                        _dispatch['status'] = 'Failed';
+                        _dispatch['status'] = 'Feedback';
                       });
                       storage
                           .setItem(STORAGE_DRIVER_DISPATCH_KEY, _dispatch)
@@ -237,12 +300,12 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
                     showDialog(context: context, builder: showIssuesDialog);
                   }
 
-                  updateDispatch(_dispatch['id'], {'status': 'Failed'})
+                  updateDispatch(_dispatch['id'], {'status': 'Feedback'})
                       .then(fn);
                 },
                 color: primaryTextColor,
                 child: Text(
-                  _dispatch['status'] != 'Failed'
+                  _dispatch['status'] != 'Feedback'
                       ? 'Report an Issue'
                       : 'Update',
                   style: TextStyle(color: primaryColor),

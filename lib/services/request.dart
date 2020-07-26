@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'endpoints.dart';
 import '../utils/constants.dart';
+import 'package:http_parser/http_parser.dart';
 
 createAuth(Map<String, String> body) async {
   // This example uses the Google Books API to search for books about http.
@@ -393,7 +394,7 @@ getShippingAddress() async {
   }
 }
 
-updateAccountProfilePicture(File filename) async {
+Future updateAccountProfilePicture(File filename) async {
   try {
     var request = http.MultipartRequest(
         'POST', Uri.parse(API_ACCOUNT_URL + '/profile-picture'));
@@ -404,9 +405,17 @@ updateAccountProfilePicture(File filename) async {
         request.headers['Authorization'] = wait['authorization'];
       }
     }
-    request.files.add(http.MultipartFile(
-        'picture', filename.readAsBytes().asStream(), filename.lengthSync(),
-        filename: filename.path.split("/").last));
+    request.files.add(
+      http.MultipartFile.fromBytes(
+        'picture',
+        filename.readAsBytesSync(),
+        filename: filename.path.split("/").last,
+        contentType: MediaType.parse('image/jpeg'),
+      ),
+    );
+    print(filename.path.split("/").last);
+    filename.readAsBytes().then((value) => print(value));
+
     var response = await request.send();
     print(response.statusCode);
 
@@ -1382,5 +1391,87 @@ unlikeOrders(String id) async {
   } catch (e) {
     // print(e);
     return false;
+  }
+}
+
+Future changePassword(Map<String, String> body) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  Map<String, String> headers = {};
+  if (prefs.containsKey(STORAGE_USER_KEY)) {
+    var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
+    if (wait.containsKey('authorization')) {
+      headers['Authorization'] = wait['authorization'];
+    }
+  }
+  try {
+    http.Response response = await http.post(
+        API_ACCOUNT_URL + '/change-password',
+        body: body,
+        headers: headers);
+    if (response.statusCode == 200) {
+      return convert.jsonDecode(response.body);
+    } else {
+      return {'error': true, 'message': "Couldn't complete request"};
+    }
+  } catch (e) {
+    return {
+      'error': true,
+      'message': "An error occured while trying complete request"
+    };
+  }
+}
+
+Future<Map> distanceMatrix(
+    {@required String origins, @required String destinations}) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  Map<String, String> headers = {};
+  if (prefs.containsKey(STORAGE_USER_KEY)) {
+    var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
+    if (wait.containsKey('authorization')) {
+      headers['Authorization'] = wait['authorization'];
+    }
+  }
+  try {
+    http.Response response = await http.post(API_SERVICE_DISTANCE_URL,
+        body: {'origins': origins, 'destinations': destinations},
+        headers: headers);
+    if (response.statusCode == 200) {
+      return convert.jsonDecode(response.body);
+    } else {
+      return {'error': true, 'message': "Couldn't complete request"};
+    }
+  } catch (e) {
+    return {
+      'error': true,
+      'message': "An error occured while trying complete request"
+    };
+  }
+}
+
+Future<Map> distanceProductMatrix(
+    {@required String productId, @required String destinations}) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  Map<String, String> headers = {};
+  if (prefs.containsKey(STORAGE_USER_KEY)) {
+    var wait = convert.jsonDecode(prefs.getString(STORAGE_USER_KEY));
+    if (wait.containsKey('authorization')) {
+      headers['Authorization'] = wait['authorization'];
+    }
+  }
+  try {
+    http.Response response = await http.post(
+        API_SERVICE_DISTANCE_URL + '-product',
+        body: {'productId': productId, 'destinations': destinations},
+        headers: headers);
+    if (response.statusCode == 200) {
+      return convert.jsonDecode(response.body);
+    } else {
+      return {'error': true, 'message': "Couldn't complete request"};
+    }
+  } catch (e) {
+    return {
+      'error': true,
+      'message': "An error occured while trying complete request"
+    };
   }
 }

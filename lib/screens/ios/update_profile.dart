@@ -12,8 +12,6 @@ class UpdateProfile extends StatefulWidget {
 
 class UpdateProfileState extends State<UpdateProfile> {
   //
-  static final String uploadEndPoint =
-      'http://localhost/flutter_test/upload_image.php';
   Future<File> file;
   String status = '';
   String base64Image;

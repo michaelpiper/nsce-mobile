@@ -196,10 +196,10 @@ class AppDrawer extends StatelessWidget {
           ),
           ListTile(
             onTap: () {
-              Navigator.pushNamed(context, '/help-and-about');
+              Navigator.pushNamed(context, '/about');
             },
             title: Text(
-              'Help and About',
+              'About',
               style: TextStyle(color: noteColor),
             ),
             leading: Icon(

@@ -16,7 +16,7 @@ class NotificationScreenState extends State<NotificationScreen>{
     super.initState();
     // initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
     // If you have skipped STEP 3 then change app_icon to @mipmap/ic_launcher
-
+    _loadNotifications();
   }
   @override
   void dispose() {
@@ -51,9 +51,6 @@ class NotificationScreenState extends State<NotificationScreen>{
   }
   @override
   Widget build(BuildContext context) {
-    if(_loading){
-      _loadNotifications();
-    }
     _buildList(e){
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: 5,vertical: 9),
@@ -65,6 +62,7 @@ class NotificationScreenState extends State<NotificationScreen>{
             ),
           ),
           child:  ListTile(
+            contentPadding: EdgeInsets.all(12),
             title:Text(e['title']),
             subtitle: Text(e['description']),
             trailing: IconButton(
@@ -76,9 +74,9 @@ class NotificationScreenState extends State<NotificationScreen>{
                     });
                   }
                 }
-                e['read']?markAsUnreadNotifications(e['id']).then(f):markAsReadNotifications(e['id']).then(f);
+                e['read']==true?markAsUnreadNotifications(e['id']).then(f):markAsReadNotifications(e['id']).then(f);
               },
-              icon: Icon(e['read']?Icons.notifications_none:Icons.notifications_active),
+              icon: Icon(e['read']==true?Icons.notifications_none:Icons.notifications_active),
             ),
           ),
         ),

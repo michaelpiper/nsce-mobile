@@ -1,3 +1,4 @@
+import 'package:NSCE/utils/helper.dart';
 import 'package:flutter/material.dart';
 import '../../utils/colors.dart';
 import 'package:NSCE/ext/dialogman.dart';
@@ -7,158 +8,212 @@ import 'package:NSCE/ext/loading.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:NSCE/utils/constants.dart';
+
 // Notification screen
 class QuarriesPage extends StatefulWidget {
-  QuarriesPageState createState()=> QuarriesPageState();
+  QuarriesPageState createState() => QuarriesPageState();
 }
-class QuarriesPageState extends State<QuarriesPage>{
-  bool _loadingStateIndicator=true;
-  List <Map<String,dynamic>> _quarriesItem=[];
+
+class QuarriesPageState extends State<QuarriesPage> {
+  bool _loadingStateIndicator = true;
+  List<Map<String, dynamic>> _quarriesItem = [];
   final LocalStorage storage = new LocalStorage(STORAGE_KEY);
-  final DialogMan dialogMan =DialogMan(child: Scaffold(
-    backgroundColor: Colors.transparent,
-    body:Center(
-     child:CircularProgressIndicator()
-    )
-  ));
+  final DialogMan dialogMan = DialogMan(
+      child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Center(child: CircularProgressIndicator())));
   String _rating;
   String _comment;
-  void _loadQuarries(){
-    fetchQuarries().then((quarries){
+
+  void _loadQuarries() {
+    fetchQuarries().then((quarries) {
       // print(quarries);
-      if(quarries is bool){
-        showDialog<void>(context: context,barrierDismissible: false,builder: (BuildContext context){
-          return SmartAlert(title: "Error",description: "couldn't load page",onOk: (){ if(Navigator.of(context).canPop())Navigator.of(context).pop();},);
-        });
-      }else if(quarries['error'] is bool && quarries['error']==true){
-        showDialog<void>(context: context,barrierDismissible: false,builder: (BuildContext context){
-          return SmartAlert(title: "Error",description: "couldn't load page");
-        });
-      }else if(quarries['data'] is List){
+      if (quarries is bool) {
+        showDialog<void>(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
+              return SmartAlert(
+                title: "Error",
+                description: "couldn't load page",
+                onOk: () {
+                  if (Navigator.of(context).canPop())
+                    Navigator.of(context).pop();
+                },
+              );
+            });
+      } else if (quarries['error'] is bool && quarries['error'] == true) {
+        showDialog<void>(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
+              return SmartAlert(
+                  title: "Error", description: "couldn't load page");
+            });
+      } else if (quarries['data'] is List) {
         List data = quarries['data'];
         setState(() {
-          _quarriesItem = data.map<Map<String,dynamic>>((e)=>e).toList();
+          _quarriesItem = data.map<Map<String, dynamic>>((e) => e).toList();
           _quarriesLoaded();
         });
-      }else{
-        if(Navigator.of(context).canPop())Navigator.of(context).pop();
+      } else {
+        if (Navigator.of(context).canPop()) Navigator.of(context).pop();
       }
     });
   }
-  void _quarriesLoaded({state:true}){
-  setState(() {
-  _loadingStateIndicator=!state;
-  });
+
+  void _quarriesLoaded({state: true}) {
+    setState(() {
+      _loadingStateIndicator = !state;
+    });
   }
+
   @override
   Widget build(BuildContext context) {
     dialogMan.buildContext(context);
 
-    if(_loadingStateIndicator){
+    if (_loadingStateIndicator) {
       _loadQuarries();
     }
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text("Yards",style: TextStyle(color: primaryTextColor),),
+        title: Text(
+          "Yards",
+          style: TextStyle(color: primaryTextColor),
+        ),
         iconTheme: IconThemeData(color: primaryTextColor),
       ),
-      body: _loadingStateIndicator?Loading():
-      _quarriesItem.length==0?Center(
-        child: Text('No yard available'),
-      ):ListView(
-        children:_quarriesItem.map<Widget>((e)=> Card(
-          child: ListTile(
-            onTap: (){
-              storage.setItem(STORAGE_QUARRY_KEY, e).then((v){
-                Navigator.pushNamed(context, '/quarry/'+e['id'].toString());
-              });
-            },
-           title:Text( e['lga']+' '+e['state']+' '+e['country']),
-           subtitle:Text( e['description']),
-           trailing: IconButton(
-              icon: Icon(Icons.star,color: Colors.orangeAccent,),
-              onPressed: ()async{
-               dialogMan.show();
-               await Future.delayed(Duration(seconds: 3));
-               dialogMan.hide();
-                showDialog<void>(context: context,barrierDismissible: false,builder: (BuildContext context){
-                  f()async {
-                    await likeQuarries(e['id'].toString(),
-                        {'rating': _rating.toString(), 'comment': _comment.toString()})
-                        .then((res) {
-                      String message=res['message']!=null?res['message']:'Raview submited';
-                      showDialog<void>(context: context,barrierDismissible: false,builder: (BuildContext context){
-                        completed(){
-                            if(Navigator.of(context).canPop())Navigator.of(context).pop();
-                        }
-                        return SmartAlert(title:"Alert",description:message,onOk: completed,);
-                      }
-                      );
-                    });
-                  }
-                  return AlertDialog(
-                    title: Text('Rate this Yard'),
-                    shape:  RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(
-                            top: Radius.elliptical(10.0,10.0),
-                            bottom: Radius.elliptical(10.0,10.0)
-                        ),
-                    ),
-                    content: SingleChildScrollView(
-                      child: ListBody(
-                        children: <Widget>[
-                          RatingBar(
-                            initialRating: 3,
-                            minRating: 1,
-                            direction: Axis.horizontal,
-                            allowHalfRating: false,
-                            itemCount: 5,
-                            itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
-                            itemBuilder: (context, _) => Icon(
-                              Icons.star,
-                              color: Colors.amber,
-                            ),
-                            onRatingUpdate: (rating) {
-                              setState(() {
-                                _rating=rating.toString();
+      body: _loadingStateIndicator
+          ? Loading()
+          : _quarriesItem.length == 0
+              ? Center(
+                  child: Text('No yard available'),
+                )
+              : ListView(
+                  children: _quarriesItem
+                      .map<Widget>(
+                        (e) => Card(
+                          child: ListTile(
+                            onTap: () {
+                              storage.setItem(STORAGE_QUARRY_KEY, e).then((v) {
+                                Navigator.pushNamed(
+                                    context, '/quarry/' + e['id'].toString());
                               });
                             },
-                          ),
-                          TextField(
-                            decoration: InputDecoration(
-                                labelText:'Comments'
+                            title: Text(isNull(e['lga'], replace: '') +
+                                ' ' +
+                                isNull(e['state'], replace: '') +
+                                ' ' +
+                                isNull(e['country'], replace: '')),
+                            subtitle:
+                                Text(isNull(e['description'], replace: '')),
+                            trailing: IconButton(
+                              icon: Icon(
+                                Icons.star,
+                                color: Colors.orangeAccent,
+                              ),
+                              onPressed: () async {
+                                dialogMan.show();
+                                await Future.delayed(Duration(seconds: 3));
+                                dialogMan.hide();
+                                showDialog<void>(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (BuildContext context) {
+                                    f() async {
+                                      await likeQuarries(e['id'].toString(), {
+                                        'rating': _rating.toString(),
+                                        'comment': _comment.toString()
+                                      }).then((res) {
+                                        String message = res['message'] != null
+                                            ? res['message']
+                                            : 'Raview submited';
+                                        showDialog<void>(
+                                            context: context,
+                                            barrierDismissible: false,
+                                            builder: (BuildContext context) {
+                                              completed() {
+                                                if (Navigator.of(context)
+                                                    .canPop())
+                                                  Navigator.of(context).pop();
+                                              }
+
+                                              return SmartAlert(
+                                                title: "Alert",
+                                                description: message,
+                                                onOk: completed,
+                                              );
+                                            });
+                                      });
+                                    }
+
+                                    return AlertDialog(
+                                      title: Text('Rate this Yard'),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.vertical(
+                                            top: Radius.elliptical(10.0, 10.0),
+                                            bottom:
+                                                Radius.elliptical(10.0, 10.0)),
+                                      ),
+                                      content: SingleChildScrollView(
+                                        child: ListBody(children: <Widget>[
+                                          RatingBar(
+                                            initialRating: 3,
+                                            minRating: 1,
+                                            direction: Axis.horizontal,
+                                            allowHalfRating: false,
+                                            itemCount: 5,
+                                            itemPadding: EdgeInsets.symmetric(
+                                                horizontal: 4.0),
+                                            itemBuilder: (context, _) => Icon(
+                                              Icons.star,
+                                              color: Colors.amber,
+                                            ),
+                                            onRatingUpdate: (rating) {
+                                              setState(() {
+                                                _rating = rating.toString();
+                                              });
+                                            },
+                                          ),
+                                          TextField(
+                                              decoration: InputDecoration(
+                                                  labelText: 'Comments'),
+                                              onChanged: (e) {
+                                                setState(() {
+                                                  _comment = e;
+                                                });
+                                              })
+                                        ]),
+                                      ),
+                                      actions: <Widget>[
+                                        FlatButton(
+                                          child: Text(
+                                            'CANCEL',
+                                            style: TextStyle(color: Colors.red),
+                                          ),
+                                          onPressed: () {
+                                            if (Navigator.of(context).canPop())
+                                              Navigator.of(context).pop();
+                                          },
+                                        ),
+                                        FlatButton(
+                                          child: Text('OK'),
+                                          onPressed: () {
+                                            f();
+                                          },
+                                        )
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
                             ),
-                            onChanged: (e){
-                              setState(() {
-                                _comment=e;
-                              });
-                            }
-                          )
-                        ]
-                      ),
-                    ),
-                    actions: <Widget>[
-                      FlatButton(
-                        child: Text('CANCEL',style: TextStyle(color: Colors.red),),
-                        onPressed: () {
-                          if(Navigator.of(context).canPop())Navigator.of(context).pop();
-                        },
-                      ),
-                      FlatButton(
-                        child: Text('OK'),
-                        onPressed: () {
-                          f();
-                        },
+                          ),
+                        ),
                       )
-                    ],
-                  );
-                });
-              },
-            ),
-          )
-        )).toList()
-      )
+                      .toList(),
+                ),
     );
   }
 }

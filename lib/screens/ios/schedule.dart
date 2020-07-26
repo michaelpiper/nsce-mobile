@@ -274,6 +274,7 @@ class _SchedulePageState extends State<SchedulePage>
 
   void _removeSchd(item) {
     setState(() {
+      _continue = false;
       _events[item['time']].removeWhere((e) {
         bool test = e['id'] == item['id'];
         if (test) {
@@ -379,9 +380,15 @@ class _SchedulePageState extends State<SchedulePage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
+          SizedBox(
+            height: 5,
+          ),
           Text(
             "Quantity per schedule",
             style: TextStyle(color: noteColor),
+          ),
+          SizedBox(
+            height: 5,
           ),
           Row(children: <Widget>[
             Card(
@@ -421,66 +428,105 @@ class _SchedulePageState extends State<SchedulePage>
         ],
       ),
     );
-    Widget _done = InkWell(
-      onTap: () {
-        if ('$totalUnit' == _schedule['post']['quantity']) {
-          setState(() {
-            _continue = true;
-          });
-        } else {
-          showDialog(
-              context: context,
-              child: SmartAlert(
-                  title: 'Alert',
-                  description:
-                      'Schedule can\'t be made done until Quantity needed is equal to quantity scheduled.'));
-        }
-      },
-      child: Text('Done', style: TextStyle(color: primaryColor)),
-    );
-    Widget _saveButton = Container(
-        color: Colors.transparent,
-        padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 20),
-        child: MaterialButton(
-          color: primaryColor,
-          onPressed: () {
-            if (_continue) {
-              fn(res) {
-                if (res is Map && res['error'] == false)
-                  Navigator.of(context).popAndPushNamed('/cart');
-                else
-                  showDialog(
-                      context: context,
-                      child: SmartAlert(
+    Widget _done = _continue == true
+        ? Container()
+        : InkWell(
+            onTap: () {
+              if ('$totalUnit' == _schedule['post']['quantity']) {
+                setState(() {
+                  _continue = true;
+                });
+              } else {
+                showDialog(
+                    context: context,
+                    child: SmartAlert(
                         title: 'Alert',
-                        description: "Can't add to cart.",
-                      ));
+                        description:
+                            'Schedule can\'t be made done until Quantity needed is equal to quantity scheduled.'));
+              }
+            },
+            child: Text('Done',
+                style: TextStyle(color: primaryColor, fontSize: 13)),
+          );
+    Widget _saveButton = Container(
+      color: Colors.transparent,
+      padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 20),
+      child: MaterialButton(
+        color: primaryColor,
+        onPressed: () {
+          if (_continue) {
+            fn(res) {
+              if (res is Map && res['error'] == false)
+                Navigator.of(context).popAndPushNamed('/cart');
+              else
+                showDialog(
+                    context: context,
+                    child: SmartAlert(
+                      title: 'Alert',
+                      description: "Can't add to cart.",
+                    ));
+            }
+
+            fetchCart(id: 'done-product-${_schedule['product']['id']}')
+                .then(fn);
+          } else {
+            showDialog(
+                context: context,
+                child: SmartAlert(
+                  title: 'Alert',
+                  description: "Scheduled not marked as done.",
+                ));
+          }
+        },
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+                top: Radius.elliptical(15.0, 15.0),
+                bottom: Radius.elliptical(15.0, 15.0)),
+            side: BorderSide(
+              color: primarySwatch,
+            )),
+        padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 45.0),
+        child: Text(
+          'Add to Cart',
+          style: TextStyle(color: primaryTextColor),
+        ),
+      ),
+    );
+    Widget _maText = _schedule['post']['type'] == 'pickup'
+        ? Text('')
+        : FutureBuilder(
+            future: distanceProductMatrix(
+                productId: '${_schedule['product']['id']}' ?? '',
+                destinations: _schedule['post']['shippingAddress']),
+            builder: (BuildContext context, AsyncSnapshot<Map> snapshot) {
+              String text = '';
+              if (snapshot.hasData) {
+                print(snapshot.data);
+              }
+              if (snapshot.hasData &&
+                  snapshot.data is Map &&
+                  snapshot.data['error'] == false) {
+                final List res = snapshot.data['data'];
+                if (res[0].length > 0 &&
+                    res[0] != null &&
+                    res[0] is Map &&
+                    res[0] != null &&
+                    res[0]['distance'] != null) {
+                  text = res[0]['distance']['text'] ?? '';
+                }
               }
 
-              fetchCart(id: 'done-product-${_schedule['product']['id']}')
-                  .then(fn);
-            } else {
-              showDialog(
-                  context: context,
-                  child: SmartAlert(
-                    title: 'Alert',
-                    description: "Scheduled not marked as done.",
-                  ));
-            }
-          },
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(
-                  top: Radius.elliptical(15.0, 15.0),
-                  bottom: Radius.elliptical(15.0, 15.0)),
-              side: BorderSide(
-                color: primarySwatch,
-              )),
-          padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 45.0),
-          child: Text(
-            'Add to Cart',
-            style: TextStyle(color: primaryTextColor),
-          ),
-        ));
+              return Text(
+                snapshot.hasData ? text : "Loading.....",
+                style: TextStyle(
+                  color: noteColor,
+                  fontSize: 18,
+                  textBaseline: TextBaseline.alphabetic,
+                  fontWeight: FontWeight.w700,
+                ),
+              );
+            },
+          );
     Widget _buildHead = Padding(
       padding: EdgeInsets.all(5),
       child: Container(
@@ -539,24 +585,31 @@ class _SchedulePageState extends State<SchedulePage>
                         width: 4,
                       ),
                       Expanded(
-                          child: Text(
-                        'Delivery address',
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ))
+                        child: Text(
+                          'Delivery address',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      )
                     ],
                   ),
+                  const SizedBox(height: 12.0),
                   Row(
                     children: <Widget>[
                       SizedBox(
                         width: 20,
                       ),
                       Expanded(
-                          child: Text(
-                        _schedule['post']['type'] == 'pickup'
-                            ? 'Pickup at yard'
-                            : _schedule['post']['shippingAddress'],
-                        style: TextStyle(color: noteColor),
-                      ))
+                        child: Text(
+                          _schedule['post']['type'] == 'pickup'
+                              ? 'Pickup at yard'
+                              : _schedule['post']['shippingAddress'],
+                          style: TextStyle(color: noteColor),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 20,
+                      ),
+                      _maText,
                     ],
                   ),
                 ],
@@ -621,6 +674,7 @@ class _SchedulePageState extends State<SchedulePage>
                           : Center(
                               child: Text(
                                 'Warning\n $_message',
+                                style: TextStyle(color: rejectColor),
                                 textAlign: TextAlign.center,
                               ),
                             )),

@@ -1,7 +1,9 @@
 import '../utils/helper.dart';
 
-const BASE_URL = isInDebugMode? "http://10.0.2.2:9000"    : "https://www.nsce.com.ng";
-const API_URL  = isInDebugMode? "http://10.0.2.2:3001/v1" : "https://api.nsce.com.ng/v1";
+const BASE_URL =
+    isInDebugMode ? "http://10.0.2.2:9000" : "https://www.nsce.com.ng";
+const API_URL =
+    isInDebugMode ? "http://10.0.2.2:3001/v1" : "https://api.nsce.com.ng/v1";
 //const BASE_URL = "https://www.nsce.com.ng";
 //const API_URL = "https://api.nsce.com.ng/v1";
 const String API_BILLING_ADDRESS = API_URL + '/billingaddress';
@@ -23,6 +25,7 @@ const String API_PRODUCT_URL = API_URL + "/products";
 const String API_ADVERT_URL = API_URL + "/adverts";
 const String API_NOTIFICATION_URL = API_URL + "/notifications";
 const String API_SERVICE_URL = API_URL + "/service";
+const String API_SERVICE_DISTANCE_URL = API_SERVICE_URL + '/distance';
 const API_SEND_MAIL_URL = API_URL + '/sendmail';
 const String API_AUTO_COMPLETE_ADDRESS_URL =
     API_SERVICE_URL + "/auto_complete_address";
