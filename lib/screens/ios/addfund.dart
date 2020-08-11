@@ -1,3 +1,4 @@
+import 'package:NSCE/services/dialog.dictionary.dart';
 import 'package:NSCE/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -74,7 +75,7 @@ class _AddFundsPage extends State<AddFundsPage> {
             onSuccess: (transaction) {
 //            // print(transaction.reference);
               // print(_amount);
-              _returnState("Your payment was received and it been process");
+              _returnState(dialogDictionary.paymentReceived);
               setState(() {
                 _loading=false;
               });
@@ -151,7 +152,7 @@ class _AddFundsPage extends State<AddFundsPage> {
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
 //        textTheme: TextTheme(display1:),
-        title: Text("Fund Your account", style:TextStyle(color:Colors.white)),
+        title: Text("", style:TextStyle(color:Colors.white)),
       ),
       body: Form(
         key: _formKey,

@@ -18,15 +18,284 @@ class OrdersPageState extends State<OrdersPage> {
   final LocalStorage storage = new LocalStorage(STORAGE_KEY);
   bool _loading;
   String _name = "All";
-  List<Map<String, dynamic>> _orders = [];
+  List<dynamic> _orders = [];
   List<Map<String, dynamic>> _cacheOrder = [];
+  final TextEditingController startDateController = new TextEditingController();
+  final TextEditingController endDateController = new TextEditingController();
+  final TextEditingController amountController = new TextEditingController();
+  final TextEditingController refController = new TextEditingController();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _loading = true;
+    filters.add(amountAndRefFilter);
   }
+
+  List<Widget> filters = [];
+
+  filter() {
+    List filter = List.from(_cacheOrder);
+    if (filters.length > 1) {
+      filter.removeWhere((e) {
+        bool remove = false;
+        var tDate = DateTime.tryParse(e['createdAt']);
+        var startDate = DateTime.tryParse(startDateController.text);
+        var endDate = DateTime.tryParse(endDateController.text);
+        final Duration sub = Duration(hours: 23);
+        if (tDate != null && startDate != null && endDate != null) {
+          if (tDate.toLocal().isBefore(startDate.subtract(sub)) ||
+              tDate.toLocal().isAfter(endDate.add(sub))) remove = true;
+        } else if (tDate != null &&
+            startDate != null &&
+            tDate.toLocal().isBefore(startDate.subtract(sub))) {
+          remove = true;
+        } else if (tDate != null &&
+            endDate != null &&
+            tDate.toLocal().isAfter(endDate.add(sub))) {
+          remove = true;
+        }
+
+        if (amountController.text != '' &&
+            amountController.text != '0.00' &&
+           oCcy.format(e['totalPrice'] +
+                e['shippingFee']) != amountController.text) {
+          remove = true;
+        }
+        if (refController.text != '' &&
+            e['id'].toString() != refController.text.trim()) {
+          remove = true;
+        }
+        return remove;
+      });
+    } else {
+      filter.removeWhere((e) {
+        bool remove = false;
+        if (amountController.text != '' &&
+            amountController.text != '0.00' &&
+            oCcy.format(e['totalPrice'] +
+                e['shippingFee']) != amountController.text) {
+          remove = true;
+        }
+        if (refController.text != '' &&
+            e['id'].toString() != refController.text.trim()) {
+          remove = true;
+        }
+        return remove;
+      });
+    }
+
+    filter.insert(0, transFilter);
+    setState(() {
+      _name = "All";
+      _orders = filter;
+    });
+  }
+
+  toggleFilter() {
+    if (filters.length > 1) {
+      setState(() {
+        filters = [amountAndRefFilter];
+        _orders.removeAt(0);
+        _orders.insert(0, transFilter);
+      });
+    } else {
+      setState(() {
+        filters = [amountAndRefFilter, dateFilter];
+        _orders.removeAt(0);
+        _orders.insert(0, transFilter);
+      });
+    }
+  }
+
+  onEditDate(e, TextEditingController controller) {
+    try {
+      e = e.replaceAll('-', '');
+      final date = [];
+      if (e.length > 8) {
+        e = e.substring(0, 8);
+      }
+
+      if (e.length >= 6) {
+        date.add(e.substring(0, 4));
+        date.add(e.substring(4, 6));
+        date.add(e.substring(6, e.length));
+      } else if (e.length >= 4) {
+        date.add(e.substring(0, 4));
+        date.add(e.substring(4, e.length));
+      } else {
+        date.add(e.substring(0, e.length));
+      }
+      controller.text = date.join('-');
+      if (e.length == 4 || e.length == 6) {
+        controller.selection = TextSelection.fromPosition(TextPosition(
+          offset: controller.text.length - 1,
+          affinity: TextAffinity.upstream,
+        ));
+      } else {
+        controller.selection = TextSelection.fromPosition(
+          TextPosition(
+            offset: controller.text.length,
+            affinity: TextAffinity.upstream,
+          ),
+        );
+      }
+    } catch (e) {
+      controller.text = '';
+      controller.selection = TextSelection.fromPosition(
+        TextPosition(
+            offset: controller.text.length, affinity: TextAffinity.upstream),
+      );
+    }
+  }
+
+  onEditAmount(e, TextEditingController controller) {
+    try {
+      String amount = e.replaceAll(',', '').replaceAll('.', '');
+      amount = amount.substring(0, amount.length - 2) +
+          '.' +
+          amount.substring(amount.length - 2, amount.length);
+      controller.text = oCcy.format(num.tryParse(amount));
+
+      if (e.length == 4 || e.length == 6) {
+        controller.selection = TextSelection.fromPosition(
+          TextPosition(
+            offset: controller.text.length - 1,
+            affinity: TextAffinity.upstream,
+          ),
+        );
+      } else {
+        controller.selection = TextSelection.fromPosition(
+          TextPosition(
+            offset: controller.text.length,
+            affinity: TextAffinity.upstream,
+          ),
+        );
+      }
+    } catch (e) {
+      controller.text = '0.00';
+      controller.selection = TextSelection.fromPosition(
+        TextPosition(
+          offset: controller.text.length,
+          affinity: TextAffinity.upstream,
+        ),
+      );
+    }
+  }
+
+  startDateOnChange(e) {
+    onEditDate(e, startDateController);
+  }
+
+  endDateOnChange(e) {
+    onEditDate(e, endDateController);
+  }
+
+  amountOnChange(e) {
+    onEditAmount(e, amountController);
+  }
+
+  Widget get amountAndRefFilter => Row(
+        children: <Widget>[
+          Expanded(
+            child: TextField(
+              key: Key('amount'),
+              controller: amountController,
+              keyboardType: TextInputType.datetime,
+              decoration: InputDecoration(
+                labelText: 'Amount',
+                hintText: '1,000.00',
+              ),
+              onChanged: amountOnChange,
+            ),
+          ),
+          const SizedBox(
+            width: 4,
+          ),
+          Expanded(
+            child: TextField(
+              key: Key('reference'),
+              controller: refController,
+              keyboardType: TextInputType.datetime,
+              decoration: InputDecoration(
+                labelText: 'Ref',
+                hintText: 'trn_23WEWDWWE',
+              ),
+            ),
+          ),
+        ],
+      );
+
+  Widget get dateFilter => Row(
+        children: <Widget>[
+          Expanded(
+            child: TextField(
+              key: Key('startdate'),
+              controller: startDateController,
+              keyboardType: TextInputType.datetime,
+              decoration: InputDecoration(
+                labelText: 'Start date',
+                hintText: 'yyyy-mm-dd',
+              ),
+              onChanged: startDateOnChange,
+              maxLength: 10,
+            ),
+          ),
+          const SizedBox(
+            width: 4,
+          ),
+          Expanded(
+            child: TextField(
+              key: Key('enddate'),
+              controller: endDateController,
+              keyboardType: TextInputType.datetime,
+              decoration: InputDecoration(
+                labelText: 'End date',
+                hintText: 'yyyy-mm-dd',
+              ),
+              onChanged: endDateOnChange,
+              maxLength: 10,
+            ),
+          ),
+        ],
+      );
+
+  toggleFilterView() {
+    setState(() {
+      if (_orders.elementAt(0) is Widget) {
+        _orders.removeAt(0);
+      } else {
+        _orders.insert(0, transFilter);
+      }
+    });
+  }
+
+  Widget get transFilter => Card(
+        elevation: 3.0,
+        key: Key('transFilter'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(
+            12.0,
+          ),
+        ),
+        child: ListTile(
+//        title: Text('Filter'),
+          title: Column(children: filters),
+          trailing: IconButton(
+            icon: Icon(Icons.filter_list),
+            onPressed: toggleFilter,
+          ),
+          subtitle: FlatButton(
+            color: primaryColor,
+            child: Text(
+              'Filter',
+              style: TextStyle(color: primaryTextColor),
+            ),
+            onPressed: filter,
+          ),
+        ),
+      );
 
   void _loadOrder() {
     f(res) {
@@ -38,8 +307,7 @@ class OrdersPageState extends State<OrdersPage> {
                   (e) => new Map<String, dynamic>.from(e))
               .toList();
           _orders = res['data']
-              .map<Map<String, dynamic>>(
-                  (e) => new Map<String, dynamic>.from(e))
+              .map<dynamic>((e) => new Map<String, dynamic>.from(e))
               .toList();
           _loading = false;
         });
@@ -80,6 +348,9 @@ class OrdersPageState extends State<OrdersPage> {
     }
     Widget _builList() {
       Widget f(e) {
+        if (e is Widget) {
+          return e;
+        }
         DateTime _date = DateTime.parse(e['createdAt']).toLocal();
         return Card(
           elevation: 0.2,
@@ -220,6 +491,12 @@ class OrdersPageState extends State<OrdersPage> {
             "My Orders",
             style: TextStyle(color: liteTextColor),
           ),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.search),
+              onPressed: toggleFilterView,
+            )
+          ],
           iconTheme: IconThemeData(color: liteTextColor),
           backgroundColor: liteColor,
         ),

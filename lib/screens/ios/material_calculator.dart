@@ -57,8 +57,14 @@ class _MaterialCalculatorPageState extends State<MaterialCalculatorPage>
       }),
       ProductType({
         'avatar': 'images/stones.png',
-        'title': 'Stones',
+        'title': 'Stonebase',
         'constant': 1.84,
+      }),
+//      Granite
+      ProductType({
+        'avatar': 'images/granite.jpg',
+        'title': 'Granite',
+        'constant': 3.048,
       }),
       ProductType({
         'avatar': 'images/concrete.png',
@@ -88,7 +94,7 @@ class _MaterialCalculatorPageState extends State<MaterialCalculatorPage>
   }
 
   animate(int idx) {
-    int adx = (products.length / 2).floor();
+    int adx = (products.length / 3).floor();
     ProductType productActive = products[idx];
     ProductType productPrevActive = products[adx];
     setState(() {
@@ -142,17 +148,24 @@ class _MaterialCalculatorPageState extends State<MaterialCalculatorPage>
             title: Text('Select Product'),
             subtitle: Padding(
               padding: EdgeInsets.symmetric(vertical: 10),
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: map<Widget>(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: map<Widget>(
                       products,
-                      (idx, e) => Product(
-                            avatar: e.avatar,
-                            title: e.title,
-                            active: idx == active,
-                            onTap: () => animate(idx),
-                          )).toList()),
+                      (idx, e) => Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: Product(
+                          avatar: e.avatar,
+                          title: e.title,
+                          active: idx == active,
+                          onTap: () => animate(idx),
+                        ),
+                      ),
+                    ).toList()),
+              ),
             ),
           ),
         ),
@@ -264,6 +277,9 @@ class _MaterialCalculatorPageState extends State<MaterialCalculatorPage>
         ),
         Expanded(
           child: TextFormField(
+            style: TextStyle(
+              fontSize: 17,
+            ),
             initialValue: "${form[e]}",
             decoration: decor2,
             keyboardType: TextInputType.number,
@@ -279,7 +295,9 @@ class _MaterialCalculatorPageState extends State<MaterialCalculatorPage>
         SizedBox(
           width: 6,
         ),
-        Text('m'),
+        Text(
+          e == 'Wastage /Shrinkage Allowance(%)' ? '%' : 'm',
+        ),
         SizedBox(
           width: 26,
         ),
@@ -389,6 +407,7 @@ class _MaterialCalculatorPageState extends State<MaterialCalculatorPage>
           Text(
             '$calculateResult  $measurement',
             textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
           ),
           SizedBox(
             height: 10,
@@ -495,7 +514,12 @@ class Product extends StatelessWidget {
         height: active ? 150 : 100,
       ));
     }
-    title != null ? children.add(Text(title)) : children.add(Text(''));
+    title != null
+        ? children.add(Text(
+            title,
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ))
+        : children.add(Text(''));
   }
 
   @override

@@ -54,7 +54,7 @@ final LocalStorage localStorage = new LocalStorage(STORAGE_KEY);
                         context: context,
                         barrierDismissible: false, // user must tap button!
                         builder: (BuildContext context) {
-                        return  SmartAlert(title:"Warning",description:"Please retry");
+                        return  SmartAlert(title:"Warning",description:"Something when wrong will trying to confirm you order.");
                         },
                       );
                     }else {

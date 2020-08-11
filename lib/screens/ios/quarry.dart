@@ -214,11 +214,11 @@ class QuarryPageState extends State<QuarryPage> {
       ),
     );
     Widget textSection = Container(
-      padding: const EdgeInsets.all(32),
-      child: Text(
-        isNull(quarry['description'], replace: ''),
-        softWrap: true,
-      ),
+//      padding: const EdgeInsets.all(32),
+//      child: Text(
+//        isNull(quarry['description'], replace: ''),
+//        softWrap: true,
+//      ),
     );
     Widget nameSection = Container(
       padding: const EdgeInsets.all(32),

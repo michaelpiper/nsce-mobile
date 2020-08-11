@@ -1,3 +1,4 @@
+import 'package:NSCE/services/dialog.dictionary.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../services/auth.dart';
@@ -72,7 +73,7 @@ class AppDrawer extends StatelessWidget {
               if (Navigator.of(context).canPop()) Navigator.of(context).pop();
             },
             title: Text(
-              'Home',
+              dialogDictionary.home,
               style: TextStyle(color: noteColor),
             ),
             leading: Icon(
@@ -90,7 +91,7 @@ class AppDrawer extends StatelessWidget {
               Navigator.pushNamed(context, '/type');
             },
             title: Text(
-              'Products',
+              dialogDictionary.products,
               style: TextStyle(color: noteColor),
             ),
             leading: Icon(
@@ -108,7 +109,7 @@ class AppDrawer extends StatelessWidget {
               Navigator.pushNamed(context, '/orders');
             },
             title: Text(
-              'My Orders',
+              dialogDictionary.myOrders,
               style: TextStyle(color: noteColor),
             ),
             leading: Icon(
@@ -126,7 +127,7 @@ class AppDrawer extends StatelessWidget {
               Navigator.pushNamed(context, '/quarries');
             },
             title: Text(
-              'Yard',
+              dialogDictionary.yards,
               style: TextStyle(color: noteColor),
             ),
             leading: Icon(
@@ -144,7 +145,7 @@ class AppDrawer extends StatelessWidget {
               Navigator.pushNamed(context, '/favorite');
             },
             title: Text(
-              'Save Items',
+              dialogDictionary.savedItems,
               style: TextStyle(color: noteColor),
             ),
             leading: Icon(
@@ -163,7 +164,7 @@ class AppDrawer extends StatelessWidget {
               Navigator.pop(context);
             },
             title: Text(
-              'Wallet',
+              dialogDictionary.wallet,
               style: TextStyle(color: noteColor),
             ),
             leading: Icon(
@@ -185,7 +186,7 @@ class AppDrawer extends StatelessWidget {
               Navigator.pushNamed(context, '/settings');
             },
             title: Text(
-              'Settings',
+              dialogDictionary.settings,
               style: TextStyle(color: noteColor),
             ),
             leading: Icon(
@@ -199,7 +200,7 @@ class AppDrawer extends StatelessWidget {
               Navigator.pushNamed(context, '/about');
             },
             title: Text(
-              'About',
+              dialogDictionary.about,
               style: TextStyle(color: noteColor),
             ),
             leading: Icon(
@@ -214,7 +215,7 @@ class AppDrawer extends StatelessWidget {
               if (Navigator.canPop(context)) Navigator.pop(context);
             },
             title: Text(
-              'Logout',
+              dialogDictionary.logout,
               style: TextStyle(color: noteColor),
             ),
             leading: Icon(

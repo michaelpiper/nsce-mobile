@@ -305,6 +305,36 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
                 },
                 color: primaryTextColor,
                 child: Text(
+                  'Quick Links',
+                  style: TextStyle(color: primaryColor),
+                ),
+                padding: EdgeInsets.all(10),
+                shape: BeveledRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                  side: BorderSide(color: primaryColor),
+                ),
+              ),
+              MaterialButton(
+                onPressed: () {
+                  dialogMan.show();
+                  fn(res) {
+                    dialogMan.hide();
+                    if (_dispatch['status'] != 'Feedback') {
+                      setState(() {
+                        _dispatch['status'] = 'Feedback';
+                      });
+                      storage
+                          .setItem(STORAGE_DRIVER_DISPATCH_KEY, _dispatch)
+                          .then((v) {});
+                    }
+                    showDialog(context: context, builder: showIssuesDialog);
+                  }
+
+                  updateDispatch(_dispatch['id'], {'status': 'Feedback'})
+                      .then(fn);
+                },
+                color: primaryTextColor,
+                child: Text(
                   _dispatch['status'] != 'Feedback'
                       ? 'Report an Issue'
                       : 'Update',
@@ -474,6 +504,102 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
     ];
   }
 
+  Dialog showQuickLinks(BuildContext context) {
+    List<QuickLink> quickLinks = [
+      QuickLink('i have an engine problem', 'Critical'),
+      QuickLink('I am in heavy traffic', 'Medium'),
+      QuickLink('I have police issue', 'Critical'),
+      QuickLink('i have flat tire ', 'Medium'),
+      QuickLink('', ''),
+    ];
+    void send(QuickLink quickLink) {
+      f(resp) {
+        if (resp == false || resp is Map && resp['error'] == true) {
+          showDialog(
+            context: context,
+            child: SmartAlert(
+              title: 'Alert',
+              description: 'Report not sent please try again.',
+            ),
+          );
+          return;
+        }
+        if (resp is Map && resp['message'] != null) {
+          showDialog(
+            context: context,
+            child: SmartAlert(
+              title: 'Alert',
+              description: resp['message'],
+              onOk: Navigator.of(context).pop,
+            ),
+          );
+          return;
+        }
+        showDialog(
+          context: context,
+          child: SmartAlert(
+            title: 'Alert',
+            description: 'Report sent.',
+            onOk: Navigator.of(context).pop,
+          ),
+        );
+      }
+
+      reportIssue(
+        _dispatch['id'],
+        quickLink.message,
+        priority: quickLink.priority,
+      ).then(f);
+    }
+
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        padding: EdgeInsets.all(20),
+        child: Stack(
+          children: <Widget>[
+            ListView.builder(
+              itemCount: quickLinks.length,
+              itemBuilder: (context, idx) {
+                QuickLink quickLink = quickLinks[idx];
+                return ListTile(
+                  onTap: () => send(quickLink),
+                  title: Text(quickLink.message),
+                  subtitle: Text(quickLink.priority),
+                );
+              },
+            ),
+            Align(
+              // These values are based on trial & error method
+              alignment: Alignment(1.05, -1.05),
+              child: InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.close,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Dialog showIssuesDialog(BuildContext context) {
     String issues = '';
     void send() {
@@ -641,4 +767,11 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
       ),
     );
   }
+}
+
+class QuickLink {
+  final String message;
+  final String priority;
+
+  QuickLink(this.message, this.priority);
 }

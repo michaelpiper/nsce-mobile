@@ -53,7 +53,8 @@ updateDispatch(id, Map body) async {
   }
 }
 
-Future<dynamic> reportIssue(id, String message) async {
+Future<dynamic> reportIssue(id, String message,
+    {String priority: 'Low'}) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   Map<String, String> headers = {};
   if (prefs.containsKey(STORAGE_USER_KEY)) {
@@ -65,7 +66,7 @@ Future<dynamic> reportIssue(id, String message) async {
   try {
     var response = await http.post(
         API_DISPATCH_URL + '/driver/' + id.toString() + '/report',
-        body: {'message': message},
+        body: {'message': message, 'priority': priority},
         headers: headers);
     if (response.statusCode == 200) {
       return convert.jsonDecode(response.body);

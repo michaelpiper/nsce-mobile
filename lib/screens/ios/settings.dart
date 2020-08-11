@@ -1,3 +1,5 @@
+import 'package:NSCE/ext/smartalert.dart';
+import 'package:NSCE/utils/colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 // third screen
 
@@ -26,16 +28,22 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:  Center(
+        title: Center(
           child: Text(
             appName ?? '',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+            style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: primaryTextColor),
           ),
         ),
       ),
       body: ListView(
         children: <Widget>[
           // A title for the subsection:
+          const SizedBox(
+            height: 10,
+          ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -61,6 +69,31 @@ class _SettingsPageState extends State<SettingsPage> {
               Navigator.pushNamed(context, '/change_password');
             },
             title: Text("Change password"),
+            trailing: Icon(Icons.arrow_right),
+          ),
+          ListTile(
+            onTap: () {
+              showDialog(
+                context: context,
+                child: SmartAlert(
+                  title: "Warning",
+                  description: "Are you sure you want to disable your account?",
+                  onOk: () {
+                    showDialog(
+                      context: context,
+                      child: SmartAlert(
+                        title: "Alert",
+                        description: "Account disable successfully.",
+                      ),
+                    );
+                  },
+                  canCancel: true,
+                  okText: 'Yes',
+                  cancelText: 'No',
+                ),
+              );
+            },
+            title: Text("Disable account"),
             trailing: Icon(Icons.arrow_right),
           ),
           Column(

@@ -1,3 +1,4 @@
+import 'package:NSCE/services/dialog.dictionary.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:NSCE/utils/colors.dart';
@@ -151,7 +152,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                         ),
                         filled: true,
                         hintStyle: new TextStyle(color: Colors.black26),
-                        hintText: "Search Materials",
+                        hintText: dialogDictionary.searchProducts,
                         contentPadding: EdgeInsets.symmetric(horizontal: 10),
                         fillColor: Colors.white,
                         suffixIcon: Icon(Icons.search)

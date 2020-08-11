@@ -1,4 +1,5 @@
 import 'package:NSCE/ext/smartalert.dart';
+import 'package:NSCE/services/dialog.dictionary.dart';
 import 'package:NSCE/utils/helper.dart';
 import 'package:NSCE/utils/month.dart';
 import 'package:flutter/material.dart';
@@ -605,7 +606,7 @@ class _ReScheduleScreenState extends State<ReScheduleScreen>
                       title:
                           Text(isNull(event['timeSlot'], replace: 'Time Slot')),
                       subtitle: Text(
-                          '${event['quantityLeft']} ${isNull(schedule['Product']['unit'], replace: 'unit')} left'),
+                          '${event['quantityLeft']} ${isNull(schedule['Product']['unit'], replace: 'unit')} available'),
                       leading: Checkbox(
                         value: _events[_calendarController.selectedDay] !=
                                 null &&
@@ -763,14 +764,16 @@ class _ReScheduleScreenState extends State<ReScheduleScreen>
                 });
               } else {
                 showDialog(
-                    context: context,
-                    child: SmartAlert(
-                        title: 'Alert',
-                        description:
-                            'Schedule can\'t be made done until Quantity needed is equal to quantity scheduled.'));
+                  context: context,
+                  child: SmartAlert(
+                    title: 'Alert',
+                    description: dialogDictionary.productScheduleNotConfirmed,
+                  ),
+                );
               }
             },
-            child: Text('Done', style: TextStyle(color: primaryColor)),
+            child: Text(dialogDictionary.orderScheduleDone,
+                style: TextStyle(color: primaryColor)),
           );
     Widget _saveButton = Container(
         color: Colors.transparent,

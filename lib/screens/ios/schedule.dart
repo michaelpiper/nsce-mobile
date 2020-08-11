@@ -1,4 +1,5 @@
 import 'package:NSCE/ext/smartalert.dart';
+import 'package:NSCE/services/dialog.dictionary.dart';
 import 'package:NSCE/utils/month.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -199,7 +200,7 @@ class _SchedulePageState extends State<SchedulePage>
                       title:
                           Text(isNull(event['timeSlot'], replace: 'Time Slot')),
                       subtitle: Text(
-                          '${event['quantityLeft']} ${isNull(_schedule['product']['unit'], replace: 'unit')} left'),
+                          '${event['quantityLeft']} ${isNull(_schedule['product']['unit'], replace: 'unit')} available'),
                       leading: Checkbox(
                         value: _events[_calendarController.selectedDay] !=
                                 null &&
@@ -438,14 +439,15 @@ class _SchedulePageState extends State<SchedulePage>
                 });
               } else {
                 showDialog(
-                    context: context,
-                    child: SmartAlert(
-                        title: 'Alert',
-                        description:
-                            'Schedule can\'t be made done until Quantity needed is equal to quantity scheduled.'));
+                  context: context,
+                  child: SmartAlert(
+                    title: 'Alert',
+                    description: dialogDictionary.productScheduleNotConfirmed,
+                  ),
+                );
               }
             },
-            child: Text('Done',
+            child: Text(dialogDictionary.orderScheduleDone,
                 style: TextStyle(color: primaryColor, fontSize: 13)),
           );
     Widget _saveButton = Container(
@@ -474,7 +476,7 @@ class _SchedulePageState extends State<SchedulePage>
                 context: context,
                 child: SmartAlert(
                   title: 'Alert',
-                  description: "Scheduled not marked as done.",
+                  description: dialogDictionary.confirmProductionSchedule,
                 ));
           }
         },

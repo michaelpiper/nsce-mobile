@@ -96,6 +96,7 @@ class _Search extends State<Search>{
                   },
                   decoration: InputDecoration(
                       hintText: widget.initValue??'Lagos',
+                      labelText: 'Enter your location',
                       suffixIcon: _searchingIndicator?Spinner(icon:Icons.sync):Icon(Icons.search),
                       border: OutlineInputBorder(
                           borderSide: BorderSide(

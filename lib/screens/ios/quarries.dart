@@ -101,13 +101,9 @@ class QuarriesPageState extends State<QuarriesPage> {
                                     context, '/quarry/' + e['id'].toString());
                               });
                             },
-                            title: Text(isNull(e['lga'], replace: '') +
-                                ' ' +
-                                isNull(e['state'], replace: '') +
-                                ' ' +
-                                isNull(e['country'], replace: '')),
-                            subtitle:
-                                Text(isNull(e['description'], replace: '')),
+                            title: Text(isNull(e['name'], replace: '')),
+//                            subtitle:
+//                                Text(isNull(e['description'], replace: '')),
                             trailing: IconButton(
                               icon: Icon(
                                 Icons.star,

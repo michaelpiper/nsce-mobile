@@ -71,16 +71,16 @@ class SaveAndPay extends StatelessWidget {
                 if (buyRes is Map && buyRes['error'] == false) {
                   dialogMan.hide();
                   showDialog(
-                      context: context,
-                      builder: (BuildContext context) => SmartAlert(
-                            title: "Alert",
-                            description: buyRes['message'],
-                            onOk: () {
-                              localStorage
-                                  .deleteItem(STORAGE_CART_CHECKOUT_KEY);
-                              Navigator.of(context).popAndPushNamed('/home');
-                            },
-                          ));
+                    context: context,
+                    builder: (BuildContext context) => SmartAlert(
+                      title: "Alert",
+                      description: buyRes['message'],
+                      onOk: () {
+                        localStorage.deleteItem(STORAGE_CART_CHECKOUT_KEY);
+                        Navigator.of(context).popAndPushNamed('/home');
+                      },
+                    ),
+                  );
                 }
               }
 
@@ -96,22 +96,23 @@ class SaveAndPay extends StatelessWidget {
               showDialog(
                   context: context,
                   builder: (BuildContext context) {
-                    String des = "";
-                    if (res['data'] >= _transaction['totalPrice']) {
-                      des = "You will be charged " +
-                          _transaction['currency'] +
-                          ' ' +
-                          oCcy.format(_transaction['totalPrice']) +
-                          " from your wallet";
-                    } else {
-                      des =
-                          "You current wallet balance is ${CURRENCY['sign']} " +
-                              oCcy.format(res['data']) +
-                              "  will be charged ${CURRENCY['sign']} " +
-                              oCcy.format(
-                                  _transaction['totalPrice'] - res['data']) +
-                              " from your card";
-                    }
+                    String des =
+                        "You do not have sufficient funds in your wallet, will you like to pay with card?";
+//                    if (res['data'] >= _transaction['totalPrice']) {
+//                      des = "You will be charged " +
+//                          _transaction['currency'] +
+//                          ' ' +
+//                          oCcy.format(_transaction['totalPrice']) +
+//                          " from your wallet";
+//                    } else {
+//                      des =
+//                          "You current wallet balance is ${CURRENCY['sign']} " +
+//                              oCcy.format(res['data']) +
+//                              "  will be charged ${CURRENCY['sign']} " +
+//                              oCcy.format(
+//                                  _transaction['totalPrice'] - res['data']) +
+//                              " from your card";
+//                    }
                     return SmartAlert(
                       title: "Confirm Payment",
                       description: des,
@@ -127,6 +128,8 @@ class SaveAndPay extends StatelessWidget {
                         }
                       },
                       canCancel: true,
+                      okText: 'Yes',
+                      cancelText: 'No',
                     );
                   },
                   barrierDismissible: false);
