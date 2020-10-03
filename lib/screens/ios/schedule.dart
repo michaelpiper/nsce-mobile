@@ -113,7 +113,8 @@ class _SchedulePageState extends State<SchedulePage>
                 child: TextField(
                   controller: _txtController,
                   autofocus: true,
-                  keyboardType: TextInputType.number,
+                  keyboardType: TextInputType.numberWithOptions(signed: true,decimal: true),
+                  textInputAction: TextInputAction.done,
                   decoration: InputDecoration(
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.all(10)),
@@ -147,7 +148,8 @@ class _SchedulePageState extends State<SchedulePage>
                 padding: EdgeInsets.symmetric(horizontal: 10),
                 child: TextField(
                   autofocus: true,
-                  keyboardType: TextInputType.number,
+                  keyboardType: TextInputType.numberWithOptions(signed: true,decimal: true),
+                  textInputAction: TextInputAction.done,
                   decoration: InputDecoration(
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.all(10)),

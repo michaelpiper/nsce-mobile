@@ -197,7 +197,7 @@ class _MaterialCalculatorPageState extends State<MaterialCalculatorPage>
           child: InkWell(
             onTap: tryCalculate,
             child: Text(
-              'Done',
+              'Confirm',
               style: textStyle,
               textAlign: TextAlign.right,
             ),

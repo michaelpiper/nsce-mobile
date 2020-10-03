@@ -116,7 +116,7 @@ class _Search extends State<Search>{
             alignment: Alignment(1.05, -1.05),
             child: InkWell(
               onTap: () {
-                Navigator.pop(context);
+                Navigator.pop(context,false);
               },
               child: Container(
                 decoration: BoxDecoration(

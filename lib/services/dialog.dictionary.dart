@@ -30,25 +30,25 @@ class DialogDictionary {
   final String creditToWallet = "Credit";
   final String debitToWallet = "Payment for";
   final String paymentReceived =
-      "Your payment was successful and your order is being processed";
+      "Your payment was successful and your order is being processed.";
 
-  final String cubicMetresAvailable = "cubic metres available";
+  final String cubicMetresAvailable = "cubic metres available.";
 
   final String productScheduleNotConfirmed =
-      "Production schedule can\’t be confirmed until the quantity requested is complete";
+      "Production schedule can\’t be confirmed until the quantity requested is complete.";
   final String pickupAdvise =
-      "You are advised to arrive at the quarry one hour before batching commences";
+      "You are advised to arrive at the yard one hour before production commences.";
 }
 
 class DialogDictionaryFr extends DialogDictionary {
-  final String confirmProductionSchedule = "Please confirm production schedule";
+  final String confirmProductionSchedule = "Please confirm production schedule.";
   final String orderScheduleDone = "Confirm";
   final String yards = "Yards";
   final String savedItems = "Saved Items";
 }
 
 class DialogDictionaryRu extends DialogDictionary {
-  final String confirmProductionSchedule = "Please confirm production schedule";
+  final String confirmProductionSchedule = "Please confirm production schedule.";
   final String orderScheduleDone = "Confirm";
   final String yards = "Yards";
   final String savedItems = "Saved Items";

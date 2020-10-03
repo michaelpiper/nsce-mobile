@@ -393,8 +393,10 @@ class ProductStatePage extends State<ProductPage>
                                             child: TextField(
                                               controller: _txtController,
                                               autofocus: true,
-                                              keyboardType:
-                                                  TextInputType.number,
+                                              keyboardType: TextInputType
+                                                  .numberWithOptions(signed: true,decimal: true),
+                                              textInputAction:
+                                                  TextInputAction.done,
                                               decoration: InputDecoration(
                                                   border: InputBorder.none,
                                                   contentPadding:
@@ -456,10 +458,10 @@ class ProductStatePage extends State<ProductPage>
                     child: Text('Schedule'),
                     onPressed: () {
                       fn(res) {
+                        dialogMan.hide();
                         if (res['data'] == null) {
                           showFancyCustomDialog(context);
                         } else {
-                          dialogMan.show();
                           setState(() {
                             selectedMethod = res['data'] == 'pickup'
                                 ? 'Pick up at Yard'
@@ -469,6 +471,7 @@ class ProductStatePage extends State<ProductPage>
                         }
                       }
 
+                      dialogMan.show();
                       fetchCart(id: 'type').then(fn);
                     },
                   )
@@ -498,12 +501,18 @@ class ProductStatePage extends State<ProductPage>
   }
 
   void changeMethod(e) {
-    setState(() {
-      selectedMethod = e;
-    });
     if (e == "Site Delivery") {
-      showFancyCustomDialogForAddress(context);
+      showFancyCustomDialogForAddress(context).then((value) {
+        if (value == true) {
+          setState(() {
+            selectedMethod = e;
+          });
+        }
+      });
     } else {
+      setState(() {
+        selectedMethod = e;
+      });
       showDialog(
         context: context,
         barrierDismissible: true,
@@ -539,7 +548,7 @@ class ProductStatePage extends State<ProductPage>
     });
   }
 
-  void showFancyCustomDialog(BuildContext context) {
+  Future showFancyCustomDialog(BuildContext context) {
     Dialog fancyDialog = Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
@@ -603,11 +612,11 @@ class ProductStatePage extends State<ProductPage>
                         return SmartAlert(
                             title: "Warning",
                             description:
-                                "Please select one of the shipping method");
+                                "Please select one of the dispatch method.");
                       },
                     );
                   } else {
-                    Navigator.pop(context);
+                    Navigator.pop(context, true);
                     dialogMan.show();
                     continueToAdd();
                   }
@@ -628,7 +637,7 @@ class ProductStatePage extends State<ProductPage>
                       "Confirm Dispatch Method",
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 20,
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -641,7 +650,7 @@ class ProductStatePage extends State<ProductPage>
               alignment: Alignment(1.05, -1.05),
               child: InkWell(
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(context, false);
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -659,34 +668,35 @@ class ProductStatePage extends State<ProductPage>
         ),
       ),
     );
-    showDialog(
+    return showDialog(
         context: context, builder: (BuildContext context) => fancyDialog);
   }
 
-  void showFancyCustomDialogForAddress(BuildContext context) {
+  Future showFancyCustomDialogForAddress(BuildContext context) {
     Dialog fancyDialog = Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.0),
-        ),
-        child: Search(
-          initValue: post['shippingAddress'] == null ? '' : post['address'],
-          onSelect: (e) {
-            post['contactPhone'] = _userDetails['phone'];
-            post['contactPerson'] =
-                _userDetails['firstName'] + ' ' + _userDetails['lastName'];
-            post['shippingAddress'] = e['address'];
-            List arrAddress = e['address'].split(',');
-            post['shippingState'] =
-                isNull(arrAddress[arrAddress.length - 1], replace: '');
-            post['shippingLGA'] =
-                isNull(arrAddress[arrAddress.length - 2], replace: '');
-            post['shippingLatLng'] = e['geolocation'];
-            updateShippingAddress(post);
-            Navigator.of(context).pop();
-          },
-        ));
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Search(
+        initValue: post['shippingAddress'] == null ? '' : post['address'],
+        onSelect: (e) {
+          post['contactPhone'] = _userDetails['phone'];
+          post['contactPerson'] =
+              _userDetails['firstName'] + ' ' + _userDetails['lastName'];
+          post['shippingAddress'] = e['address'];
+          List arrAddress = e['address'].split(',');
+          post['shippingState'] =
+              isNull(arrAddress[arrAddress.length - 1], replace: '');
+          post['shippingLGA'] =
+              isNull(arrAddress[arrAddress.length - 2], replace: '');
+          post['shippingLatLng'] = e['geolocation'];
+          updateShippingAddress(post);
+          Navigator.of(context).pop(true);
+        },
+      ),
+    );
 
-    showDialog(
+    return showDialog(
         context: context,
         builder: (BuildContext context) => fancyDialog,
         barrierDismissible: false);

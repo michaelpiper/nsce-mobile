@@ -285,23 +285,27 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
                     borderRadius: BorderRadius.circular(5)),
               ),
               MaterialButton(
-                onPressed: () {
+                onPressed: () async {
                   dialogMan.show();
-                  fn(res) {
-                    dialogMan.hide();
-                    if (_dispatch['status'] != 'Feedback') {
-                      setState(() {
-                        _dispatch['status'] = 'Feedback';
-                      });
-                      storage
-                          .setItem(STORAGE_DRIVER_DISPATCH_KEY, _dispatch)
-                          .then((v) {});
-                    }
-                    showDialog(context: context, builder: showIssuesDialog);
-                  }
+                  await Future.delayed(Duration(seconds: 5), dialogMan.hide);
+                  showDialog(context: context, builder: showQuickLinks).then(
+                    (c) {
+                      fn(res) {
+                        if (_dispatch['status'] != 'Feedback') {
+                          setState(() {
+                            _dispatch['status'] = 'Feedback';
+                          });
+                          storage
+                              .setItem(STORAGE_DRIVER_DISPATCH_KEY, _dispatch)
+                              .then((v) {});
+                        }
+                      }
 
-                  updateDispatch(_dispatch['id'], {'status': 'Feedback'})
-                      .then(fn);
+                      if (c)
+                        updateDispatch(_dispatch['id'], {'status': 'Feedback'})
+                            .then(fn);
+                    },
+                  );
                 },
                 color: primaryTextColor,
                 child: Text(
@@ -315,23 +319,28 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
                 ),
               ),
               MaterialButton(
-                onPressed: () {
+                onPressed: () async {
                   dialogMan.show();
-                  fn(res) {
-                    dialogMan.hide();
-                    if (_dispatch['status'] != 'Feedback') {
-                      setState(() {
-                        _dispatch['status'] = 'Feedback';
-                      });
-                      storage
-                          .setItem(STORAGE_DRIVER_DISPATCH_KEY, _dispatch)
-                          .then((v) {});
-                    }
-                    showDialog(context: context, builder: showIssuesDialog);
-                  }
+                  await Future.delayed(Duration(seconds: 5), dialogMan.hide);
 
-                  updateDispatch(_dispatch['id'], {'status': 'Feedback'})
-                      .then(fn);
+                  showDialog(context: context, builder: showIssuesDialog)
+                      .then((c) {
+                    fn(res) {
+                      dialogMan.hide();
+                      if (_dispatch['status'] != 'Feedback') {
+                        setState(() {
+                          _dispatch['status'] = 'Feedback';
+                        });
+                        storage
+                            .setItem(STORAGE_DRIVER_DISPATCH_KEY, _dispatch)
+                            .then((v) {});
+                      }
+                    }
+
+                    if (c)
+                      updateDispatch(_dispatch['id'], {'status': 'Feedback'})
+                          .then(fn);
+                  });
                 },
                 color: primaryTextColor,
                 child: Text(
@@ -415,56 +424,60 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
   }
 
   _buildBody() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        _fillHead(_dispatch),
-        Card(
-          child: ListTile(
-            title: Text('Contact Details'),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                    _dispatch['OrderDetail']['Order']['contactPhone'] ?? 'nil'),
-                Text(_dispatch['OrderDetail']['Order']['shippingAddress'] ??
-                    'nil')
-              ],
+    return ListView(
+      children: [
+        Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            _fillHead(_dispatch),
+            Card(
+              child: ListTile(
+                title: Text('Contact Details'),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(_dispatch['OrderDetail']['Order']['contactPhone'] ??
+                        'nil'),
+                    Text(_dispatch['OrderDetail']['Order']['shippingAddress'] ??
+                        'nil')
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            title: Text('Dispatch Status'),
-            trailing: Text(_dispatch['status'] ?? 'Pending'),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            title: Text(
-                'Quantity: ${_dispatch['OrderDetail']['quantity']} ${_dispatch['OrderDetail']['Product']['unit'] ?? 'unit'}'),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Text(
-                    'UnitPrice: ${CURRENCY['sign']} ${_dispatch['OrderDetail']['unitPrice']}'),
-                Text(
-                    'ShippingFee: ${CURRENCY['sign']} ${_dispatch['OrderDetail']['shippingFee']}'),
-                Text(
-                    'TotalPrice: ${CURRENCY['sign']} ${_dispatch['OrderDetail']['totalPrice']}'),
-              ],
+            Card(
+              child: ListTile(
+                title: Text('Dispatch Status'),
+                trailing: Text(_dispatch['status'] ?? 'Pending'),
+              ),
             ),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            title: Text('Product'),
-            trailing:
-                Text(_dispatch['OrderDetail']['Product']['name'] ?? 'nil'),
-          ),
-        ),
-        _fillButton()
+            Card(
+              child: ListTile(
+                title: Text(
+                    'Quantity: ${_dispatch['OrderDetail']['quantity']} ${_dispatch['OrderDetail']['Product']['unit'] ?? 'unit'}'),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Text(
+                        'UnitPrice: ${CURRENCY['sign']} ${_dispatch['OrderDetail']['unitPrice']}'),
+                    Text(
+                        'ShippingFee: ${CURRENCY['sign']} ${_dispatch['OrderDetail']['shippingFee']}'),
+                    Text(
+                        'TotalPrice: ${CURRENCY['sign']} ${_dispatch['OrderDetail']['totalPrice']}'),
+                  ],
+                ),
+              ),
+            ),
+            Card(
+              child: ListTile(
+                title: Text('Product'),
+                trailing:
+                    Text(_dispatch['OrderDetail']['Product']['name'] ?? 'nil'),
+              ),
+            ),
+            _fillButton()
+          ],
+        )
       ],
     );
   }
@@ -510,7 +523,7 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
       QuickLink('I am in heavy traffic', 'Medium'),
       QuickLink('I have police issue', 'Critical'),
       QuickLink('i have flat tire ', 'Medium'),
-      QuickLink('', ''),
+      QuickLink('i have all flat tire', 'Medium'),
     ];
     void send(QuickLink quickLink) {
       f(resp) {
@@ -530,7 +543,7 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
             child: SmartAlert(
               title: 'Alert',
               description: resp['message'],
-              onOk: Navigator.of(context).pop,
+              onOk: () => Navigator.of(context).pop(true),
             ),
           );
           return;
@@ -540,7 +553,7 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
           child: SmartAlert(
             title: 'Alert',
             description: 'Report sent.',
-            onOk: Navigator.of(context).pop,
+            onOk: () => Navigator.of(context).pop(true),
           ),
         );
       }
@@ -568,10 +581,20 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
               itemCount: quickLinks.length,
               itemBuilder: (context, idx) {
                 QuickLink quickLink = quickLinks[idx];
-                return ListTile(
-                  onTap: () => send(quickLink),
-                  title: Text(quickLink.message),
-                  subtitle: Text(quickLink.priority),
+                return Card(
+                  child: Column(
+                    children: [
+                      ListTile(
+                        onTap: () => send(quickLink),
+                        title: Text(quickLink.message),
+                        subtitle: Text(quickLink.priority),
+                      ),
+                      Divider(
+                        thickness: 2,
+                        color: Colors.black,
+                      ),
+                    ],
+                  ),
                 );
               },
             ),
@@ -580,7 +603,7 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
               alignment: Alignment(1.05, -1.05),
               child: InkWell(
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(context, false);
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -620,7 +643,7 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
             child: SmartAlert(
               title: 'Alert',
               description: resp['message'],
-              onOk: Navigator.of(context).pop,
+              onOk: () => Navigator.of(context).pop(true),
             ),
           );
           return;
@@ -630,7 +653,7 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
           child: SmartAlert(
             title: 'Alert',
             description: 'Report sent.',
-            onOk: Navigator.of(context).pop,
+            onOk: () => Navigator.of(context).pop(true),
           ),
         );
       }
@@ -723,7 +746,7 @@ class _DriverDispatchPage extends State<DriverDispatchPage> {
               alignment: Alignment(1.05, -1.05),
               child: InkWell(
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(context, false);
                 },
                 child: Container(
                   decoration: BoxDecoration(

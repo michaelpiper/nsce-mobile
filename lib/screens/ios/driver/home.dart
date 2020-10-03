@@ -13,6 +13,7 @@ import 'package:localstorage/localstorage.dart';
 // third screen
 import 'package:geolocator/geolocator.dart';
 import 'package:device_id/device_id.dart';
+import 'package:provider/provider.dart';
 
 class DriverHomePage extends StatefulWidget {
   DriverHomePage({Key key}) : super(key: key);
@@ -28,10 +29,12 @@ class _DriverHomePage extends State<DriverHomePage> {
   var refreshKey = GlobalKey<RefreshIndicatorState>();
   bool _loadingDispatchIndicator = true;
   final LocalStorage storage = new LocalStorage(STORAGE_KEY);
+  Timer _timer;
 
   init() async {
     final geoLocator = Geolocator();
-    final locationOptions = LocationOptions(accuracy: LocationAccuracy.high,distanceFilter: 10);
+    final locationOptions =
+        LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: 10);
     String deviceId = await DeviceId.getID;
     String device =
         Platform.isAndroid ? 'Android' : Platform.isIOS ? 'IOS' : 'others';
@@ -47,7 +50,7 @@ class _DriverHomePage extends State<DriverHomePage> {
     geoLocator.getPositionStream(locationOptions).listen((Position position) {
 //      print('[deviceId] - $deviceId');
 //      print('[location] - $position');
-      if(position!=null){
+      if (position != null) {
         updateUserLocation({
           'device': device,
           'deviceId': deviceId,
@@ -55,12 +58,17 @@ class _DriverHomePage extends State<DriverHomePage> {
           'latitude': position.latitude.toString()
         });
       }
-
     });
     //
     // 2.  Configure the plugin
     //
+  }
 
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _timer.cancel();
   }
 
   @override
@@ -76,6 +84,16 @@ class _DriverHomePage extends State<DriverHomePage> {
     }
 
     AuthService.getUserDetails().then(onValue);
+    _timer = new Timer.periodic(const Duration(seconds: 5), _checkLogin);
+  }
+
+  void _checkLogin(Timer timer) {
+    AuthService.getAccount(id: "id").then((value) {
+      if (value == false || value['error'] == true) {
+        Provider.of<AuthService>(context).logout();
+        timer.cancel();
+      }
+    });
   }
 
   _updateDispatch(dispatch) {
@@ -271,6 +289,11 @@ class _DriverHomePage extends State<DriverHomePage> {
     _dispatchLoaded(state: false);
     fetchDispatch().then(fn).catchError((e) {
       // print(e);
+    });
+    AuthService.getAccount(id: "id").then((value) {
+      if (value == false || value['error'] == true) {
+        Provider.of<AuthService>(context).logout();
+      }
     });
     return null;
   }

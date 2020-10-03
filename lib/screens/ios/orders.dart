@@ -19,7 +19,7 @@ class OrdersPageState extends State<OrdersPage> {
   bool _loading;
   String _name = "All";
   List<dynamic> _orders = [];
-  List<Map<String, dynamic>> _cacheOrder = [];
+  List<dynamic> _cacheOrder = [];
   final TextEditingController startDateController = new TextEditingController();
   final TextEditingController endDateController = new TextEditingController();
   final TextEditingController amountController = new TextEditingController();
@@ -31,6 +31,7 @@ class OrdersPageState extends State<OrdersPage> {
     super.initState();
     _loading = true;
     filters.add(amountAndRefFilter);
+    _loadOrder();
   }
 
   List<Widget> filters = [];
@@ -59,8 +60,8 @@ class OrdersPageState extends State<OrdersPage> {
 
         if (amountController.text != '' &&
             amountController.text != '0.00' &&
-           oCcy.format(e['totalPrice'] +
-                e['shippingFee']) != amountController.text) {
+            oCcy.format(e['totalPrice'] + e['shippingFee']) !=
+                amountController.text) {
           remove = true;
         }
         if (refController.text != '' &&
@@ -74,8 +75,8 @@ class OrdersPageState extends State<OrdersPage> {
         bool remove = false;
         if (amountController.text != '' &&
             amountController.text != '0.00' &&
-            oCcy.format(e['totalPrice'] +
-                e['shippingFee']) != amountController.text) {
+            oCcy.format(e['totalPrice'] + e['shippingFee']) !=
+                amountController.text) {
           remove = true;
         }
         if (refController.text != '' &&
@@ -220,7 +221,7 @@ class OrdersPageState extends State<OrdersPage> {
               keyboardType: TextInputType.datetime,
               decoration: InputDecoration(
                 labelText: 'Ref',
-                hintText: 'trn_23WEWDWWE',
+                hintText: '12345',
               ),
             ),
           ),
@@ -303,8 +304,7 @@ class OrdersPageState extends State<OrdersPage> {
         // print(res['data']);
         setState(() {
           _cacheOrder = res['data']
-              .map<Map<String, dynamic>>(
-                  (e) => new Map<String, dynamic>.from(e))
+              .map<dynamic>((e) => new Map<String, dynamic>.from(e))
               .toList();
           _orders = res['data']
               .map<dynamic>((e) => new Map<String, dynamic>.from(e))
@@ -322,7 +322,7 @@ class OrdersPageState extends State<OrdersPage> {
   }
 
   void _sort(n) {
-    List<Map<String, dynamic>> orders = [];
+    List<dynamic> orders = [];
 
     f(order) {
       if (order['status'] == n) {
@@ -343,9 +343,6 @@ class OrdersPageState extends State<OrdersPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) {
-      _loadOrder();
-    }
     Widget _builList() {
       Widget f(e) {
         if (e is Widget) {

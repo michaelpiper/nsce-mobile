@@ -1170,7 +1170,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                                 "subject":
                                     "A message from ${_sendMailData['fullname']} ",
                                 "body":
-                                    '${_sendMailData['fullname']} your message "${_sendMailData['body']}" \n has been received and our support will respond back to you via mail.'
+                                    '${_sendMailData['body']}'
                               }).then((res) {
                                 dialogMan.hide();
                                 String msg;

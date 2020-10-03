@@ -10,9 +10,11 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:NSCE/utils/local_notications_helper.dart';
 import 'package:NSCE/utils/constants.dart';
 import 'package:NSCE/ext/smartalert.dart';
+
 // import services here
 import '../../services/auth.dart';
 import '../../services/request.dart';
+
 // import screen here
 import 'home/transactions.dart';
 import 'home/notification.dart';
@@ -26,6 +28,7 @@ final settingsAndroid = AndroidInitializationSettings('app_icon');
 final settingsIOS = IOSInitializationSettings(
     onDidReceiveLocalNotification: (id, title, body, payload) =>
         onSelectNotification(payload));
+
 Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) {
   if (message.containsKey('data')) {
     // Handle data message
@@ -69,6 +72,7 @@ Future onSelectNotification(String payload) async {
 class TabContent {
   final String title;
   final Widget content;
+
   TabContent({this.title, this.content});
 }
 
@@ -76,6 +80,7 @@ class HomePage extends StatefulWidget {
   var currentUser;
   String title;
   int currentIndex;
+
   HomePage({Key key, this.title, this.currentIndex = 0}) : super(key: key) {
     this.title = (this.title != null) ? this.title : 'NSCE';
   }
@@ -104,9 +109,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Future act2;
   final LocalStorage storage = new LocalStorage(STORAGE_KEY);
   Timer _updateme;
+
   _HomePageState({this.currentIndex = 0}) {
     _refresh();
   }
+
   @override
   void initState() {
     super.initState();
@@ -374,6 +381,8 @@ class CartLength extends StatefulWidget {
 class _CartLength extends State<CartLength> {
   int _cartCount = 0;
   Timer _timer;
+  Timer _timer2;
+
   void updateCart(_t) {
     count(cartCount) {
       if (cartCount is bool || cartCount == null) {
@@ -386,6 +395,12 @@ class _CartLength extends State<CartLength> {
       }
     }
 
+    AuthService.getAccount(id: "id").then((value) {
+      print("$value ------high------------------------------");
+      if (value == null) {
+        Provider.of<AuthService>(context).logout();
+      }
+    });
     fetchCart(id: 'grouped-count').then(count);
   }
 
@@ -395,6 +410,7 @@ class _CartLength extends State<CartLength> {
     super.initState();
     updateCart(_timer);
     _timer = new Timer.periodic(const Duration(seconds: 5), updateCart);
+    _timer2 = new Timer.periodic(const Duration(seconds: 5), _checkLogin);
   }
 
   @override
@@ -402,6 +418,16 @@ class _CartLength extends State<CartLength> {
     // TODO: implement dispose
     super.dispose();
     _timer.cancel();
+    _timer2.cancel();
+  }
+
+  void _checkLogin(Timer timer) {
+    AuthService.getAccount(id: "id").then((value) {
+      if (value == false || value['error'] == true) {
+        Provider.of<AuthService>(context).logout();
+        timer.cancel();
+      }
+    });
   }
 
   @override
@@ -410,19 +436,20 @@ class _CartLength extends State<CartLength> {
     return Stack(
       children: <Widget>[
         Positioned(
-            right: 8,
-            top: 10,
-            child: _cartCount == 0
-                ? SizedBox()
-                : Container(
-                    decoration: BoxDecoration(
-                        color: Colors.green, shape: BoxShape.circle),
-                    padding: EdgeInsets.all(3),
-                    child: Text(
-                      _cartCount.toString(),
-                      style: TextStyle(color: primaryTextColor),
-                    ),
-                  )),
+          right: 8,
+          top: 10,
+          child: _cartCount == 0
+              ? SizedBox()
+              : Container(
+                  decoration: BoxDecoration(
+                      color: Colors.green, shape: BoxShape.circle),
+                  padding: EdgeInsets.all(3),
+                  child: Text(
+                    _cartCount.toString(),
+                    style: TextStyle(color: primaryTextColor),
+                  ),
+                ),
+        ),
         Align(
           child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),

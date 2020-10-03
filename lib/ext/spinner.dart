@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+
 class Spinner extends StatefulWidget {
   final IconData icon;
   final Duration duration;
+  final Color color;
 
   const Spinner({
     Key key,
     @required this.icon,
+    this.color = Colors.black,
     this.duration = const Duration(milliseconds: 2400),
   }) : super(key: key);
 
@@ -23,7 +26,10 @@ class _SpinnerState extends State<Spinner> with SingleTickerProviderStateMixin {
       vsync: this,
       duration: widget.duration,
     )..repeat();
-    _child = Icon(widget.icon);
+    _child = Icon(
+      widget.icon,
+      color: widget.color,
+    );
 
     super.initState();
   }

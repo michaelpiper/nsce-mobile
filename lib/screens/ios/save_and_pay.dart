@@ -58,7 +58,7 @@ class SaveAndPay extends StatelessWidget {
     );
   }
 
-  payWithWallectORCard(BuildContext context) {
+  payWithWalletORCard(BuildContext context) {
     return Card(
       elevation: 4.0,
       child: ListTile(
@@ -94,45 +94,42 @@ class SaveAndPay extends StatelessWidget {
               }
 
               showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    String des =
+                context: context,
+                builder: (BuildContext context) {
+                  String des = "";
+
+                  if (res['data'] >= _transaction['totalPrice']) {
+                    des = "You will be charged " +
+                        _transaction['currency'] +
+                        ' ' +
+                        oCcy.format(_transaction['totalPrice']) +
+                        " from your wallet";
+                  } else {
+                    des =
                         "You do not have sufficient funds in your wallet, will you like to pay with card?";
-//                    if (res['data'] >= _transaction['totalPrice']) {
-//                      des = "You will be charged " +
-//                          _transaction['currency'] +
-//                          ' ' +
-//                          oCcy.format(_transaction['totalPrice']) +
-//                          " from your wallet";
-//                    } else {
-//                      des =
-//                          "You current wallet balance is ${CURRENCY['sign']} " +
-//                              oCcy.format(res['data']) +
-//                              "  will be charged ${CURRENCY['sign']} " +
-//                              oCcy.format(
-//                                  _transaction['totalPrice'] - res['data']) +
-//                              " from your card";
-//                    }
-                    return SmartAlert(
-                      title: "Confirm Payment",
-                      description: des,
-                      onOk: () {
-                        if (res['data'] >= _transaction['totalPrice']) {
-                          onDone();
-                        } else {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => AddFundsPage(
-                                  onDone: onDone,
-                                  amount: (_transaction['totalPrice'] -
-                                      res['data']))));
-                        }
-                      },
-                      canCancel: true,
-                      okText: 'Yes',
-                      cancelText: 'No',
-                    );
-                  },
-                  barrierDismissible: false);
+                  }
+//
+                  return SmartAlert(
+                    title: "Confirm Payment",
+                    description: des,
+                    onOk: () {
+                      if (res['data'] >= _transaction['totalPrice']) {
+                        onDone();
+                      } else {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => AddFundsPage(
+                                onDone: onDone,
+                                amount: (_transaction['totalPrice'] -
+                                    res['data']))));
+                      }
+                    },
+                    canCancel: true,
+                    okText: 'Yes',
+                    cancelText: 'No',
+                  );
+                },
+                barrierDismissible: false,
+              );
             }
           }
 
@@ -221,23 +218,30 @@ class SaveAndPay extends StatelessWidget {
       elevation: 4.0,
       child: ListTile(
           onTap: () {
-//            dialogMan.show();
-//            f(buyRes){
-//              dialogMan.hide();
-//              if(buyRes is Map && buyRes['error']==false){
-//                // print(buyRes);
-//                showDialog(
-//                    context: context,
-//                    builder: (BuildContext context) =>SmartAlert(
-//                      title: "Alert",
-//                      description: buyRes['message'],
-//                      onOk: (){
-//                        localStorage.deleteItem(STORAGE_CART_CHECKOUT_KEY);
-//                        Navigator.of(context).popAndPushNamed('/home');
-//                      },));
-//              }
-//            }
-//            buyItem({'amount':_transaction['totalPrice'].toString(),'typeId':'4','trnRef':_transaction['trnRef']}).then(f);
+            dialogMan.show();
+            f(buyRes) {
+              dialogMan.hide();
+              if (buyRes is Map && buyRes['error'] == false) {
+                // print(buyRes);
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) => SmartAlert(
+                    title: "Alert",
+                    description: buyRes['message'],
+                    onOk: () {
+                      localStorage.deleteItem(STORAGE_CART_CHECKOUT_KEY);
+                      Navigator.of(context).popAndPushNamed('/home');
+                    },
+                  ),
+                );
+              }
+            }
+
+            buyItem({
+              'amount': _transaction['totalPrice'].toString(),
+              'typeId': '3',
+              'trnRef': _transaction['trnRef']
+            }).then(f);
           },
           leading: Image.asset('images/bank.png'),
           title: Text(
@@ -283,7 +287,7 @@ class SaveAndPay extends StatelessWidget {
             SizedBox(
               height: 21.0,
             ),
-            payWithWallectORCard(context),
+            payWithWalletORCard(context),
             payWithCard(context),
             payWithBank(context),
           ]),

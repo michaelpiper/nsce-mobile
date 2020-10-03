@@ -362,7 +362,7 @@ class CheckoutPageState extends State<CheckoutPage> {
                           height: 4,
                         ),
                         TextFormField(
-                          initialValue: _billingData['pickupDriverId']??'',
+                          initialValue: _billingData['pickupDriverId'] ?? '',
                           onChanged: (value) =>
                               _billingData['pickupDriverId'] = value,
                           decoration: const InputDecoration(
@@ -408,7 +408,8 @@ class CheckoutPageState extends State<CheckoutPage> {
                               _billingData['company'] == _customer['company'] &&
                               _billingData['country'] == _customer['country'] &&
                               _billingData['address'] == _customer['address'] &&
-                          _billingData['pickupDriverId'] == _customer['pickupDriverId']) {
+                              _billingData['pickupDriverId'] ==
+                                  _customer['pickupDriverId']) {
                             showDialog<void>(
                               context: context,
                               barrierDismissible: false,
